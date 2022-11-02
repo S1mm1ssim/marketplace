@@ -8,5 +8,6 @@
     </changeSet>
 
     <include file="2022-11-01-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="2022-11-02-add-fk-position.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
