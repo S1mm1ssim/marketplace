@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Position {
     private Long id;
     private Item item;
-    private Company companyId;
+    private Company company;
     private User createdBy;
     private LocalDateTime created;
     // Positive value. Values start at 0.01

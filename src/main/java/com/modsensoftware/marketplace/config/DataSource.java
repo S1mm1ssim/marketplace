@@ -18,7 +18,7 @@ public class DataSource {
         config.setJdbcUrl("jdbc:postgresql://localhost:32768/marketplace");
         config.setUsername("postgres");
         config.setPassword("postgres");
-        dataSource = new HikariDataSource();
+        dataSource = new HikariDataSource(config);
     }
 
     public static Connection getConnection() throws SQLException {
