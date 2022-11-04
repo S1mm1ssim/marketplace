@@ -10,5 +10,7 @@
     <include file="2022-11-01-initial-schema.xml" relativeToChangelogFile="true"/>
     <include file="2022-11-02-add-fk-position.xml" relativeToChangelogFile="true"/>
     <include file="2022-11-03-add-uuid-generated-ids.xml" relativeToChangelogFile="true" />
+    <include file="2022-11-04-add-unique-email-user.xml" relativeToChangelogFile="true" />
+    <include file="2022-11-04-add-enum-role.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>
