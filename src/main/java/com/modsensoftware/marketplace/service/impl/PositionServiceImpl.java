@@ -6,7 +6,7 @@ import com.modsensoftware.marketplace.dto.PositionDto;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.PositionService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@AllArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PositionServiceImpl implements PositionService {
 
     private final PositionDao positionDao;

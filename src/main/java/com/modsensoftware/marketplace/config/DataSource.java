@@ -11,17 +11,17 @@ import java.sql.SQLException;
  */
 public class DataSource {
 
-    private static final HikariConfig config = new HikariConfig();
-    private static final HikariDataSource dataSource;
+    private static final HikariConfig CONFIG = new HikariConfig();
+    private static final HikariDataSource DATA_SOURCE;
 
     static {
-        config.setJdbcUrl("jdbc:postgresql://localhost:32768/marketplace");
-        config.setUsername("postgres");
-        config.setPassword("postgres");
-        dataSource = new HikariDataSource(config);
+        CONFIG.setJdbcUrl("jdbc:postgresql://localhost:32768/marketplace");
+        CONFIG.setUsername("postgres");
+        CONFIG.setPassword("postgres");
+        DATA_SOURCE = new HikariDataSource(CONFIG);
     }
 
     public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        return DATA_SOURCE.getConnection();
     }
 }

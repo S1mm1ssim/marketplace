@@ -5,7 +5,11 @@ import com.modsensoftware.marketplace.domain.Category;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,21 +24,22 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Component
 public class CategoryDao implements Dao<Category, Long> {
 
-    private static final int PARENT_CATEGORY_COLUMN_ID = 3;
-
     @Override
     public Optional<Category> get(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT c.*, p.* FROM category c " +
-                    "LEFT JOIN category p ON p.id = c.parent_category " +
-                    "WHERE c.id = ?";
+            String query = "SELECT c.id AS category_id, c.name AS category_name, "
+                    + "c.parent_category AS fk_category_parent, c.description AS category_description, "
+                    + "p.id AS parent_id, p.name AS parent_name, p.description AS parent_description "
+                    + "FROM category c "
+                    + "LEFT JOIN category p ON p.id = c.parent_category "
+                    + "WHERE c.id = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 // In createCategoryFromResultSet method rs.wasNull() is called.
                 // So we check if parent_category is null
-                rs.getLong(PARENT_CATEGORY_COLUMN_ID);
+                rs.getLong("fk_parent_category");
                 return Optional.of(createCategoryFromResultSet(rs));
             }
         } catch (SQLException e) {
@@ -49,15 +54,18 @@ public class CategoryDao implements Dao<Category, Long> {
     @Override
     public List<Category> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT c.*, p.* FROM category c " +
-                    "LEFT JOIN category p ON p.id = c.parent_category";
+            String query = "SELECT c.id AS category_id, c.name AS category_name, "
+                    + "c.parent_category AS fk_parent_category, c.description AS category_description, "
+                    + "p.id AS parent_id, p.name AS parent_name, p.description AS parent_description "
+                    + "FROM category c "
+                    + "LEFT JOIN category p ON p.id = c.parent_category";
             PreparedStatement ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             List<Category> categories = new ArrayList<>();
             while (rs.next()) {
                 // In createCategoryFromResultSet method rs.wasNull() is called.
                 // So we check if parent_category is null
-                rs.getLong(PARENT_CATEGORY_COLUMN_ID);
+                rs.getLong("fk_parent_category");
                 categories.add(createCategoryFromResultSet(rs));
             }
             return categories;
@@ -73,8 +81,8 @@ public class CategoryDao implements Dao<Category, Long> {
     @Override
     public void save(Category category) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO category(name, parent_category, description) " +
-                    "VALUES(?, ?, ?)";
+            String insertQuery = "INSERT INTO category(name, parent_category, description) "
+                    + "VALUES(?, ?, ?)";
             PreparedStatement ps = connection.prepareStatement(insertQuery);
             ps.setString(1, category.getName());
 
@@ -105,8 +113,8 @@ public class CategoryDao implements Dao<Category, Long> {
             setIfNotNull(updatedFields.getDescription(), category::setDescription);
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE category SET name = ?, " +
-                        "description = ?, parent_category = ? WHERE id = ?";
+                String updateQuery = "UPDATE category SET name = ?, "
+                        + "description = ?, parent_category = ? WHERE id = ?";
                 PreparedStatement ps = connection.prepareStatement(updateQuery);
                 ps.setString(1, category.getName());
                 ps.setString(2, category.getDescription());
@@ -144,12 +152,13 @@ public class CategoryDao implements Dao<Category, Long> {
     private Category createCategoryFromResultSet(ResultSet rs) throws SQLException {
         Category category;
         if (rs.wasNull()) {
-            category = new Category(rs.getLong(1),
-                    rs.getString(2), rs.getString(4), null);
+            category = new Category(rs.getLong("category_id"),
+                    rs.getString("category_name"), rs.getString("category_description"), null);
         } else {
-            category = new Category(rs.getLong(1),
-                    rs.getString(2), rs.getString(4),
-                    new Category(rs.getLong(5), rs.getString(6), rs.getString(8), null));
+            category = new Category(rs.getLong("category_id"),
+                    rs.getString("category_name"), rs.getString("category_description"),
+                    new Category(rs.getLong("parent_id"), rs.getString("parent_name"),
+                            rs.getString("parent_description"), null));
         }
         return category;
     }

@@ -1,13 +1,25 @@
 package com.modsensoftware.marketplace.dao;
 
 import com.modsensoftware.marketplace.config.DataSource;
-import com.modsensoftware.marketplace.domain.*;
+import com.modsensoftware.marketplace.domain.Category;
+import com.modsensoftware.marketplace.domain.Company;
+import com.modsensoftware.marketplace.domain.Item;
+import com.modsensoftware.marketplace.domain.Position;
+import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 
@@ -20,11 +32,25 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public Optional<Position> get(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT p.*, i.*, c.*, u.* FROM position AS p " +
-                    "INNER JOIN company AS c ON p.company_id = c.id " +
-                    "INNER JOIN item AS i ON p.item_id = i.id " +
-                    "INNER JOIN \"user\" AS u ON p.created_by = u.id " +
-                    "WHERE p.id = ?";
+            String query = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
+                    + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
+                    + "p.created AS position_created, p.amount AS position_amount, "
+                    + "i.id AS item_id, i.name AS item_name, "
+                    + "i.description AS item_description, i.created AS item_created, "
+                    + "i.category_id AS fk_item_category, "
+                    + "categ.id AS category_id, categ.name AS category_name, "
+                    + "categ.parent_category AS fk_category_parent, categ.description AS category_description, "
+                    + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
+                    + "c.created AS company_created, c.description AS company_description, "
+                    + "u.id AS user_id, u.username AS user_username, u.email AS user_email, "
+                    + "u.name AS user_name, u.role AS user_role, u.created AS user_created,"
+                    + "u.updated AS user_updated, u.company_id AS fk_user_company "
+                    + "FROM position AS p "
+                    + "INNER JOIN company AS c ON p.company_id = c.id "
+                    + "INNER JOIN item AS i ON p.item_id = i.id "
+                    + "INNER JOIN category categ on i.category_id = categ.id "
+                    + "INNER JOIN \"user\" AS u ON p.created_by = u.id "
+                    + "WHERE p.id = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
@@ -43,10 +69,24 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public List<Position> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT p.*, i.*, c.*, u.* FROM position AS p " +
-                    "INNER JOIN company AS c ON p.company_id = c.id " +
-                    "INNER JOIN item AS i ON p.item_id = i.id " +
-                    "INNER JOIN \"user\" AS u ON p.created_by = u.id";
+            String query = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
+                    + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
+                    + "p.created AS position_created, p.amount AS position_amount, "
+                    + "i.id AS item_id, i.name AS item_name, "
+                    + "i.description AS item_description, i.created AS item_created, "
+                    + "i.category_id AS fk_item_category, "
+                    + "categ.id AS category_id, categ.name AS category_name, "
+                    + "categ.parent_category AS fk_category_parent, categ.description AS category_description, "
+                    + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
+                    + "c.created AS company_created, c.description AS company_description, "
+                    + "u.id AS user_id, u.username AS user_username, u.email AS user_email, "
+                    + "u.name AS user_name, u.role AS user_role, u.created AS user_created,"
+                    + "u.updated AS user_updated, u.company_id AS fk_user_company "
+                    + "FROM position AS p "
+                    + "INNER JOIN company AS c ON p.company_id = c.id "
+                    + "INNER JOIN item AS i ON p.item_id = i.id "
+                    + "INNER JOIN category categ on i.category_id = categ.id "
+                    + "INNER JOIN \"user\" AS u ON p.created_by = u.id";
             PreparedStatement ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             List<Position> positions = new ArrayList<>();
@@ -66,8 +106,8 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public void save(Position position) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO position(item_id, company_id, created_by, created, amount) " +
-                    "VALUES(?, ?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO position(item_id, company_id, created_by, created, amount) "
+                    + "VALUES(?, ?, ?, ?, ?)";
             PreparedStatement ps = connection.prepareStatement(insertQuery);
             ps.setObject(1, position.getItem().getId());
             ps.setLong(2, position.getCompany().getId());
@@ -98,8 +138,8 @@ public class PositionDao implements Dao<Position, Long> {
             setIfNotNull(updatedFields.getAmount(), position::setAmount);
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE position SET item_id = ?, company_id = ?, " +
-                        "created_by = ?, created = ?, amount = ? WHERE id = ?";
+                String updateQuery = "UPDATE position SET item_id = ?, company_id = ?, "
+                        + "created_by = ?, created = ?, amount = ? WHERE id = ?";
                 PreparedStatement ps = connection.prepareStatement(updateQuery);
                 ps.setObject(1, position.getItem().getId());
                 ps.setLong(2, position.getCompany().getId());
@@ -133,9 +173,19 @@ public class PositionDao implements Dao<Position, Long> {
     }
 
     private Position createPositionFromResultSetRow(ResultSet rs) throws SQLException {
-        Item item = new Item(UUID.fromString(rs.getString(7)), rs.getString(8), rs.getString(9), rs.getTimestamp(10).toLocalDateTime(), new Category());
-        Company company = new Company(rs.getLong(12), rs.getString(13), rs.getString(14), rs.getTimestamp(15).toLocalDateTime(), rs.getString(16));
-        User user = new User(UUID.fromString(rs.getString(17)), rs.getString(18), rs.getString(19), rs.getString(20), Role.valueOf(rs.getString(21)), rs.getTimestamp(22).toLocalDateTime(), rs.getTimestamp(23).toLocalDateTime(), company);
-        return new Position(rs.getLong(1), item, company, user, rs.getTimestamp(5).toLocalDateTime(), rs.getDouble(6));
+        Category category = new Category(rs.getLong("category_id"),
+                rs.getString("category_name"), rs.getString("category_description"), new Category());
+        Item item = new Item(UUID.fromString(rs.getString("item_id")), rs.getString("item_name"),
+                rs.getString("item_description"), rs.getTimestamp("item_created").toLocalDateTime(), category);
+        Company company = new Company(rs.getLong("company_id"), rs.getString("company_name"),
+                rs.getString("company_email"), rs.getTimestamp("company_created").toLocalDateTime(),
+                rs.getString("company_description"));
+        User user = new User(UUID.fromString(rs.getString("user_id")), rs.getString("user_username"),
+                rs.getString("user_email"), rs.getString("user_name"), Role.valueOf(rs.getString("user_role")),
+                rs.getTimestamp("user_created").toLocalDateTime(),
+                rs.getTimestamp("user_updated").toLocalDateTime(), company);
+
+        return new Position(rs.getLong("position_id"), item, company, user,
+                rs.getTimestamp("position_created").toLocalDateTime(), rs.getDouble("position_amount"));
     }
 }

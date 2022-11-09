@@ -6,8 +6,16 @@ import com.modsensoftware.marketplace.domain.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 
@@ -21,10 +29,15 @@ public class ItemDao implements Dao<Item, UUID> {
     @Override
     public Optional<Item> get(UUID id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT i.*, c.* FROM item i " +
-                    "INNER JOIN category c on i.category_id = c.id " +
-                    "INNER JOIN category pc on pc.id = c.parent_category " +
-                    "WHERE i.id = ?";
+            String query = "SELECT i.id AS item_id, i.name AS item_name, "
+                    + "i.description AS item_description, i.created AS item_created, "
+                    + "i.category_id AS fk_item_category, "
+                    + "c.id AS category_id, c.name AS category_name, "
+                    + "c.parent_category AS fk_category_parent, c.description AS category_description "
+                    + "FROM item i "
+                    + "INNER JOIN category c on i.category_id = c.id "
+                    + "LEFT JOIN category pc on pc.id = c.parent_category "
+                    + "WHERE i.id = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
@@ -43,9 +56,14 @@ public class ItemDao implements Dao<Item, UUID> {
     @Override
     public List<Item> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT i.*, c.* FROM item AS i " +
-                    "INNER JOIN category c on i.category_id = c.id " +
-                    "INNER JOIN category pc on pc.id = c.parent_category";
+            String query = "SELECT i.id AS item_id, i.name AS item_name, "
+                    + "i.description AS item_description, i.created AS item_created, "
+                    + "i.category_id AS fk_item_category, "
+                    + "c.id AS category_id, c.name AS category_name, "
+                    + "c.parent_category AS fk_category_parent, c.description AS category_description "
+                    + "FROM item i "
+                    + "INNER JOIN category c on i.category_id = c.id "
+                    + "LEFT JOIN category pc on pc.id = c.parent_category";
             PreparedStatement ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             List<Item> items = new ArrayList<>();
@@ -92,8 +110,8 @@ public class ItemDao implements Dao<Item, UUID> {
                     (value) -> item.getCategory().setId(value));
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE item SET name=?," +
-                        "description=?, created=?, category_id=? WHERE id=?";
+                String updateQuery = "UPDATE item SET name = ?, "
+                        + "description = ?, created = ?, category_id = ? WHERE id = ?";
                 PreparedStatement ps = connection.prepareStatement(updateQuery);
                 ps.setString(1, item.getName());
                 ps.setString(2, item.getDescription());
@@ -126,11 +144,11 @@ public class ItemDao implements Dao<Item, UUID> {
     }
 
     private Item createItemFromResultSet(ResultSet rs) throws SQLException {
+        Category category = new Category(rs.getLong("category_id"), rs.getString("category_name"),
+                rs.getString("category_description"), null);
         return new Item(
-                UUID.fromString(rs.getString(1)), rs.getString(2), rs.getString(3),
-                rs.getTimestamp(4).toLocalDateTime(),
-                new Category(rs.getLong(6), rs.getString(7), rs.getString(9),
-                        new Category())
+                UUID.fromString(rs.getString("item_id")), rs.getString("item_name"), rs.getString("item_description"),
+                rs.getTimestamp("item_created").toLocalDateTime(), category
         );
     }
 }

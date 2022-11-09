@@ -5,7 +5,11 @@ import com.modsensoftware.marketplace.domain.Company;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,13 +26,13 @@ public class CompanyDao implements Dao<Company, Long> {
     @Override
     public Optional<Company> get(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT * FROM company WHERE id=?";
+            String query = "SELECT id, name, email, created, description FROM company WHERE id=?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Company company = new Company(rs.getLong(1), rs.getString(2), rs.getString(3),
-                        rs.getTimestamp(4).toLocalDateTime(), rs.getString(5)
+                Company company = new Company(rs.getLong("id"), rs.getString("name"), rs.getString("email"),
+                        rs.getTimestamp("created").toLocalDateTime(), rs.getString("description")
                 );
                 return Optional.of(company);
             }
@@ -44,13 +48,13 @@ public class CompanyDao implements Dao<Company, Long> {
     @Override
     public List<Company> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT * FROM company";
+            String query = "SELECT id, name, email, created, description FROM company";
             PreparedStatement ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             List<Company> companies = new ArrayList<>();
             while (rs.next()) {
-                Company company = new Company(rs.getLong(1), rs.getString(2), rs.getString(3),
-                        rs.getTimestamp(4).toLocalDateTime(), rs.getString(5)
+                Company company = new Company(rs.getLong("id"), rs.getString("name"), rs.getString("email"),
+                        rs.getTimestamp("created").toLocalDateTime(), rs.getString("description")
                 );
                 companies.add(company);
             }
@@ -67,8 +71,8 @@ public class CompanyDao implements Dao<Company, Long> {
     @Override
     public void save(Company company) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO company(name, email, created, description) " +
-                    "VALUES(?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO company(name, email, created, description) "
+                    + "VALUES(?, ?, ?, ?)";
             PreparedStatement ps = connection.prepareStatement(insertQuery);
             ps.setString(1, company.getName());
             ps.setString(2, company.getEmail());
@@ -94,8 +98,8 @@ public class CompanyDao implements Dao<Company, Long> {
             setIfNotNull(updatedFields.getDescription(), company::setDescription);
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE company SET name=?, email=?, created=?," +
-                        "description=? WHERE id=?";
+                String updateQuery = "UPDATE company SET name=?, email=?, created=?,"
+                        + "description=? WHERE id=?";
                 PreparedStatement ps = connection.prepareStatement(updateQuery);
                 ps.setString(1, company.getName());
                 ps.setString(2, company.getEmail());
