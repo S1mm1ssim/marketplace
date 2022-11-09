@@ -26,19 +26,29 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Component
 public class ItemDao implements Dao<Item, UUID> {
 
+    private static final String SELECT = "SELECT i.id AS item_id, i.name AS item_name, "
+            + "i.description AS item_description, i.created AS item_created, "
+            + "i.category_id AS fk_item_category, "
+            + "c.id AS category_id, c.name AS category_name, "
+            + "c.parent_category AS fk_category_parent, c.description AS category_description "
+            + "FROM item i "
+            + "INNER JOIN category c on i.category_id = c.id "
+            + "LEFT JOIN category pc on pc.id = c.parent_category";
+
+    private static final String SELECT_BY_ID = SELECT + " WHERE i.id = ?";
+
+    private static final String INSERT = "INSERT INTO item(name, description, created, category_id) "
+            + "VALUES(?, ?, ?, ?)";
+
+    private static final String UPDATE = "UPDATE item SET name = ?, "
+            + "description = ?, created = ?, category_id = ? WHERE id = ?";
+
+    private static final String DELETE = "DELETE FROM item WHERE id=?";
+
     @Override
     public Optional<Item> get(UUID id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT i.id AS item_id, i.name AS item_name, "
-                    + "i.description AS item_description, i.created AS item_created, "
-                    + "i.category_id AS fk_item_category, "
-                    + "c.id AS category_id, c.name AS category_name, "
-                    + "c.parent_category AS fk_category_parent, c.description AS category_description "
-                    + "FROM item i "
-                    + "INNER JOIN category c on i.category_id = c.id "
-                    + "LEFT JOIN category pc on pc.id = c.parent_category "
-                    + "WHERE i.id = ?";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -56,15 +66,7 @@ public class ItemDao implements Dao<Item, UUID> {
     @Override
     public List<Item> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT i.id AS item_id, i.name AS item_name, "
-                    + "i.description AS item_description, i.created AS item_created, "
-                    + "i.category_id AS fk_item_category, "
-                    + "c.id AS category_id, c.name AS category_name, "
-                    + "c.parent_category AS fk_category_parent, c.description AS category_description "
-                    + "FROM item i "
-                    + "INNER JOIN category c on i.category_id = c.id "
-                    + "LEFT JOIN category pc on pc.id = c.parent_category";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Item> items = new ArrayList<>();
             while (rs.next()) {
@@ -83,8 +85,7 @@ public class ItemDao implements Dao<Item, UUID> {
     @Override
     public void save(Item item) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO item(name, description, created, category_id) VALUES(?, ?, ?, ?)";
-            PreparedStatement ps = connection.prepareStatement(insertQuery);
+            PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, item.getName());
             ps.setString(2, item.getDescription());
             ps.setTimestamp(3, Timestamp.valueOf(item.getCreated()));
@@ -110,9 +111,7 @@ public class ItemDao implements Dao<Item, UUID> {
                     (value) -> item.getCategory().setId(value));
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE item SET name = ?, "
-                        + "description = ?, created = ?, category_id = ? WHERE id = ?";
-                PreparedStatement ps = connection.prepareStatement(updateQuery);
+                PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, item.getName());
                 ps.setString(2, item.getDescription());
                 ps.setTimestamp(3, Timestamp.valueOf(item.getCreated()));
@@ -131,8 +130,7 @@ public class ItemDao implements Dao<Item, UUID> {
     @Override
     public void deleteById(UUID id) {
         try (Connection connection = DataSource.getConnection()) {
-            String deleteQuery = "DELETE FROM item WHERE id=?";
-            PreparedStatement ps = connection.prepareStatement(deleteQuery);
+            PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {

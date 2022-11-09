@@ -24,16 +24,22 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Component
 public class CategoryDao implements Dao<Category, Long> {
 
+    private static final String SELECT = "SELECT c.id AS category_id, c.name AS category_name, "
+            + "c.parent_category AS fk_parent_category, c.description AS category_description, "
+            + "p.id AS parent_id, p.name AS parent_name, p.description AS parent_description "
+            + "FROM category c "
+            + "LEFT JOIN category p ON p.id = c.parent_category";
+    private static final String SELECT_BY_ID = SELECT + " WHERE c.id = ?";
+    private static final String INSERT_INTO = "INSERT INTO category(name, parent_category, description) "
+            + "VALUES(?, ?, ?)";
+    private static final String UPDATE = "UPDATE category SET name = ?, "
+            + "description = ?, parent_category = ? WHERE id = ?";
+    private static final String DELETE = "DELETE FROM category WHERE id=?";
+
     @Override
     public Optional<Category> get(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT c.id AS category_id, c.name AS category_name, "
-                    + "c.parent_category AS fk_category_parent, c.description AS category_description, "
-                    + "p.id AS parent_id, p.name AS parent_name, p.description AS parent_description "
-                    + "FROM category c "
-                    + "LEFT JOIN category p ON p.id = c.parent_category "
-                    + "WHERE c.id = ?";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -54,12 +60,7 @@ public class CategoryDao implements Dao<Category, Long> {
     @Override
     public List<Category> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT c.id AS category_id, c.name AS category_name, "
-                    + "c.parent_category AS fk_parent_category, c.description AS category_description, "
-                    + "p.id AS parent_id, p.name AS parent_name, p.description AS parent_description "
-                    + "FROM category c "
-                    + "LEFT JOIN category p ON p.id = c.parent_category";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Category> categories = new ArrayList<>();
             while (rs.next()) {
@@ -81,9 +82,7 @@ public class CategoryDao implements Dao<Category, Long> {
     @Override
     public void save(Category category) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO category(name, parent_category, description) "
-                    + "VALUES(?, ?, ?)";
-            PreparedStatement ps = connection.prepareStatement(insertQuery);
+            PreparedStatement ps = connection.prepareStatement(INSERT_INTO);
             ps.setString(1, category.getName());
 
             if (category.getParent().getId() != null) {
@@ -113,9 +112,7 @@ public class CategoryDao implements Dao<Category, Long> {
             setIfNotNull(updatedFields.getDescription(), category::setDescription);
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE category SET name = ?, "
-                        + "description = ?, parent_category = ? WHERE id = ?";
-                PreparedStatement ps = connection.prepareStatement(updateQuery);
+                PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, category.getName());
                 ps.setString(2, category.getDescription());
                 if (category.getParent() != null && category.getParent().getId() != null) {
@@ -137,8 +134,7 @@ public class CategoryDao implements Dao<Category, Long> {
     @Override
     public void deleteById(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String deleteQuery = "DELETE FROM category WHERE id=?";
-            PreparedStatement ps = connection.prepareStatement(deleteQuery);
+            PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {

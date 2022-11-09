@@ -23,11 +23,17 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Slf4j
 @Component
 public class CompanyDao implements Dao<Company, Long> {
+
+    private static final String SELECT = "SELECT id, name, email, created, description FROM company";
+    private static final String SELECT_BY_ID = SELECT + " WHERE id=?";
+    private static final String INSERT = "INSERT INTO company(name, email, created, description) VALUES(?, ?, ?, ?)";
+    private static final String UPDATE = "UPDATE company SET name=?, email=?, created=?, description=? WHERE id=?";
+    private static final String DELETE = "DELETE FROM company WHERE id=?";
+
     @Override
     public Optional<Company> get(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT id, name, email, created, description FROM company WHERE id=?";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -48,8 +54,7 @@ public class CompanyDao implements Dao<Company, Long> {
     @Override
     public List<Company> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT id, name, email, created, description FROM company";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Company> companies = new ArrayList<>();
             while (rs.next()) {
@@ -71,9 +76,7 @@ public class CompanyDao implements Dao<Company, Long> {
     @Override
     public void save(Company company) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO company(name, email, created, description) "
-                    + "VALUES(?, ?, ?, ?)";
-            PreparedStatement ps = connection.prepareStatement(insertQuery);
+            PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, company.getName());
             ps.setString(2, company.getEmail());
             ps.setTimestamp(3, Timestamp.valueOf(company.getCreated()));
@@ -98,9 +101,7 @@ public class CompanyDao implements Dao<Company, Long> {
             setIfNotNull(updatedFields.getDescription(), company::setDescription);
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE company SET name=?, email=?, created=?,"
-                        + "description=? WHERE id=?";
-                PreparedStatement ps = connection.prepareStatement(updateQuery);
+                PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, company.getName());
                 ps.setString(2, company.getEmail());
                 ps.setTimestamp(3, Timestamp.valueOf(company.getCreated()));
@@ -119,8 +120,7 @@ public class CompanyDao implements Dao<Company, Long> {
     @Override
     public void deleteById(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String deleteQuery = "DELETE FROM company WHERE id=?";
-            PreparedStatement ps = connection.prepareStatement(deleteQuery);
+            PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {

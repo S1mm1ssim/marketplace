@@ -29,29 +29,36 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Slf4j
 @Component
 public class PositionDao implements Dao<Position, Long> {
+
+    private static final String SELECT = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
+            + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
+            + "p.created AS position_created, p.amount AS position_amount, "
+            + "i.id AS item_id, i.name AS item_name, "
+            + "i.description AS item_description, i.created AS item_created, "
+            + "i.category_id AS fk_item_category, "
+            + "categ.id AS category_id, categ.name AS category_name, "
+            + "categ.parent_category AS fk_category_parent, categ.description AS category_description, "
+            + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
+            + "c.created AS company_created, c.description AS company_description, "
+            + "u.id AS user_id, u.username AS user_username, u.email AS user_email, "
+            + "u.name AS user_name, u.role AS user_role, u.created AS user_created,"
+            + "u.updated AS user_updated, u.company_id AS fk_user_company "
+            + "FROM position AS p "
+            + "INNER JOIN company AS c ON p.company_id = c.id "
+            + "INNER JOIN item AS i ON p.item_id = i.id "
+            + "INNER JOIN category categ on i.category_id = categ.id "
+            + "INNER JOIN \"user\" AS u ON p.created_by = u.id";
+    private static final String SELECT_BY_ID = SELECT + " WHERE p.id = ?";
+    private static final String INSERT = "INSERT INTO position(item_id, company_id, created_by, created, amount) "
+            + "VALUES(?, ?, ?, ?, ?)";
+    private static final String UPDATE = "UPDATE position SET item_id = ?, company_id = ?, "
+            + "created_by = ?, created = ?, amount = ? WHERE id = ?";
+    private static final String DELETE = "DELETE FROM position WHERE id = ?";
+
     @Override
     public Optional<Position> get(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
-                    + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
-                    + "p.created AS position_created, p.amount AS position_amount, "
-                    + "i.id AS item_id, i.name AS item_name, "
-                    + "i.description AS item_description, i.created AS item_created, "
-                    + "i.category_id AS fk_item_category, "
-                    + "categ.id AS category_id, categ.name AS category_name, "
-                    + "categ.parent_category AS fk_category_parent, categ.description AS category_description, "
-                    + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
-                    + "c.created AS company_created, c.description AS company_description, "
-                    + "u.id AS user_id, u.username AS user_username, u.email AS user_email, "
-                    + "u.name AS user_name, u.role AS user_role, u.created AS user_created,"
-                    + "u.updated AS user_updated, u.company_id AS fk_user_company "
-                    + "FROM position AS p "
-                    + "INNER JOIN company AS c ON p.company_id = c.id "
-                    + "INNER JOIN item AS i ON p.item_id = i.id "
-                    + "INNER JOIN category categ on i.category_id = categ.id "
-                    + "INNER JOIN \"user\" AS u ON p.created_by = u.id "
-                    + "WHERE p.id = ?";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -69,25 +76,7 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public List<Position> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
-                    + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
-                    + "p.created AS position_created, p.amount AS position_amount, "
-                    + "i.id AS item_id, i.name AS item_name, "
-                    + "i.description AS item_description, i.created AS item_created, "
-                    + "i.category_id AS fk_item_category, "
-                    + "categ.id AS category_id, categ.name AS category_name, "
-                    + "categ.parent_category AS fk_category_parent, categ.description AS category_description, "
-                    + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
-                    + "c.created AS company_created, c.description AS company_description, "
-                    + "u.id AS user_id, u.username AS user_username, u.email AS user_email, "
-                    + "u.name AS user_name, u.role AS user_role, u.created AS user_created,"
-                    + "u.updated AS user_updated, u.company_id AS fk_user_company "
-                    + "FROM position AS p "
-                    + "INNER JOIN company AS c ON p.company_id = c.id "
-                    + "INNER JOIN item AS i ON p.item_id = i.id "
-                    + "INNER JOIN category categ on i.category_id = categ.id "
-                    + "INNER JOIN \"user\" AS u ON p.created_by = u.id";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Position> positions = new ArrayList<>();
             while (rs.next()) {
@@ -106,9 +95,7 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public void save(Position position) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO position(item_id, company_id, created_by, created, amount) "
-                    + "VALUES(?, ?, ?, ?, ?)";
-            PreparedStatement ps = connection.prepareStatement(insertQuery);
+            PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setObject(1, position.getItem().getId());
             ps.setLong(2, position.getCompany().getId());
             ps.setObject(3, position.getCreatedBy().getId());
@@ -138,9 +125,7 @@ public class PositionDao implements Dao<Position, Long> {
             setIfNotNull(updatedFields.getAmount(), position::setAmount);
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE position SET item_id = ?, company_id = ?, "
-                        + "created_by = ?, created = ?, amount = ? WHERE id = ?";
-                PreparedStatement ps = connection.prepareStatement(updateQuery);
+                PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setObject(1, position.getItem().getId());
                 ps.setLong(2, position.getCompany().getId());
                 ps.setObject(3, position.getCreatedBy().getId());
@@ -160,8 +145,7 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public void deleteById(Long id) {
         try (Connection connection = DataSource.getConnection()) {
-            String deleteQuery = "DELETE FROM position WHERE id = ?";
-            PreparedStatement ps = connection.prepareStatement(deleteQuery);
+            PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {

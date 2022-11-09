@@ -27,18 +27,24 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Component
 public class UserDao implements Dao<User, UUID> {
 
+    private static final String SELECT = "SELECT u.id AS user_id, u.username AS user_username, u.email AS user_email, "
+            + "u.name AS user_name, u.role AS user_role, u.created AS user_created, "
+            + "u.updated AS user_updated, u.company_id AS fk_user_company, "
+            + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
+            + "c.created AS company_created, c.description AS company_description "
+            + "FROM \"user\" AS u "
+            + "INNER JOIN company AS c on u.company_id = c.id ";
+    private static final String SELECT_BY_ID = SELECT + " WHERE u.id=?";
+    private static final String INSERT = "INSERT INTO \"user\"(username, email, name, role, "
+            + "created, updated, company_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE = "UPDATE \"user\" SET username=?, email=?, name=?,"
+            + "role=?, created=?, updated=?, company_id=? WHERE id=?";
+    private static final String DELETE = "DELETE FROM \"user\" WHERE id=?";
+
     @Override
     public Optional<User> get(UUID id) {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT u.id AS user_id, u.username AS user_username, u.email AS user_email, "
-                    + "u.name AS user_name, u.role AS user_role, u.created AS user_created, "
-                    + "u.updated AS user_updated, u.company_id AS fk_user_company, "
-                    + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
-                    + "c.created AS company_created, c.description AS company_description "
-                    + "FROM \"user\" AS u "
-                    + "INNER JOIN company AS c on u.company_id = c.id "
-                    + "WHERE u.id=?";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -56,14 +62,7 @@ public class UserDao implements Dao<User, UUID> {
     @Override
     public List<User> getAll() {
         try (Connection connection = DataSource.getConnection()) {
-            String query = "SELECT u.id AS user_id, u.username AS user_username, u.email AS user_email, "
-                    + "u.name AS user_name, u.role AS user_role, u.created AS user_created, "
-                    + "u.updated AS user_updated, u.company_id AS fk_user_company, "
-                    + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
-                    + "c.created AS company_created, c.description AS company_description "
-                    + "FROM \"user\" AS u "
-                    + "INNER JOIN company c on u.company_id = c.id";
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<User> users = new ArrayList<>();
             while (rs.next()) {
@@ -82,9 +81,7 @@ public class UserDao implements Dao<User, UUID> {
     @Override
     public void save(User user) {
         try (Connection connection = DataSource.getConnection()) {
-            String insertQuery = "INSERT INTO \"user\"(username, email, name, role, created, updated, company_id) "
-                    + "VALUES(?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement ps = connection.prepareStatement(insertQuery);
+            PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getName());
@@ -116,9 +113,7 @@ public class UserDao implements Dao<User, UUID> {
                     (value) -> user.getCompany().setId(value));
 
             try (Connection connection = DataSource.getConnection()) {
-                String updateQuery = "UPDATE \"user\" SET username=?, email=?, name=?,"
-                        + "role=?, created=?, updated=?, company_id=? WHERE id=?";
-                PreparedStatement ps = connection.prepareStatement(updateQuery);
+                PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, user.getUsername());
                 ps.setString(2, user.getEmail());
                 ps.setString(3, user.getName());
@@ -140,8 +135,7 @@ public class UserDao implements Dao<User, UUID> {
     @Override
     public void deleteById(UUID id) {
         try (Connection connection = DataSource.getConnection()) {
-            String deleteQuery = "DELETE FROM \"user\" WHERE id=?";
-            PreparedStatement ps = connection.prepareStatement(deleteQuery);
+            PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
