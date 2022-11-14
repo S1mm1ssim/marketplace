@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
+import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -24,17 +25,27 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 @Component
 public class CategoryDao implements Dao<Category, Long> {
 
-    private static final String SELECT = "SELECT c.id AS category_id, c.name AS category_name, "
+    private static final String CATEGORY_TABLE_NAME = "category";
+
+    private static final String SELECT = format("SELECT c.id AS category_id, c.name AS category_name, "
             + "c.parent_category AS fk_parent_category, c.description AS category_description, "
             + "p.id AS parent_id, p.name AS parent_name, p.description AS parent_description "
-            + "FROM category c "
-            + "LEFT JOIN category p ON p.id = c.parent_category";
+            + "FROM %s c "
+            + "LEFT JOIN %s p ON p.id = c.parent_category", CATEGORY_TABLE_NAME, CATEGORY_TABLE_NAME);
     private static final String SELECT_BY_ID = SELECT + " WHERE c.id = ?";
-    private static final String INSERT_INTO = "INSERT INTO category(name, parent_category, description) "
-            + "VALUES(?, ?, ?)";
-    private static final String UPDATE = "UPDATE category SET name = ?, "
-            + "description = ?, parent_category = ? WHERE id = ?";
-    private static final String DELETE = "DELETE FROM category WHERE id=?";
+    private static final String INSERT_INTO = format("INSERT INTO %s(name, parent_category, description) "
+            + "VALUES(?, ?, ?)", CATEGORY_TABLE_NAME);
+    private static final String UPDATE = format("UPDATE %s SET name = ?, "
+            + "description = ?, parent_category = ? WHERE id = ?", CATEGORY_TABLE_NAME);
+    private static final String DELETE = format("DELETE FROM %s WHERE id=?", CATEGORY_TABLE_NAME);
+
+    private static final String CATEGORY_ID = "category_id";
+    private static final String CATEGORY_NAME = "category_name";
+    private static final String CATEGORY_DESCRIPTION = "category_description";
+    private static final String FK_PARENT_CATEGORY = "fk_parent_category";
+    private static final String PARENT_ID = "parent_id";
+    private static final String PARENT_NAME = "parent_name";
+    private static final String PARENT_DESCRIPTION = "parent_description";
 
     @Override
     public Optional<Category> get(Long id) {
@@ -45,7 +56,7 @@ public class CategoryDao implements Dao<Category, Long> {
             if (rs.next()) {
                 // In createCategoryFromResultSet method rs.wasNull() is called.
                 // So we check if parent_category is null
-                rs.getLong("fk_parent_category");
+                rs.getLong(FK_PARENT_CATEGORY);
                 return Optional.of(createCategoryFromResultSet(rs));
             }
         } catch (SQLException e) {
@@ -66,7 +77,7 @@ public class CategoryDao implements Dao<Category, Long> {
             while (rs.next()) {
                 // In createCategoryFromResultSet method rs.wasNull() is called.
                 // So we check if parent_category is null
-                rs.getLong("fk_parent_category");
+                rs.getLong(FK_PARENT_CATEGORY);
                 categories.add(createCategoryFromResultSet(rs));
             }
             return categories;
@@ -148,13 +159,13 @@ public class CategoryDao implements Dao<Category, Long> {
     private Category createCategoryFromResultSet(ResultSet rs) throws SQLException {
         Category category;
         if (rs.wasNull()) {
-            category = new Category(rs.getLong("category_id"),
-                    rs.getString("category_name"), rs.getString("category_description"), null);
+            category = new Category(rs.getLong(CATEGORY_ID),
+                    rs.getString(CATEGORY_NAME), rs.getString(CATEGORY_DESCRIPTION), null);
         } else {
-            category = new Category(rs.getLong("category_id"),
-                    rs.getString("category_name"), rs.getString("category_description"),
-                    new Category(rs.getLong("parent_id"), rs.getString("parent_name"),
-                            rs.getString("parent_description"), null));
+            category = new Category(rs.getLong(CATEGORY_ID),
+                    rs.getString(CATEGORY_NAME), rs.getString(CATEGORY_DESCRIPTION),
+                    new Category(rs.getLong(PARENT_ID), rs.getString(PARENT_NAME),
+                            rs.getString(PARENT_DESCRIPTION), null));
         }
         return category;
     }
