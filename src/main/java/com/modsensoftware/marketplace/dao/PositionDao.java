@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
+import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -34,7 +35,13 @@ public class PositionDao implements Dao<Position, Long> {
 
     private final DataSource dataSource;
 
-    private static final String SELECT = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
+    private static final String USER_TABLE_NAME = "\"user\"";
+    private static final String COMPANY_TABLE_NAME = "company";
+    private static final String ITEM_TABLE_NAME = "item";
+    private static final String CATEGORY_TABLE_NAME = "category";
+    private static final String POSITION_TABLE_NAME = "position";
+
+    private static final String SELECT = format("SELECT p.id AS position_id, p.item_id AS fk_position_item, "
             + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
             + "p.created AS position_created, p.amount AS position_amount, "
             + "i.id AS item_id, i.name AS item_name, "
@@ -47,17 +54,41 @@ public class PositionDao implements Dao<Position, Long> {
             + "u.id AS user_id, u.username AS user_username, u.email AS user_email, "
             + "u.name AS user_name, u.role AS user_role, u.created AS user_created,"
             + "u.updated AS user_updated, u.company_id AS fk_user_company "
-            + "FROM position AS p "
-            + "INNER JOIN company AS c ON p.company_id = c.id "
-            + "INNER JOIN item AS i ON p.item_id = i.id "
-            + "INNER JOIN category categ on i.category_id = categ.id "
-            + "INNER JOIN \"user\" AS u ON p.created_by = u.id";
+            + "FROM %s AS p "
+            + "INNER JOIN %s AS c ON p.company_id = c.id "
+            + "INNER JOIN %s AS i ON p.item_id = i.id "
+            + "INNER JOIN %s categ on i.category_id = categ.id "
+            + "INNER JOIN %s AS u ON p.created_by = u.id", POSITION_TABLE_NAME,
+            COMPANY_TABLE_NAME, ITEM_TABLE_NAME, CATEGORY_TABLE_NAME, USER_TABLE_NAME);
     private static final String SELECT_BY_ID = SELECT + " WHERE p.id = ?";
-    private static final String INSERT = "INSERT INTO position(item_id, company_id, created_by, created, amount) "
-            + "VALUES(?, ?, ?, ?, ?)";
-    private static final String UPDATE = "UPDATE position SET item_id = ?, company_id = ?, "
-            + "created_by = ?, created = ?, amount = ? WHERE id = ?";
-    private static final String DELETE = "DELETE FROM position WHERE id = ?";
+    private static final String INSERT = format("INSERT INTO %s(item_id, company_id, created_by, created, amount) "
+            + "VALUES(?, ?, ?, ?, ?)", POSITION_TABLE_NAME);
+    private static final String UPDATE = format("UPDATE %s SET item_id = ?, company_id = ?, "
+            + "created_by = ?, created = ?, amount = ? WHERE id = ?", POSITION_TABLE_NAME);
+    private static final String DELETE = format("DELETE FROM %S WHERE id = ?", POSITION_TABLE_NAME);
+
+    private static final String COMPANY_ID = "company_id";
+    private static final String COMPANY_NAME = "company_name";
+    private static final String COMPANY_EMAIL = "company_email";
+    private static final String COMPANY_CREATED = "company_created";
+    private static final String COMPANY_DESCRIPTION = "company_description";
+    private static final String USER_ID = "user_id";
+    private static final String USER_USERNAME = "user_username";
+    private static final String USER_EMAIL = "user_email";
+    private static final String USER_NAME = "user_name";
+    private static final String USER_ROLE = "user_role";
+    private static final String USER_CREATED = "user_created";
+    private static final String USER_UPDATED = "user_updated";
+    private static final String CATEGORY_ID = "category_id";
+    private static final String CATEGORY_NAME = "category_name";
+    private static final String CATEGORY_DESCRIPTION = "category_description";
+    private static final String ITEM_ID = "item_id";
+    private static final String ITEM_NAME = "item_name";
+    private static final String ITEM_DESCRIPTION = "item_description";
+    private static final String ITEM_CREATED = "item_created";
+    private static final String POSITION_ID = "position_id";
+    private static final String POSITION_CREATED = "position_created";
+    private static final String POSITION_AMOUNT = "position_amount";
 
     @Override
     public Optional<Position> get(Long id) {
@@ -161,19 +192,19 @@ public class PositionDao implements Dao<Position, Long> {
     }
 
     private Position createPositionFromResultSetRow(ResultSet rs) throws SQLException {
-        Category category = new Category(rs.getLong("category_id"),
-                rs.getString("category_name"), rs.getString("category_description"), new Category());
-        Item item = new Item(UUID.fromString(rs.getString("item_id")), rs.getString("item_name"),
-                rs.getString("item_description"), rs.getTimestamp("item_created").toLocalDateTime(), category);
-        Company company = new Company(rs.getLong("company_id"), rs.getString("company_name"),
-                rs.getString("company_email"), rs.getTimestamp("company_created").toLocalDateTime(),
-                rs.getString("company_description"));
-        User user = new User(UUID.fromString(rs.getString("user_id")), rs.getString("user_username"),
-                rs.getString("user_email"), rs.getString("user_name"), Role.valueOf(rs.getString("user_role")),
-                rs.getTimestamp("user_created").toLocalDateTime(),
-                rs.getTimestamp("user_updated").toLocalDateTime(), company);
+        Category category = new Category(rs.getLong(CATEGORY_ID),
+                rs.getString(CATEGORY_NAME), rs.getString(CATEGORY_DESCRIPTION), new Category());
+        Item item = new Item(UUID.fromString(rs.getString(ITEM_ID)), rs.getString(ITEM_NAME),
+                rs.getString(ITEM_DESCRIPTION), rs.getTimestamp(ITEM_CREATED).toLocalDateTime(), category);
+        Company company = new Company(rs.getLong(COMPANY_ID), rs.getString(COMPANY_NAME),
+                rs.getString(COMPANY_EMAIL), rs.getTimestamp(COMPANY_CREATED).toLocalDateTime(),
+                rs.getString(COMPANY_DESCRIPTION));
+        User user = new User(UUID.fromString(rs.getString(USER_ID)), rs.getString(USER_USERNAME),
+                rs.getString(USER_EMAIL), rs.getString(USER_NAME), Role.valueOf(rs.getString(USER_ROLE)),
+                rs.getTimestamp(USER_CREATED).toLocalDateTime(),
+                rs.getTimestamp(USER_UPDATED).toLocalDateTime(), company);
 
-        return new Position(rs.getLong("position_id"), item, company, user,
-                rs.getTimestamp("position_created").toLocalDateTime(), rs.getDouble("position_amount"));
+        return new Position(rs.getLong(POSITION_ID), item, company, user,
+                rs.getTimestamp(POSITION_CREATED).toLocalDateTime(), rs.getDouble(POSITION_AMOUNT));
     }
 }
