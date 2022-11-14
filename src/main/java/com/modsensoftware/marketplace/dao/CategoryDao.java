@@ -122,15 +122,19 @@ public class CategoryDao implements Dao<Category, Long> {
             Category category = optionalCategory.orElseThrow();
             Optional.ofNullable(updatedFields.getName()).ifPresent(category::setName);
             setIfNotNull(updatedFields.getName(), category::setName);
-            setIfNotNull(updatedFields.getParent().getId(),
-                    value -> category.getParent().setId(value));
+            if (updatedFields.getParent() != null) {
+                setIfNotNull(updatedFields.getParent().getId(),
+                        value -> category.getParent().setId(value));
+            } else {
+                category.setParent(null);
+            }
             setIfNotNull(updatedFields.getDescription(), category::setDescription);
 
             try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, category.getName());
                 ps.setString(2, category.getDescription());
-                if (category.getParent() != null && category.getParent().getId() != null) {
+                if (category.getParent() != null) {
                     ps.setLong(3, category.getParent().getId());
                 } else {
                     ps.setNull(3, Types.BIGINT);
