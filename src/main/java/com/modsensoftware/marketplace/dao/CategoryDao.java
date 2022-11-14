@@ -123,8 +123,11 @@ public class CategoryDao implements Dao<Category, Long> {
             Optional.ofNullable(updatedFields.getName()).ifPresent(category::setName);
             setIfNotNull(updatedFields.getName(), category::setName);
             if (updatedFields.getParent() != null) {
-                setIfNotNull(updatedFields.getParent().getId(),
-                        value -> category.getParent().setId(value));
+                Long parentId = updatedFields.getParent().getId();
+                if (parentId != null) {
+                    category.setParent(new Category());
+                    category.getParent().setId(parentId);
+                }
             } else {
                 category.setParent(null);
             }
