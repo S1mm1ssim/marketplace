@@ -2,6 +2,7 @@ package com.modsensoftware.marketplace.dao;
 
 import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Company;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,10 @@ import static java.lang.String.format;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CompanyDao implements Dao<Company, Long> {
+
+    private final DataSource dataSource;
 
     private static final String COMPANY_TABLE_NAME = "company";
     private static final String SELECT = format("SELECT id, name, email, created, description FROM %s",
@@ -43,7 +47,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public Optional<Company> get(Long id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
@@ -65,7 +69,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public List<Company> getAll() {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Company> companies = new ArrayList<>();
@@ -88,7 +92,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public void save(Company company) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, company.getName());
             ps.setString(2, company.getEmail());
@@ -113,7 +117,7 @@ public class CompanyDao implements Dao<Company, Long> {
             setIfNotNull(updatedFields.getCreated(), company::setCreated);
             setIfNotNull(updatedFields.getDescription(), company::setDescription);
 
-            try (Connection connection = DataSource.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, company.getName());
                 ps.setString(2, company.getEmail());
@@ -132,7 +136,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public void deleteById(Long id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setLong(1, id);
             ps.executeUpdate();

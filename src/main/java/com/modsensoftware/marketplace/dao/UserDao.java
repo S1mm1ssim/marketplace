@@ -4,6 +4,7 @@ import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.enums.Role;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,10 @@ import static java.lang.String.format;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserDao implements Dao<User, UUID> {
+
+    private final DataSource dataSource;
 
     private static final String USER_TABLE_NAME = "\"user\"";
     private static final String COMPANY_TABLE_NAME = "company";
@@ -60,7 +64,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public Optional<User> get(UUID id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
@@ -78,7 +82,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public List<User> getAll() {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<User> users = new ArrayList<>();
@@ -97,7 +101,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void save(User user) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
@@ -129,7 +133,7 @@ public class UserDao implements Dao<User, UUID> {
             setIfNotNull(updatedFields.getCompany().getId(),
                     (value) -> user.getCompany().setId(value));
 
-            try (Connection connection = DataSource.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, user.getUsername());
                 ps.setString(2, user.getEmail());
@@ -151,7 +155,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void deleteById(UUID id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setObject(1, id);
             ps.executeUpdate();

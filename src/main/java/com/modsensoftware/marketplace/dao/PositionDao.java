@@ -7,6 +7,7 @@ import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.enums.Role;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,10 @@ import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class PositionDao implements Dao<Position, Long> {
+
+    private final DataSource dataSource;
 
     private static final String SELECT = "SELECT p.id AS position_id, p.item_id AS fk_position_item, "
             + "p.company_id AS fk_position_company, p.created_by AS fk_position_user, "
@@ -57,7 +61,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public Optional<Position> get(Long id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
@@ -75,7 +79,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public List<Position> getAll() {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Position> positions = new ArrayList<>();
@@ -94,7 +98,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public void save(Position position) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setObject(1, position.getItem().getId());
             ps.setLong(2, position.getCompany().getId());
@@ -124,7 +128,7 @@ public class PositionDao implements Dao<Position, Long> {
             setIfNotNull(updatedFields.getCreated(), position::setCreated);
             setIfNotNull(updatedFields.getAmount(), position::setAmount);
 
-            try (Connection connection = DataSource.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setObject(1, position.getItem().getId());
                 ps.setLong(2, position.getCompany().getId());
@@ -144,7 +148,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public void deleteById(Long id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setLong(1, id);
             ps.executeUpdate();

@@ -2,6 +2,7 @@ package com.modsensoftware.marketplace.dao;
 
 import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Category;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,10 @@ import static java.lang.String.format;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CategoryDao implements Dao<Category, Long> {
+
+    private final DataSource dataSource;
 
     private static final String CATEGORY_TABLE_NAME = "category";
 
@@ -49,7 +53,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public Optional<Category> get(Long id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
@@ -70,7 +74,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public List<Category> getAll() {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Category> categories = new ArrayList<>();
@@ -92,7 +96,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public void save(Category category) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(INSERT_INTO);
             ps.setString(1, category.getName());
 
@@ -122,7 +126,7 @@ public class CategoryDao implements Dao<Category, Long> {
                     value -> category.getParent().setId(value));
             setIfNotNull(updatedFields.getDescription(), category::setDescription);
 
-            try (Connection connection = DataSource.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, category.getName());
                 ps.setString(2, category.getDescription());
@@ -144,7 +148,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public void deleteById(Long id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setLong(1, id);
             ps.executeUpdate();

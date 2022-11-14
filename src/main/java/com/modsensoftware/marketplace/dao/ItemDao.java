@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.dao;
 import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,10 @@ import static java.lang.String.format;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ItemDao implements Dao<Item, UUID> {
+
+    private final DataSource dataSource;
 
     private static final String ITEM_TABLE_NAME = "item";
     private static final String CATEGORY_TABLE_NAME = "category";
@@ -60,7 +64,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public Optional<Item> get(UUID id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
@@ -78,7 +82,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public List<Item> getAll() {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<Item> items = new ArrayList<>();
@@ -97,7 +101,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public void save(Item item) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, item.getName());
             ps.setString(2, item.getDescription());
@@ -123,7 +127,7 @@ public class ItemDao implements Dao<Item, UUID> {
             setIfNotNull(updatedFields.getCategory().getId(),
                     (value) -> item.getCategory().setId(value));
 
-            try (Connection connection = DataSource.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, item.getName());
                 ps.setString(2, item.getDescription());
@@ -142,7 +146,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public void deleteById(UUID id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setObject(1, id);
             ps.executeUpdate();
