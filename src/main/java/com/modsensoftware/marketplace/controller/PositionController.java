@@ -2,11 +2,9 @@ package com.modsensoftware.marketplace.controller;
 
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +21,7 @@ import java.util.List;
 /**
  * @author andrey.demyanchik on 11/3/2022
  */
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/positions")
@@ -40,7 +38,7 @@ public class PositionController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public ResponseEntity<Position> getPositionById(@PathVariable(name = "id") Long id) throws EntityNotFoundException {
+    public ResponseEntity<Position> getPositionById(@PathVariable(name = "id") Long id) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching position by id={}", id);
         }

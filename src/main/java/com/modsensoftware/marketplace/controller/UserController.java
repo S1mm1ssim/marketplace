@@ -2,11 +2,9 @@ package com.modsensoftware.marketplace.controller;
 
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.UserDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +25,7 @@ import java.util.UUID;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/users")
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
@@ -41,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public ResponseEntity<User> getUserById(@PathVariable(name = "id") UUID id) throws EntityNotFoundException {
+    public ResponseEntity<User> getUserById(@PathVariable(name = "id") UUID id) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching user by id={}", id);
         }

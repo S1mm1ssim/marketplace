@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface CompanyService {
 
-    Company getCompanyById(Long id) throws EntityNotFoundException;
+    Company getCompanyById(Long id);
 
     List<Company> getAllCompanies();
 

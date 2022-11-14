@@ -2,7 +2,6 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.UserDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +11,7 @@ import java.util.UUID;
  */
 public interface UserService {
 
-    User getUserById(UUID id) throws EntityNotFoundException;
+    User getUserById(UUID id);
 
     List<User> getAllUsers();
 

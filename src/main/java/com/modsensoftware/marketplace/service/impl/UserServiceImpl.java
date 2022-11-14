@@ -8,7 +8,6 @@ import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,14 +18,14 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final UserMapper userMapper;
 
     @Override
-    public User getUserById(UUID id) throws EntityNotFoundException {
+    public User getUserById(UUID id) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching user by id: {}", id);
         }

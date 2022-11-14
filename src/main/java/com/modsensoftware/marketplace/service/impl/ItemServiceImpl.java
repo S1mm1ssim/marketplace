@@ -8,7 +8,6 @@ import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,14 +18,14 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemDao itemDao;
     private final ItemMapper itemMapper;
 
     @Override
-    public Item getItemById(UUID id) throws EntityNotFoundException {
+    public Item getItemById(UUID id) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching item by id: {}", id);
         }

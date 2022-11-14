@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public interface ItemService {
 
-    Item getItemById(UUID id) throws EntityNotFoundException;
+    Item getItemById(UUID id);
 
     List<Item> getAllItems();
 

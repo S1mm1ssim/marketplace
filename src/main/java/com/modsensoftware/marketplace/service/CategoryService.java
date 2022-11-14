@@ -2,7 +2,6 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.dto.CategoryDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
  */
 public interface CategoryService {
 
-    Category getCategoryById(Long id) throws EntityNotFoundException;
+    Category getCategoryById(Long id);
 
     List<Category> getAllCategories();
 

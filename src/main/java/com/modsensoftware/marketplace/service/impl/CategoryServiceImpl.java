@@ -8,7 +8,6 @@ import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,14 +17,14 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryDao categoryDao;
     private final CategoryMapper categoryMapper;
 
     @Override
-    public Category getCategoryById(Long id) throws EntityNotFoundException {
+    public Category getCategoryById(Long id) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching category by id: {}", id);
         }
