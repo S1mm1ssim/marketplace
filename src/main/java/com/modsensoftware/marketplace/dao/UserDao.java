@@ -4,6 +4,7 @@ import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.enums.Role;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,31 +20,51 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
+import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/1/2022
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserDao implements Dao<User, UUID> {
 
-    private static final String SELECT = "SELECT u.id AS user_id, u.username AS user_username, u.email AS user_email, "
+    private final DataSource dataSource;
+
+    private static final String USER_TABLE_NAME = "\"user\"";
+    private static final String COMPANY_TABLE_NAME = "company";
+
+    private static final String SELECT = format("SELECT u.id AS user_id, u.username AS user_username, u.email AS user_email, "
             + "u.name AS user_name, u.role AS user_role, u.created AS user_created, "
             + "u.updated AS user_updated, u.company_id AS fk_user_company, "
             + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
             + "c.created AS company_created, c.description AS company_description "
-            + "FROM \"user\" AS u "
-            + "INNER JOIN company AS c on u.company_id = c.id ";
+            + "FROM %s AS u "
+            + "INNER JOIN %s AS c on u.company_id = c.id ", USER_TABLE_NAME, COMPANY_TABLE_NAME);
     private static final String SELECT_BY_ID = SELECT + " WHERE u.id=?";
-    private static final String INSERT = "INSERT INTO \"user\"(username, email, name, role, "
-            + "created, updated, company_id) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE = "UPDATE \"user\" SET username=?, email=?, name=?,"
-            + "role=?, created=?, updated=?, company_id=? WHERE id=?";
-    private static final String DELETE = "DELETE FROM \"user\" WHERE id=?";
+    private static final String INSERT = format("INSERT INTO %s(username, email, name, role, "
+            + "created, updated, company_id) VALUES(?, ?, ?, ?, ?, ?, ?)", USER_TABLE_NAME);
+    private static final String UPDATE = format("UPDATE %s SET username=?, email=?, name=?,"
+            + "role=?, created=?, updated=?, company_id=? WHERE id=?", USER_TABLE_NAME);
+    private static final String DELETE = format("DELETE FROM %s WHERE id=?", USER_TABLE_NAME);
+
+    private static final String COMPANY_ID = "company_id";
+    private static final String COMPANY_NAME = "company_name";
+    private static final String COMPANY_EMAIL = "company_email";
+    private static final String COMPANY_CREATED = "company_created";
+    private static final String COMPANY_DESCRIPTION = "company_description";
+    private static final String USER_ID = "user_id";
+    private static final String USER_USERNAME = "user_username";
+    private static final String USER_EMAIL = "user_email";
+    private static final String USER_NAME = "user_name";
+    private static final String USER_ROLE = "user_role";
+    private static final String USER_CREATED = "user_created";
+    private static final String USER_UPDATED = "user_updated";
 
     @Override
     public Optional<User> get(UUID id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
@@ -61,7 +82,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public List<User> getAll() {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(SELECT);
             ResultSet rs = ps.executeQuery();
             List<User> users = new ArrayList<>();
@@ -80,7 +101,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void save(User user) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(INSERT);
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
@@ -112,7 +133,7 @@ public class UserDao implements Dao<User, UUID> {
             setIfNotNull(updatedFields.getCompany().getId(),
                     (value) -> user.getCompany().setId(value));
 
-            try (Connection connection = DataSource.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
                 PreparedStatement ps = connection.prepareStatement(UPDATE);
                 ps.setString(1, user.getUsername());
                 ps.setString(2, user.getEmail());
@@ -134,7 +155,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void deleteById(UUID id) {
-        try (Connection connection = DataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(DELETE);
             ps.setObject(1, id);
             ps.executeUpdate();
@@ -147,13 +168,13 @@ public class UserDao implements Dao<User, UUID> {
     }
 
     private User createUserFromResultSetRow(ResultSet rs) throws SQLException {
-        Company company = new Company(rs.getLong("company_id"), rs.getString("company_name"),
-                rs.getString("company_email"), rs.getTimestamp("company_created").toLocalDateTime(),
-                rs.getString("company_description"));
-        return new User(UUID.fromString(rs.getString("user_id")),
-                rs.getString("user_username"), rs.getString("user_email"), rs.getString("user_name"),
-                Role.valueOf(rs.getString("user_role")), rs.getTimestamp("user_created").toLocalDateTime(),
-                rs.getTimestamp("user_updated").toLocalDateTime(), company
+        Company company = new Company(rs.getLong(COMPANY_ID), rs.getString(COMPANY_NAME),
+                rs.getString(COMPANY_EMAIL), rs.getTimestamp(COMPANY_CREATED).toLocalDateTime(),
+                rs.getString(COMPANY_DESCRIPTION));
+        return new User(UUID.fromString(rs.getString(USER_ID)),
+                rs.getString(USER_USERNAME), rs.getString(USER_EMAIL), rs.getString(USER_NAME),
+                Role.valueOf(rs.getString(USER_ROLE)), rs.getTimestamp(USER_CREATED).toLocalDateTime(),
+                rs.getTimestamp(USER_UPDATED).toLocalDateTime(), company
         );
     }
 }

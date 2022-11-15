@@ -17,6 +17,7 @@
         <java.version>11</java.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <com.zaxxer.version>5.0.1</com.zaxxer.version>
+        <maven.checkstyle.plugin.version>3.2.0</maven.checkstyle.plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -76,6 +77,16 @@
                             <artifactId>mapstruct-processor</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyle.plugin.version}</version>
+                <configuration>
+                    <failsOnError>true</failsOnError>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
                 </configuration>
             </plugin>
         </plugins>

@@ -2,7 +2,6 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.ItemDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +11,7 @@ import java.util.UUID;
  */
 public interface ItemService {
 
-    Item getItemById(UUID id) throws EntityNotFoundException;
+    Item getItemById(UUID id);
 
     List<Item> getAllItems();
 

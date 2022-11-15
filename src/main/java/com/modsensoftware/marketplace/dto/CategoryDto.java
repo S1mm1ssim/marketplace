@@ -13,5 +13,11 @@ import lombok.NoArgsConstructor;
 public class CategoryDto {
     private String name;
     private String description;
+
+    // If parent id comes as null from client it does not affect anything
+    // Only nonNull values matter
     private Long parentId;
+
+    // If nullParent is true then parentId on entity will be set to null
+    private boolean nullParent;
 }

@@ -2,7 +2,6 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
  */
 public interface PositionService {
 
-    Position getPositionById(Long id) throws EntityNotFoundException;
+    Position getPositionById(Long id);
 
     List<Position> getAllPositions();
 
