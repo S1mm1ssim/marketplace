@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  modsen-marketplace-postgres:
+    image: "postgres"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=marketplace
+    volumes:
+      - marketplace-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "32768:5432"
+
+volumes:
+  marketplace-postgres-data:
+    driver: local

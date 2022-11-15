@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="add-tag-1.0" author="Andrdemyan4ik@gmail.com">
+        <tagDatabase tag="v.1.0"/>
+    </changeSet>
+
+    <include file="2022-11-01-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="2022-11-02-add-fk-position.xml" relativeToChangelogFile="true"/>
+    <include file="2022-11-03-add-uuid-generated-ids.xml" relativeToChangelogFile="true" />
+    <include file="2022-11-04-add-unique-email-user.xml" relativeToChangelogFile="true" />
+    <include file="2022-11-04-add-enum-role.xml" relativeToChangelogFile="true" />
+
+</databaseChangeLog>
