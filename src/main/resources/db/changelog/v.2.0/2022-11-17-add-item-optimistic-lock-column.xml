@@ -2,6 +2,13 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
-    <include file="v.1.0/changelog-v.1.0-cumulative.xml" relativeToChangelogFile="true"/>
-    <include file="v.2.0/changelog-v.2.0-cumulative.xml" relativeToChangelogFile="true"/>
+
+    <changeSet id="2022-11-17-add-item-optimistic-lock-column" author="Andrdemyan4ik@gmail.com">
+        <addColumn tableName="item">
+            <column name="version" type="bigint" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
