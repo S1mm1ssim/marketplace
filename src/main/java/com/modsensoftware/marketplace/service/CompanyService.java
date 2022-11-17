@@ -12,7 +12,7 @@ public interface CompanyService {
 
     Company getCompanyById(Long id);
 
-    List<Company> getAllCompanies(int pageNumber);
+    List<Company> getAllCompanies(int pageNumber, String email, String name);
 
     void createCompany(CompanyDto companyDto);
 

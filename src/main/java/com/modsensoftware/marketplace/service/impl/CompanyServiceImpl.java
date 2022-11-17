@@ -6,12 +6,15 @@ import com.modsensoftware.marketplace.dto.CompanyDto;
 import com.modsensoftware.marketplace.dto.mapper.CompanyMapper;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
 import com.modsensoftware.marketplace.service.CompanyService;
+import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -35,11 +38,14 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public List<Company> getAllCompanies(int pageNumber) {
+    public List<Company> getAllCompanies(int pageNumber, String email, String name) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all companies");
         }
-        return companyDao.getAll(pageNumber);
+        Map<String, String> filterProperties = new HashMap<>();
+        Utils.putIfNotNull("email", email, filterProperties::put);
+        Utils.putIfNotNull("name", name, filterProperties::put);
+        return companyDao.getAll(pageNumber, filterProperties);
     }
 
     @Override

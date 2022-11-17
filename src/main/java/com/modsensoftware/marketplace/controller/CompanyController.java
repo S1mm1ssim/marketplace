@@ -33,12 +33,15 @@ public class CompanyController {
     private static final String DEFAULT_PAGE_NUMBER = "0";
 
     @GetMapping(produces = {"application/json"})
-    public List<Company> getAllCompanies(@RequestParam(name = "page",
-            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+    public List<Company> getAllCompanies(
+            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "name", required = false) String name
+    ) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all companies");
         }
-        return companyService.getAllCompanies(pageNumber);
+        return companyService.getAllCompanies(pageNumber, email, name);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
@@ -53,7 +56,7 @@ public class CompanyController {
     @PostMapping
     public void createCompany(@RequestBody CompanyDto companyDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new company: {}", companyDto);
+            log.debug("Creating new company from dto: {}", companyDto);
         }
         companyService.createCompany(companyDto);
     }
