@@ -42,10 +42,13 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public void createPosition(PositionDto positionDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new position: {}", positionDto);
+            log.debug("Creating new position from dto: {}", positionDto);
         }
         Position position = positionMapper.toPosition(positionDto);
         position.setCreated(LocalDateTime.now());
+        if (log.isDebugEnabled()) {
+            log.debug("Mapping result: {}", position);
+        }
         positionDao.save(position);
     }
 

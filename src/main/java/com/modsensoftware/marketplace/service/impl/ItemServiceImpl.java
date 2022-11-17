@@ -43,10 +43,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void createItem(ItemDto itemDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new item: {}", itemDto);
+            log.debug("Creating new item from dto: {}", itemDto);
         }
         Item item = itemMapper.toItem(itemDto);
         item.setCreated(LocalDateTime.now());
+        if (log.isDebugEnabled()) {
+            log.debug("Mapping result: {}", item);
+        }
         itemDao.save(item);
     }
 

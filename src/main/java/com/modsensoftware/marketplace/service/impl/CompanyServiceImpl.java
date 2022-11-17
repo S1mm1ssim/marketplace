@@ -45,11 +45,14 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void createCompany(CompanyDto companyDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new company: {}", companyDto);
+            log.debug("Creating new company from dto: {}", companyDto);
         }
         if (!companyDao.existsByEmail(companyDto.getEmail())) {
             Company company = companyMapper.toCompany(companyDto);
             company.setCreated(LocalDateTime.now());
+            if (log.isDebugEnabled()) {
+                log.debug("Mapping result: {}", company);
+            }
             companyDao.save(company);
         } else {
             throw new EntityAlreadyExistsException(format("Company with email %s already exists",

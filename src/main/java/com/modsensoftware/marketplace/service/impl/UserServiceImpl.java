@@ -49,13 +49,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void createUser(UserDto userDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new user: {}", userDto);
+            log.debug("Creating new user from dto: {}", userDto);
         }
         if (!userDao.existsByEmail(userDto.getEmail())) {
             User user = userMapper.toUser(userDto);
             user.setRole(DEFAULT_ROLE);
             user.setCreated(LocalDateTime.now());
             user.setUpdated(LocalDateTime.now());
+            if (log.isDebugEnabled()) {
+                log.debug("Mapping result: {}", user);
+            }
             userDao.save(user);
         } else {
             throw new EntityAlreadyExistsException(format("User with email %s already exists",

@@ -41,9 +41,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void createCategory(CategoryDto categoryDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new category: {}", categoryDto);
+            log.debug("Creating new category from dto: {}", categoryDto);
         }
-        categoryDao.save(categoryMapper.toCategory(categoryDto));
+        Category category = categoryMapper.toCategory(categoryDto);
+        if (log.isDebugEnabled()) {
+            log.debug("Mapping result: {}", category);
+        }
+        categoryDao.save(category);
     }
 
     @Override
