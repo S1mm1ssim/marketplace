@@ -9,3 +9,10 @@ spring:
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+logging:
+  level:
+    root: info
+
+page:
+  size: 20
