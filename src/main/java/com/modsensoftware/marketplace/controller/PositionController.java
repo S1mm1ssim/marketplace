@@ -53,7 +53,7 @@ public class PositionController {
     @PostMapping
     public void createPosition(@RequestBody PositionDto positionDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new position: {}", positionDto);
+            log.debug("Creating new position from dto: {}", positionDto);
         }
         positionService.createPosition(positionDto);
     }

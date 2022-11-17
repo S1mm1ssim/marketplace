@@ -53,7 +53,7 @@ public class CategoryController {
     @PostMapping
     public void createCategory(@RequestBody CategoryDto categoryDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new category: {}", categoryDto);
+            log.debug("Creating new category dto: {}", categoryDto);
         }
         categoryService.createCategory(categoryDto);
     }

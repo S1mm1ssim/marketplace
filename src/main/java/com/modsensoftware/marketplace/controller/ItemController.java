@@ -54,7 +54,7 @@ public class ItemController {
     @PostMapping
     public void createItem(@RequestBody ItemDto itemDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new item: {}", itemDto);
+            log.debug("Creating new item from dto: {}", itemDto);
         }
         itemService.createItem(itemDto);
     }
