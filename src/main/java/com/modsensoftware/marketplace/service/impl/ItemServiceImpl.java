@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class ItemServiceImpl implements ItemService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all items");
         }
-        return itemDao.getAll(pageNumber);
+        return itemDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override

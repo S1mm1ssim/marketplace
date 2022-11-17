@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all categories");
         }
-        return categoryDao.getAll(pageNumber);
+        return categoryDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override

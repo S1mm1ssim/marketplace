@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ public class PositionServiceImpl implements PositionService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all positions");
         }
-        return positionDao.getAll(pageNumber);
+        return positionDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override
