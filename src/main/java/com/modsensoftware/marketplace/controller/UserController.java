@@ -34,12 +34,17 @@ public class UserController {
     private static final String DEFAULT_PAGE_NUMBER = "0";
 
     @GetMapping(produces = {"application/json"})
-    public List<User> getAllUsers(@RequestParam(name = "page",
-            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+    public List<User> getAllUsers(
+            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "created", required = false) String createdBetween,
+            @RequestParam(name = "companyId", required = false) Long companyId
+    ) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all users");
         }
-        return userService.getAllUsers(pageNumber);
+        return userService.getAllUsers(pageNumber, email, name, createdBetween, companyId);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
@@ -54,7 +59,7 @@ public class UserController {
     @PostMapping
     public void createUser(@RequestBody UserDto userDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new user: {}", userDto);
+            log.debug("Creating new user from dto: {}", userDto);
         }
         userService.createUser(userDto);
     }
