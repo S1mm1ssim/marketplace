@@ -36,7 +36,7 @@ import java.util.UUID;
         typeClass = PostgreSQLEnumType.class
 )
 @NamedEntityGraph(
-        name = "user-entity-graph",
+        name = "graph.User.company",
         attributeNodes = {
                 @NamedAttributeNode("company")
         }

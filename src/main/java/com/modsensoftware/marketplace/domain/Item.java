@@ -34,11 +34,11 @@ import java.util.UUID;
         @NamedEntityGraph(
                 name = "graph.Item.category.parent",
                 attributeNodes = {
-                        @NamedAttributeNode(value = "category", subgraph = "parent-category-subgraph")
+                        @NamedAttributeNode(value = "category", subgraph = "subgraph.category.parent")
                 },
                 subgraphs = {
                         @NamedSubgraph(
-                                name = "parent-category-subgraph",
+                                name = "subgraph.category.parent",
                                 attributeNodes = {
                                         @NamedAttributeNode("parent")
                                 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,21 +27,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @NamedEntityGraph(
-        name = "position-entity-graph",
+        name = "graph.Position.item.company.user",
         attributeNodes = {
-                @NamedAttributeNode(value = "createdBy", subgraph = "user-subgraph"),
+                @NamedAttributeNode(value = "createdBy", subgraph = "subgraph.user.company"),
                 @NamedAttributeNode(value = "company"),
-                @NamedAttributeNode(value = "item", subgraph = "item-subgraph")
+                @NamedAttributeNode(value = "item", subgraph = "subgraph.item.category")
         },
         subgraphs = {
                 @NamedSubgraph(
-                        name = "item-subgraph",
+                        name = "subgraph.item.category",
                         attributeNodes = {
                                 @NamedAttributeNode("category")
                         }
                 ),
                 @NamedSubgraph(
-                        name = "user-subgraph",
+                        name = "subgraph.user.company",
                         attributeNodes = {
                                 @NamedAttributeNode("company")
                         }
