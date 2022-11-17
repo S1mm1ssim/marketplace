@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,18 +31,21 @@ public class ItemController {
 
     private final ItemService itemService;
 
+    private static final String DEFAULT_PAGE_NUMBER = "0";
+
     @GetMapping(produces = {"application/json"})
-    public List<Item> getAllItems() {
+    public List<Item> getAllItems(@RequestParam(name = "page",
+            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching all users");
+            log.debug("Fetching all items");
         }
-        return itemService.getAllItems();
+        return itemService.getAllItems(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Item getItemById(@PathVariable(name = "id") UUID id) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching user by id={}", id);
+            log.debug("Fetching item by id={}", id);
         }
         return itemService.getItemById(id);
     }

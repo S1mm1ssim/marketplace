@@ -4,7 +4,6 @@ import com.modsensoftware.marketplace.dao.CategoryDao;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.dto.CategoryDto;
 import com.modsensoftware.marketplace.dto.mapper.CategoryMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,15 +27,15 @@ public class CategoryServiceImpl implements CategoryService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching category by id: {}", id);
         }
-        return categoryDao.get(id).orElseThrow(EntityNotFoundException::new);
+        return categoryDao.get(id);
     }
 
     @Override
-    public List<Category> getAllCategories() {
+    public List<Category> getAllCategories(int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all categories");
         }
-        return categoryDao.getAll();
+        return categoryDao.getAll(pageNumber);
     }
 
     @Override

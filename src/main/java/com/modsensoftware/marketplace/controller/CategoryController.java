@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,12 +30,15 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    private static final String DEFAULT_PAGE_NUMBER = "0";
+
     @GetMapping(produces = {"application/json"})
-    public List<Category> getAllCategories() {
+    public List<Category> getAllCategories(@RequestParam(name = "page",
+            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all categories");
         }
-        return categoryService.getAllCategories();
+        return categoryService.getAllCategories(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
@@ -65,7 +69,7 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     public void updateCategory(@PathVariable(name = "id") Long id,
-                                               @RequestBody CategoryDto updatedFields) {
+                               @RequestBody CategoryDto updatedFields) {
         if (log.isDebugEnabled()) {
             log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
         }

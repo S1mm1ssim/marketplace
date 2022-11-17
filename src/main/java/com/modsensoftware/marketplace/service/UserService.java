@@ -13,7 +13,7 @@ public interface UserService {
 
     User getUserById(UUID id);
 
-    List<User> getAllUsers();
+    List<User> getAllUsers(int pageNumber);
 
     void createUser(UserDto userDto);
 

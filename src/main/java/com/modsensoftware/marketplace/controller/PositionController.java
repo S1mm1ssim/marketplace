@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,12 +30,15 @@ public class PositionController {
 
     private final PositionService positionService;
 
+    private static final String DEFAULT_PAGE_NUMBER = "0";
+
     @GetMapping(produces = {"application/json"})
-    public List<Position> getAllPositions() {
+    public List<Position> getAllPositions(@RequestParam(name = "page",
+            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all positions");
         }
-        return positionService.getAllPositions();
+        return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})

@@ -13,7 +13,7 @@ public interface ItemService {
 
     Item getItemById(UUID id);
 
-    List<Item> getAllItems();
+    List<Item> getAllItems(int pageNumber);
 
     void createItem(ItemDto itemDto);
 

@@ -4,14 +4,18 @@ import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.UserDto;
 import com.modsensoftware.marketplace.dto.mapper.UserMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.enums.Role;
+import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
 import com.modsensoftware.marketplace.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -24,20 +28,22 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final UserMapper userMapper;
 
+    private static final Role DEFAULT_ROLE = Role.MANAGER;
+
     @Override
     public User getUserById(UUID id) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching user by id: {}", id);
         }
-        return userDao.get(id).orElseThrow(EntityNotFoundException::new);
+        return userDao.get(id);
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all users");
         }
-        return userDao.getAll();
+        return userDao.getAll(pageNumber);
     }
 
     @Override
@@ -45,7 +51,16 @@ public class UserServiceImpl implements UserService {
         if (log.isDebugEnabled()) {
             log.debug("Creating new user: {}", userDto);
         }
-        userDao.save(userMapper.toUser(userDto));
+        if (!userDao.existsByEmail(userDto.getEmail())) {
+            User user = userMapper.toUser(userDto);
+            user.setRole(DEFAULT_ROLE);
+            user.setCreated(LocalDateTime.now());
+            user.setUpdated(LocalDateTime.now());
+            userDao.save(user);
+        } else {
+            throw new EntityAlreadyExistsException(format("User with email %s already exists",
+                    userDto.getEmail()));
+        }
     }
 
     @Override
@@ -61,6 +76,8 @@ public class UserServiceImpl implements UserService {
         if (log.isDebugEnabled()) {
             log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
         }
-        userDao.update(id, userMapper.toUser(updatedFields));
+        User user = userMapper.toUser(updatedFields);
+        user.setUpdated(LocalDateTime.now());
+        userDao.update(id, user);
     }
 }

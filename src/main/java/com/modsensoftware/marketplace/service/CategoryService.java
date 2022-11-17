@@ -12,7 +12,7 @@ public interface CategoryService {
 
     Category getCategoryById(Long id);
 
-    List<Category> getAllCategories();
+    List<Category> getAllCategories(int pageNumber);
 
     void createCategory(CategoryDto categoryDto);
 

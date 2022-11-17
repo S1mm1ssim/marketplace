@@ -4,12 +4,12 @@ import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.ItemDto;
 import com.modsensoftware.marketplace.dto.mapper.ItemMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,15 +29,15 @@ public class ItemServiceImpl implements ItemService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching item by id: {}", id);
         }
-        return itemDao.get(id).orElseThrow(EntityNotFoundException::new);
+        return itemDao.get(id);
     }
 
     @Override
-    public List<Item> getAllItems() {
+    public List<Item> getAllItems(int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all items");
         }
-        return itemDao.getAll();
+        return itemDao.getAll(pageNumber);
     }
 
     @Override
@@ -45,7 +45,9 @@ public class ItemServiceImpl implements ItemService {
         if (log.isDebugEnabled()) {
             log.debug("Creating new item: {}", itemDto);
         }
-        itemDao.save(itemMapper.toItem(itemDto));
+        Item item = itemMapper.toItem(itemDto);
+        item.setCreated(LocalDateTime.now());
+        itemDao.save(item);
     }
 
     @Override

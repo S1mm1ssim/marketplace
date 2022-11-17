@@ -4,13 +4,16 @@ import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.dto.CompanyDto;
 import com.modsensoftware.marketplace.dto.mapper.CompanyMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
 import com.modsensoftware.marketplace.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -28,23 +31,30 @@ public class CompanyServiceImpl implements CompanyService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching company by id: {}", id);
         }
-        return companyDao.get(id).orElseThrow(EntityNotFoundException::new);
+        return companyDao.get(id);
     }
 
     @Override
-    public List<Company> getAllCompanies() {
+    public List<Company> getAllCompanies(int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all companies");
         }
-        return companyDao.getAll();
+        return companyDao.getAll(pageNumber);
     }
 
     @Override
-    public void createCompany(Company company) {
+    public void createCompany(CompanyDto companyDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new company: {}", company);
+            log.debug("Creating new company: {}", companyDto);
         }
-        companyDao.save(company);
+        if (!companyDao.existsByEmail(companyDto.getEmail())) {
+            Company company = companyMapper.toCompany(companyDto);
+            company.setCreated(LocalDateTime.now());
+            companyDao.save(company);
+        } else {
+            throw new EntityAlreadyExistsException(format("Company with email %s already exists",
+                    companyDto.getEmail()));
+        }
     }
 
     @Override

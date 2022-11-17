@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,12 +30,15 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
+    private static final String DEFAULT_PAGE_NUMBER = "0";
+
     @GetMapping(produces = {"application/json"})
-    public List<Company> getAllCompanies() {
+    public List<Company> getAllCompanies(@RequestParam(name = "page",
+            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all companies");
         }
-        return companyService.getAllCompanies();
+        return companyService.getAllCompanies(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
@@ -47,11 +51,11 @@ public class CompanyController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCompany(@RequestBody Company company) {
+    public void createCompany(@RequestBody CompanyDto companyDto) {
         if (log.isDebugEnabled()) {
-            log.debug("Creating new company: {}", company);
+            log.debug("Creating new company: {}", companyDto);
         }
-        companyService.createCompany(company);
+        companyService.createCompany(companyDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -65,7 +69,7 @@ public class CompanyController {
 
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = "id") Long id,
-                                              @RequestBody CompanyDto updatedFields) {
+                              @RequestBody CompanyDto updatedFields) {
         if (log.isDebugEnabled()) {
             log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         }

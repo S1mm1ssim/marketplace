@@ -4,12 +4,12 @@ import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -28,15 +28,15 @@ public class PositionServiceImpl implements PositionService {
         if (log.isDebugEnabled()) {
             log.debug("Fetching company by id: {}", id);
         }
-        return positionDao.get(id).orElseThrow(EntityNotFoundException::new);
+        return positionDao.get(id);
     }
 
     @Override
-    public List<Position> getAllPositions() {
+    public List<Position> getAllPositions(int pageNumber) {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all positions");
         }
-        return positionDao.getAll();
+        return positionDao.getAll(pageNumber);
     }
 
     @Override
@@ -44,7 +44,9 @@ public class PositionServiceImpl implements PositionService {
         if (log.isDebugEnabled()) {
             log.debug("Creating new position: {}", positionDto);
         }
-        positionDao.save(positionMapper.toPosition(positionDto));
+        Position position = positionMapper.toPosition(positionDto);
+        position.setCreated(LocalDateTime.now());
+        positionDao.save(position);
     }
 
     @Override

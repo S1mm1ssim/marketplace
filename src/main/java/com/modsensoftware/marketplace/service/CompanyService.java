@@ -2,7 +2,6 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.dto.CompanyDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 
 import java.util.List;
 
@@ -13,9 +12,9 @@ public interface CompanyService {
 
     Company getCompanyById(Long id);
 
-    List<Company> getAllCompanies();
+    List<Company> getAllCompanies(int pageNumber);
 
-    void createCompany(Company company);
+    void createCompany(CompanyDto companyDto);
 
     void deleteCompany(Long id);
 
