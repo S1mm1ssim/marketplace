@@ -13,11 +13,11 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import java.util.List;
@@ -114,24 +114,19 @@ public class ItemDao implements Dao<Item, UUID> {
             log.debug("Updating item entity with id {} with values from: {}", id, updatedFields);
         }
         Session session = hibernateSessionFactory.getSessionFactory().openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaUpdate<Item> update = cb.createCriteriaUpdate(Item.class);
-        Root<Item> root = update.from(Item.class);
+        Transaction transaction = session.beginTransaction();
+        Item item = session.find(Item.class, id, LockModeType.OPTIMISTIC);
 
         if (updatedFields.getName() != null) {
-            update.set(ITEM_NAME, updatedFields.getName());
+            item.setName(updatedFields.getName());
         }
         if (updatedFields.getDescription() != null) {
-            update.set(ITEM_DESCRIPTION, updatedFields.getDescription());
+            item.setDescription(updatedFields.getDescription());
         }
         if (updatedFields.getCategory().getId() != null) {
-            update.set(root.get(ITEM_CATEGORY_COLUMN_NAME).get(CATEGORY_ID),
-                    updatedFields.getCategory().getId());
+            item.getCategory().setId(updatedFields.getCategory().getId());
         }
-        update.where(cb.equal(root.get(ITEM_ID), id));
-
-        Transaction transaction = session.beginTransaction();
-        session.createQuery(update).executeUpdate();
+        session.merge(item);
         transaction.commit();
         session.close();
     }

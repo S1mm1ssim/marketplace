@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OptimisticLockException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,15 @@ public class ItemServiceImpl implements ItemService {
         if (log.isDebugEnabled()) {
             log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         }
-        itemDao.update(id, itemMapper.toItem(updatedFields));
+        Item item = itemDao.get(id);
+        if (item.getVersion().equals(updatedFields.getVersion())) {
+            log.debug("Item versions match");
+            itemDao.update(id, itemMapper.toItem(updatedFields));
+        } else {
+            log.error("Item versions do not match. Provided: {}, in the database: {}",
+                    item.getVersion(), updatedFields.getVersion());
+            throw new OptimisticLockException("Provided item version "
+                    + "does not match with the one in the database");
+        }
     }
 }

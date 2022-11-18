@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.persistence.OptimisticLockException;
+
 /**
  * @author andrey.demyanchik on 11/16/2022
  */
@@ -20,7 +22,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(value = {EntityAlreadyExistsException.class, InvalidFilterException.class})
+    @ExceptionHandler(value = {EntityAlreadyExistsException.class,
+            InvalidFilterException.class,
+            OptimisticLockException.class})
     protected ResponseEntity<Object> handleBadRequest(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);

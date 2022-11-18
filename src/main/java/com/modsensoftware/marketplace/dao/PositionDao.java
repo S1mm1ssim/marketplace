@@ -13,16 +13,15 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
 
-import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 import static java.lang.String.format;
 
 /**
@@ -124,28 +123,24 @@ public class PositionDao implements Dao<Position, Long> {
             log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);
         }
         Session session = hibernateSessionFactory.getSessionFactory().openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaUpdate<Position> update = cb.createCriteriaUpdate(Position.class);
-        Root<Position> root = update.from(Position.class);
-
+        Transaction transaction = session.beginTransaction();
+        Position position = session.find(Position.class, id, LockModeType.OPTIMISTIC);
         if (updatedFields.getItem().getId() != null) {
-            update.set(root.get(ITEM_FIELD_NAME).get(ITEM_ID),
-                    updatedFields.getItem().getId());
+            position.getItem().setId(updatedFields.getItem().getId());
         }
         if (updatedFields.getCompany().getId() != null) {
-            update.set(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID),
-                    updatedFields.getCompany().getId());
+            position.getCompany().setId(updatedFields.getCompany().getId());
         }
         if (updatedFields.getCreatedBy().getId() != null) {
-            update.set(root.get(USER_FIELD_NAME).get(USER_ID),
-                    updatedFields.getCreatedBy().getId());
+            position.getCreatedBy().setId(updatedFields.getCreatedBy().getId());
         }
-        setIfNotNull(POSITION_AMOUNT, updatedFields.getAmount(), update::set);
-        update.where(cb.equal(root.get(POSITION_ID), id));
+        if (updatedFields.getAmount() != null) {
+            position.setAmount(updatedFields.getAmount());
+        }
 
-        Transaction transaction = session.beginTransaction();
-        session.createQuery(update).executeUpdate();
+        session.merge(position);
         transaction.commit();
+        session.close();
     }
 
     @Override

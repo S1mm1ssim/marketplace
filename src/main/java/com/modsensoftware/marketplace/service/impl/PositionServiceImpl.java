@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OptimisticLockException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -66,6 +67,15 @@ public class PositionServiceImpl implements PositionService {
         if (log.isDebugEnabled()) {
             log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         }
-        positionDao.update(id, positionMapper.toPosition(updatedFields));
+        Position position = positionDao.get(id);
+        if (position.getVersion().equals(updatedFields.getVersion())) {
+            log.debug("Position versions match");
+            positionDao.update(id, positionMapper.toPosition(updatedFields));
+        } else {
+            log.error("Position versions do not match. Provided: {}, in the database: {}",
+                    position.getVersion(), updatedFields.getVersion());
+            throw new OptimisticLockException("Provided position version "
+                    + "does not match with the one in the database");
+        }
     }
 }
