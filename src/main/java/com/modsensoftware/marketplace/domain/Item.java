@@ -15,7 +15,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -30,26 +29,20 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "item")
-@NamedEntityGraphs({
-        @NamedEntityGraph(
-                name = "graph.Item.category.parent",
-                attributeNodes = {
-                        @NamedAttributeNode(value = "category", subgraph = "subgraph.category.parent")
-                },
-                subgraphs = {
-                        @NamedSubgraph(
-                                name = "subgraph.category.parent",
-                                attributeNodes = {
-                                        @NamedAttributeNode("parent")
-                                }
-                        )
-                }
-        ), @NamedEntityGraph(
-        name = "graph.Item.category",
+@NamedEntityGraph(
+        name = "graph.Item.category.parent",
         attributeNodes = {
-                @NamedAttributeNode(value = "category")
-        })
-})
+                @NamedAttributeNode(value = "category", subgraph = "subgraph.category.parent")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "subgraph.category.parent",
+                        attributeNodes = {
+                                @NamedAttributeNode("parent")
+                        }
+                )
+        }
+)
 public class Item {
 
     @Id
