@@ -36,7 +36,7 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public List<Position> getAllPositions(int pageNumber) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching all positions");
+            log.debug("Fetching all positions for page {}", pageNumber);
         }
         return positionDao.getAll(pageNumber, Collections.emptyMap());
     }

@@ -40,7 +40,8 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public List<Company> getAllCompanies(int pageNumber, String email, String name) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching all companies");
+            log.debug("Fetching all companies for page {}. Filter by email: {} and name: {}",
+                    pageNumber, email, name);
         }
         Map<String, String> filterProperties = new HashMap<>();
         Utils.putIfNotNull("email", email, filterProperties::put);

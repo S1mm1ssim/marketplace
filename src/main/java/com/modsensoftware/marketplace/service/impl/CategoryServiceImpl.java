@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> getAllCategories(int pageNumber) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching all categories");
+            log.debug("Fetching all categories for page {}", pageNumber);
         }
         return categoryDao.getAll(pageNumber, Collections.emptyMap());
     }

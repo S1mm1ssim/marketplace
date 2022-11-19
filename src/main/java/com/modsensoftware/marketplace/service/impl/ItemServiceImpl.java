@@ -37,7 +37,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<Item> getAllItems(int pageNumber) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching all items");
+            log.debug("Fetching all items for page {}", pageNumber);
         }
         return itemDao.getAll(pageNumber, Collections.emptyMap());
     }

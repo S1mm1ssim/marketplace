@@ -46,7 +46,9 @@ public class UserServiceImpl implements UserService {
                                   String name, String createdBetween,
                                   Long companyId) {
         if (log.isDebugEnabled()) {
-            log.debug("Fetching all users");
+            log.debug("Fetching all users for page {}. "
+                            + "Filter by email: {}, name: {}, created between: {}, company id: {}",
+                    pageNumber, email, name, createdBetween, companyId);
         }
         Map<String, String> filterProperties = new HashMap<>();
         Utils.putIfNotNull("email", email, filterProperties::put);
