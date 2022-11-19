@@ -14,5 +14,8 @@ logging:
   level:
     root: info
 
-page:
-  size: 20
+default:
+  page:
+    size: 20
+  role: MANAGER
+

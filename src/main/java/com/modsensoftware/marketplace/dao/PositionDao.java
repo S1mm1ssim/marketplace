@@ -34,7 +34,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     private final HibernateSessionFactory hibernateSessionFactory;
 
-    @Value("${page.size}")
+    @Value("${default.page.size}")
     private int pageSize;
     private static final String POSITION_GRAPH = "graph.Position.item.company.user";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";

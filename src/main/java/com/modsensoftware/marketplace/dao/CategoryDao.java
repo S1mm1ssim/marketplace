@@ -35,7 +35,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     private final HibernateSessionFactory hibernateSessionFactory;
 
-    @Value("${page.size}")
+    @Value("${default.page.size}")
     private int pageSize;
     private static final String CATEGORY_PARENT_FIELD_NAME = "parent";
     private static final String PARENT_ID = "id";

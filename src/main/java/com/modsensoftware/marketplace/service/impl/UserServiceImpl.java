@@ -10,6 +10,7 @@ import com.modsensoftware.marketplace.service.UserService;
 import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,7 +32,8 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final UserMapper userMapper;
 
-    private static final Role DEFAULT_ROLE = Role.MANAGER;
+    @Value("${default.role}")
+    private String defaultRole;
 
     @Override
     public User getUserById(UUID id) {
@@ -69,7 +71,7 @@ public class UserServiceImpl implements UserService {
         }
         if (!userDao.existsByEmail(userDto.getEmail())) {
             User user = userMapper.toUser(userDto);
-            user.setRole(DEFAULT_ROLE);
+            user.setRole(Role.valueOf(defaultRole));
             user.setCreated(LocalDateTime.now());
             user.setUpdated(LocalDateTime.now());
             if (log.isDebugEnabled()) {

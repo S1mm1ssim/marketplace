@@ -36,7 +36,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     private final HibernateSessionFactory hibernateSessionFactory;
 
-    @Value("${page.size}")
+    @Value("${default.page.size}")
     private int pageSize;
     private static final String ITEM_ENTITY_GRAPH = "graph.Item.category.parent";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";

@@ -35,7 +35,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     private final HibernateSessionFactory hibernateSessionFactory;
 
-    @Value("${page.size}")
+    @Value("${default.page.size}")
     private int pageSize;
     private static final String ID_COLUMN_NAME = "id";
     private static final String NAME_COLUMN_NAME = "name";

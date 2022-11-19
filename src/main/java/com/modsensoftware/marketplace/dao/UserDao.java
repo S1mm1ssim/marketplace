@@ -43,7 +43,7 @@ public class UserDao implements Dao<User, UUID> {
 
     private final HibernateSessionFactory hibernateSessionFactory;
 
-    @Value("${page.size}")
+    @Value("${default.page.size}")
     private int pageSize;
     private static final String USER_ENTITY_GRAPH = "graph.User.company";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
