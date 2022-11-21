@@ -74,7 +74,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Checking if company with email {} exists", email);
         }
-        Session session = sessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> byId = cb.createQuery(Company.class);
         Root<Company> root = byId.from(Company.class);
@@ -129,7 +129,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Saving company entity: {}", company);
         }
-        Session session = sessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(company);
         transaction.commit();

@@ -98,7 +98,7 @@ public class ItemDao implements Dao<Item, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Saving item entity: {}", item);
         }
-        Session session = sessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(item);
         transaction.commit();

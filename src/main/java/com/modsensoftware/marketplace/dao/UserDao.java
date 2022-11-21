@@ -95,7 +95,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Checking if user with email {} exists", email);
         }
-        Session session = sessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> byId = cb.createQuery(User.class);
         Root<User> root = byId.from(User.class);
