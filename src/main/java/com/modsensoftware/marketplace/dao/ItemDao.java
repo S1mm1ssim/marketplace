@@ -42,10 +42,7 @@ public class ItemDao implements Dao<Item, UUID> {
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
     private static final String ITEM_CATEGORY_COLUMN_NAME = "category";
-    private static final String CATEGORY_ID = "id";
     private static final String ITEM_ID = "id";
-    private static final String ITEM_NAME = "name";
-    private static final String ITEM_DESCRIPTION = "description";
 
     @Override
     public Item get(UUID id) {

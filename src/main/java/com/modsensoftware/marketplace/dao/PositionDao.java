@@ -40,14 +40,9 @@ public class PositionDao implements Dao<Position, Long> {
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
     private static final String COMPANY_FIELD_NAME = "company";
-    private static final String COMPANY_ID = "id";
     private static final String IS_COMPANY_SOFT_DELETED = "isDeleted";
-    private static final String USER_FIELD_NAME = "createdBy";
-    private static final String USER_ID = "id";
-    private static final String ITEM_FIELD_NAME = "item";
     private static final String ITEM_ID = "id";
     private static final String POSITION_ID = "id";
-    private static final String POSITION_AMOUNT = "amount";
 
     @Override
     public Position get(Long id) {
