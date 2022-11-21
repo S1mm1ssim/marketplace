@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.HibernateSessionFactory;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
@@ -8,6 +7,7 @@ import com.modsensoftware.marketplace.exception.InvalidFilterException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.graph.RootGraph;
 import org.hibernate.query.Query;
@@ -41,7 +41,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class UserDao implements Dao<User, UUID> {
 
-    private final HibernateSessionFactory hibernateSessionFactory;
+    private final SessionFactory sessionFactory;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -65,7 +65,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching user entity with uuid {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> byId = cb.createQuery(User.class);
@@ -95,7 +95,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Checking if user with email {} exists", email);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.getSessionFactory().openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> byId = cb.createQuery(User.class);
         Root<User> root = byId.from(User.class);
@@ -125,7 +125,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all users for page {}", pageNumber);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> getAll = cb.createQuery(User.class);
@@ -153,7 +153,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Saving user entity: {}", user);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(user);
         transaction.commit();
@@ -165,7 +165,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Updating user entity with id {} with values from: {}", id, updatedFields);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<User> update = cb.createCriteriaUpdate(User.class);
         Root<User> root = update.from(User.class);
@@ -190,7 +190,7 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Deleting user entity with id: {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<User> delete = cb.createCriteriaDelete(User.class);
         Root<User> root = delete.from(User.class);

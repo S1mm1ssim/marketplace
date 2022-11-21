@@ -1,12 +1,12 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.HibernateSessionFactory;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.graph.RootGraph;
 import org.hibernate.query.Query;
@@ -34,7 +34,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class ItemDao implements Dao<Item, UUID> {
 
-    private final HibernateSessionFactory hibernateSessionFactory;
+    private final SessionFactory sessionFactory;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -52,7 +52,7 @@ public class ItemDao implements Dao<Item, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching item entity with id {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Item> byId = cb.createQuery(Item.class);
@@ -78,7 +78,7 @@ public class ItemDao implements Dao<Item, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all items for page {}", pageNumber);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Item> getAll = cb.createQuery(Item.class);
@@ -101,7 +101,7 @@ public class ItemDao implements Dao<Item, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Saving item entity: {}", item);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(item);
         transaction.commit();
@@ -113,7 +113,7 @@ public class ItemDao implements Dao<Item, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Updating item entity with id {} with values from: {}", id, updatedFields);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         Item item = session.find(Item.class, id, LockModeType.OPTIMISTIC);
 
@@ -136,7 +136,7 @@ public class ItemDao implements Dao<Item, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Deleting item entity with id: {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Item> delete = cb.createCriteriaDelete(Item.class);
         Root<Item> root = delete.from(Item.class);

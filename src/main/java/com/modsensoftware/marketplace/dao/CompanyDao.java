@@ -1,11 +1,11 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.HibernateSessionFactory;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class CompanyDao implements Dao<Company, Long> {
 
-    private final HibernateSessionFactory hibernateSessionFactory;
+    private final SessionFactory sessionFactory;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -48,7 +48,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching company entity with id {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> byId = cb.createQuery(Company.class);
         Root<Company> root = byId.from(Company.class);
@@ -74,7 +74,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Checking if company with email {} exists", email);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.getSessionFactory().openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> byId = cb.createQuery(Company.class);
         Root<Company> root = byId.from(Company.class);
@@ -104,7 +104,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all companies for page {}", pageNumber);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> getAll = cb.createQuery(Company.class);
         Root<Company> root = getAll.from(Company.class);
@@ -129,7 +129,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Saving company entity: {}", company);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(company);
         transaction.commit();
@@ -141,7 +141,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Updating company entity with id {} with values from: {}", id, updatedFields);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Company> update = cb.createCriteriaUpdate(Company.class);
         Root<Company> root = update.from(Company.class);
@@ -166,7 +166,7 @@ public class CompanyDao implements Dao<Company, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Deleting company entity with id: {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Company> softDelete = cb.createCriteriaUpdate(Company.class);
         Root<Company> root = softDelete.from(Company.class);

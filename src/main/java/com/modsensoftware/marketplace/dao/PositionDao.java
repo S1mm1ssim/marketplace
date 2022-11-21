@@ -1,12 +1,12 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.HibernateSessionFactory;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.graph.RootGraph;
 import org.hibernate.query.Query;
@@ -32,7 +32,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class PositionDao implements Dao<Position, Long> {
 
-    private final HibernateSessionFactory hibernateSessionFactory;
+    private final SessionFactory sessionFactory;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -54,7 +54,7 @@ public class PositionDao implements Dao<Position, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching position entity with id {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(POSITION_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Position> byId = cb.createQuery(Position.class);
@@ -84,7 +84,7 @@ public class PositionDao implements Dao<Position, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all positions for page {}", pageNumber);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(POSITION_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Position> getAll = cb.createQuery(Position.class);
@@ -108,7 +108,7 @@ public class PositionDao implements Dao<Position, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Saving position entity: {}", position);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Item item = session.get(Item.class, position.getItem().getId());
         position.setItem(item);
         Transaction transaction = session.beginTransaction();
@@ -122,7 +122,7 @@ public class PositionDao implements Dao<Position, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         Position position = session.find(Position.class, id, LockModeType.OPTIMISTIC);
         if (updatedFields.getItem().getId() != null) {
@@ -148,7 +148,7 @@ public class PositionDao implements Dao<Position, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Deleting position entity with id: {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Position> delete = cb.createCriteriaDelete(Position.class);
         Root<Position> root = delete.from(Position.class);

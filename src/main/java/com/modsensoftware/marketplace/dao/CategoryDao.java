@@ -1,11 +1,11 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.HibernateSessionFactory;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class CategoryDao implements Dao<Category, Long> {
 
-    private final HibernateSessionFactory hibernateSessionFactory;
+    private final SessionFactory sessionFactory;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -48,7 +48,7 @@ public class CategoryDao implements Dao<Category, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching category entity with id {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Category> byId = cb.createQuery(Category.class);
         Root<Category> root = byId.from(Category.class);
@@ -74,7 +74,7 @@ public class CategoryDao implements Dao<Category, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Fetching all categories for page {}", pageNumber);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Category> getAll = cb.createQuery(Category.class);
         Root<Category> root = getAll.from(Category.class);
@@ -96,7 +96,7 @@ public class CategoryDao implements Dao<Category, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Saving category entity: {}", category);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(category);
         transaction.commit();
@@ -108,7 +108,7 @@ public class CategoryDao implements Dao<Category, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Updating category entity with id {} with values from: {}", id, updatedFields);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Category> update = cb.createCriteriaUpdate(Category.class);
         Root<Category> root = update.from(Category.class);
@@ -132,7 +132,7 @@ public class CategoryDao implements Dao<Category, Long> {
         if (log.isDebugEnabled()) {
             log.debug("Deleting category entity with id: {}", id);
         }
-        Session session = hibernateSessionFactory.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Category> delete = cb.createCriteriaDelete(Category.class);
         Root<Category> root = delete.from(Category.class);

@@ -4,20 +4,18 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author andrey.demyanchik on 11/15/2022
  */
-@Component
-public class HibernateSessionFactory {
+@Configuration
+public class SessionFactoryConfig {
 
-    private SessionFactory sessionFactory;
-
-    @PostConstruct
-    private void buildSessionFactory() {
+    @Bean
+    public SessionFactory sessionFactory() {
+        SessionFactory sessionFactory;
         final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
                 .configure()
                 .build();
@@ -27,9 +25,6 @@ public class HibernateSessionFactory {
             StandardServiceRegistryBuilder.destroy(registry);
             throw new ExceptionInInitializerError("Initialization of SessionFactory failed" + e);
         }
-    }
-
-    public SessionFactory getSessionFactory() {
         return sessionFactory;
     }
 }
