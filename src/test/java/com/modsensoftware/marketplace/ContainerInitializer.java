@@ -23,8 +23,7 @@ public class ContainerInitializer {
             .withDatabaseName("marketplace_tests")
             .withUsername("postgres")
             .withPassword("postgres")
-            .withExposedPorts(32768)
-            .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*\\n", 1));
+            .withExposedPorts(5432);
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override

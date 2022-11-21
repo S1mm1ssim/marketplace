@@ -25,6 +25,7 @@ public class CategoryDaoTest {
 
     @BeforeEach
     void setUp() {
+        ContainerInitializer.postgreSQLContainer.start();
         sessionFactory = hibernateSessionFactory.getSessionFactory();
         ReflectionTestUtils.setField(underTest, "sessionFactory", sessionFactory);
     }
@@ -32,5 +33,6 @@ public class CategoryDaoTest {
     @Test
     public void canGetById() {
         System.out.println(ContainerInitializer.postgreSQLContainer.getJdbcUrl());
+        System.out.println(ContainerInitializer.postgreSQLContainer.getDriverClassName());
     }
 }

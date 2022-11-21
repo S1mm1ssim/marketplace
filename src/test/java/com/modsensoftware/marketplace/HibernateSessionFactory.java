@@ -23,8 +23,8 @@ public class HibernateSessionFactory {
 
     private SessionFactory createSessionFactory() {
         Map<String, String> settings = new HashMap<>();
-        settings.put("connection.driver_class", "org.testcontainers.jdbc.ContainerDatabaseDriver");
-        settings.put("connection.url", "jdbc:tc:postgresql:latest:///marketplace_tests");
+        settings.put("connection.driver_class", "org.postgresql.Driver");
+        settings.put("connection.url", ContainerInitializer.postgreSQLContainer.getJdbcUrl());
         settings.put("hibernate.connection.username", "postgres");
         settings.put("hibernate.connection.password", "postgres");
         settings.put("dialect", "org.hibernate.dialect.PostgreSQL10Dialect");
