@@ -18,6 +18,8 @@
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <maven.checkstyle.plugin.version>3.2.0</maven.checkstyle.plugin.version>
         <hibernate.version>5.6.11.Final</hibernate.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
+        <restassured.version>5.2.0</restassured.version>
     </properties>
     <dependencies>
         <dependency>
@@ -62,18 +64,39 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>1.17.6</version>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>junit</groupId>-->
+<!--                    <artifactId>junit</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>5.2.0</version>
+            <version>${restassured.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy-xml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
-
     </dependencies>
 
     <build>
@@ -81,6 +104,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.7.5</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -105,18 +129,37 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <argLine>
+                        --illegal-access=permit
+                    </argLine>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <forkCount>2</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <argLine>${surefireArgLine}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.8</version>
                 <executions>
                     <execution>
+                        <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
                     </execution>
                     <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
+                        <id>default-report</id>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
