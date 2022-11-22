@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 /**
  * @author andrey.demyanchik on 11/18/2022
  */
-public class CompanyMapperTest {
+public class CategoryMapperTest {
 
     private final CategoryMapper underTest = new CategoryMapperImpl();
 
@@ -24,7 +24,9 @@ public class CompanyMapperTest {
 
         // then
         Category expected = new Category();
-        expected.setParent(null);
+        Category parent = new Category();
+        parent.setId(null);
+        expected.setParent(parent);
         Assertions.assertThat(category.getParent()).isEqualTo(expected.getParent());
     }
 
@@ -38,13 +40,26 @@ public class CompanyMapperTest {
 
         // then
         Category expected = new Category();
-        expected.setId(1L);
-        expected.setParent(null);
+        Category parent = new Category();
+        parent.setId(1L);
+        expected.setParent(parent);
         Assertions.assertThat(category.getParent()).isEqualTo(expected.getParent());
     }
 
     @Test
     public void shouldMapDtoToNullParentIfParamsNotProvided() {
+        // given
+        CategoryDto categoryDto = new CategoryDto(null, null, null, null);
+
+        // when
+        Category category = underTest.toCategory(categoryDto);
+
+        // then
+        Assertions.assertThat(category.getParent()).isNull();
+    }
+
+    @Test
+    public void shouldMapDtoToNullParentIfNullParentParamIsFalse() {
         // given
         CategoryDto categoryDto = new CategoryDto(null, null, null, false);
 
@@ -56,7 +71,7 @@ public class CompanyMapperTest {
     }
 
     @Test
-    public void shouldMapDtoToNotNullParent() {
+    public void shouldMapDtoToParentWithId() {
         // given
         Long parentId = 1L;
         CategoryDto categoryDto = new CategoryDto(null, null, parentId, false);

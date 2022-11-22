@@ -25,8 +25,10 @@ public class CategoryMapperImpl implements CategoryMapper {
         Category category = new Category();
         category.setName(categoryDto.getName());
         category.setDescription(categoryDto.getDescription());
-        if (categoryDto.getParentId() == null && categoryDto.getNullParent().equals(true)) {
-            category.setParent(new Category());
+        if (categoryDto.getParentId() == null && categoryDto.getNullParent() != null) {
+            if (categoryDto.getNullParent().equals(true)) {
+                category.setParent(new Category());
+            }
         } else if (categoryDto.getParentId() != null) {
             Category parent = new Category();
             parent.setId(categoryDto.getParentId());
