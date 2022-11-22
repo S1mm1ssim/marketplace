@@ -113,18 +113,25 @@ public class CategoryDao implements Dao<Category, Long> {
         CriteriaUpdate<Category> update = cb.createCriteriaUpdate(Category.class);
         Root<Category> root = update.from(Category.class);
 
-        setIfNotNull(CATEGORY_NAME, updatedFields.getName(), update::set);
-        setIfNotNull(CATEGORY_DESCRIPTION, updatedFields.getDescription(), update::set);
-        update.set(root.get(CATEGORY_PARENT_FIELD_NAME).get(PARENT_ID),
-                updatedFields.getParent() != null
-                        ? updatedFields.getParent().getId()
-                        : null
-        );
-        update.where(cb.equal(root.get(CATEGORY_ID), id));
+        int totalFieldsUpdated = 0;
+        if (setIfNotNull(CATEGORY_NAME, updatedFields.getName(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(CATEGORY_DESCRIPTION, updatedFields.getDescription(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (updatedFields.getParent() != null) {
+            update.set(root.get(CATEGORY_PARENT_FIELD_NAME).get(PARENT_ID), updatedFields.getParent().getId());
+            totalFieldsUpdated++;
+        }
+        if (totalFieldsUpdated > 0) {
+            update.where(cb.equal(root.get(CATEGORY_ID), id));
 
-        Transaction transaction = session.beginTransaction();
-        session.createQuery(update).executeUpdate();
-        transaction.commit();
+            Transaction transaction = session.beginTransaction();
+            session.createQuery(update).executeUpdate();
+            transaction.commit();
+        }
+        session.close();
     }
 
     @Override

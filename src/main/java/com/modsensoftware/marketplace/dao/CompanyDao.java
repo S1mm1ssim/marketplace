@@ -146,19 +146,29 @@ public class CompanyDao implements Dao<Company, Long> {
         CriteriaUpdate<Company> update = cb.createCriteriaUpdate(Company.class);
         Root<Company> root = update.from(Company.class);
 
-        setIfNotNull(NAME_COLUMN_NAME, updatedFields.getName(), update::set);
-        setIfNotNull(EMAIL_COLUMN_NAME, updatedFields.getEmail(), update::set);
-        setIfNotNull(DESCRIPTION_COLUMN_NAME, updatedFields.getDescription(), update::set);
-        update.where(
-                cb.and(
-                        cb.equal(root.get(ID_COLUMN_NAME), id),
-                        cb.isFalse(root.get(IS_SOFT_DELETED))
-                )
-        );
+        int totalFieldsUpdated = 0;
+        if (setIfNotNull(NAME_COLUMN_NAME, updatedFields.getName(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(EMAIL_COLUMN_NAME, updatedFields.getEmail(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(DESCRIPTION_COLUMN_NAME, updatedFields.getDescription(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (totalFieldsUpdated > 0) {
+            update.where(
+                    cb.and(
+                            cb.equal(root.get(ID_COLUMN_NAME), id),
+                            cb.isFalse(root.get(IS_SOFT_DELETED))
+                    )
+            );
 
-        Transaction transaction = session.beginTransaction();
-        session.createQuery(update).executeUpdate();
-        transaction.commit();
+            Transaction transaction = session.beginTransaction();
+            session.createQuery(update).executeUpdate();
+            transaction.commit();
+        }
+        session.close();
     }
 
     @Override

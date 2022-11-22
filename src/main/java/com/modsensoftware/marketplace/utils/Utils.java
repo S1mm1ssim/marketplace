@@ -9,16 +9,20 @@ import java.util.function.Consumer;
  */
 public class Utils {
 
-    public static <V> void setIfNotNull(V value, Consumer<V> setter) {
+    public static <V> boolean setIfNotNull(V value, Consumer<V> setter) {
         if (Objects.nonNull(value)) {
             setter.accept(value);
+            return true;
         }
+        return false;
     }
 
-    public static <R, U> void setIfNotNull(R value1, U value2, BiConsumer<R, U> setter) {
+    public static <R, U> boolean setIfNotNull(R value1, U value2, BiConsumer<R, U> setter) {
         if (Objects.nonNull(value1) && Objects.nonNull(value2)) {
             setter.accept(value1, value2);
+            return true;
         }
+        return false;
     }
 
     public static <R, U> void putIfNotNull(R key, U value, BiConsumer<R, U> put) {

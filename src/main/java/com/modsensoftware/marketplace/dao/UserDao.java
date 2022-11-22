@@ -170,19 +170,32 @@ public class UserDao implements Dao<User, UUID> {
         CriteriaUpdate<User> update = cb.createCriteriaUpdate(User.class);
         Root<User> root = update.from(User.class);
 
-        setIfNotNull(USER_USERNAME, updatedFields.getUsername(), update::set);
-        setIfNotNull(USER_EMAIL, updatedFields.getEmail(), update::set);
-        setIfNotNull(USER_NAME, updatedFields.getName(), update::set);
-        setIfNotNull(USER_UPDATED, updatedFields.getUpdated(), update::set);
+        int totalFieldsUpdated = 0;
+        if (setIfNotNull(USER_USERNAME, updatedFields.getUsername(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(USER_EMAIL, updatedFields.getEmail(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(USER_NAME, updatedFields.getName(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(USER_UPDATED, updatedFields.getUpdated(), update::set)) {
+            totalFieldsUpdated++;
+        }
         if (updatedFields.getCompany().getId() != null) {
             update.set(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID),
                     updatedFields.getCompany().getId());
+            totalFieldsUpdated++;
         }
-        update.where(cb.equal(root.get(USER_ID), id));
+        if (totalFieldsUpdated > 0) {
+            update.where(cb.equal(root.get(USER_ID), id));
 
-        Transaction transaction = session.beginTransaction();
-        session.createQuery(update).executeUpdate();
-        transaction.commit();
+            Transaction transaction = session.beginTransaction();
+            session.createQuery(update).executeUpdate();
+            transaction.commit();
+        }
+        session.close();
     }
 
     @Override
