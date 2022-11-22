@@ -8,12 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -40,13 +38,8 @@ public class CategoryDaoTest {
     public static CustomPostgreSQLContainer postgreSQLContainer
             = CustomPostgreSQLContainer.getInstance();
 
-    private static final int PAGE_SIZE = 20;
-
-    @BeforeEach
-    void setUp() {
-        underTest = new CategoryDao(sessionFactory);
-        ReflectionTestUtils.setField(underTest, "pageSize", PAGE_SIZE);
-    }
+    @Value("${default.page.size}")
+    private int pageSize;
 
     @Test
     public void canSaveCategory() {
@@ -124,7 +117,7 @@ public class CategoryDaoTest {
         // given
         List<Category> categories = new ArrayList<>();
         Category testCategory;
-        for (int i = 0; i < PAGE_SIZE + 1; i++) {
+        for (int i = 0; i < pageSize + 1; i++) {
             testCategory = new Category();
             testCategory.setName("category" + i);
             categories.add(testCategory);
@@ -136,8 +129,8 @@ public class CategoryDaoTest {
         List<Category> secondPageElemNumber = underTest.getAll(1, Collections.emptyMap());
 
         // then
-        Assertions.assertThat(firstPageElemTotal).hasSize(PAGE_SIZE);
-        Assertions.assertThat(secondPageElemNumber).hasSize(categories.size() - PAGE_SIZE);
+        Assertions.assertThat(firstPageElemTotal).hasSize(pageSize);
+        Assertions.assertThat(secondPageElemNumber).hasSize(categories.size() - pageSize);
 
         // clean up
         categories.forEach(category -> underTest.deleteById(category.getId()));
