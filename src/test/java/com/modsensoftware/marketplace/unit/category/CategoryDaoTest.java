@@ -213,7 +213,6 @@ public class CategoryDaoTest {
         underTest.deleteById(parent2.getId());
     }
 
-    @Disabled
     @Test
     public void noMutationOnNoUpdateFieldsProvided() {
         // given
