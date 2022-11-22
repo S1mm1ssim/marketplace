@@ -38,6 +38,7 @@ public class CompanyMapperTest {
 
         // then
         Category expected = new Category();
+        expected.setId(1L);
         expected.setParent(null);
         Assertions.assertThat(category.getParent()).isEqualTo(expected.getParent());
     }
@@ -51,9 +52,7 @@ public class CompanyMapperTest {
         Category category = underTest.toCategory(categoryDto);
 
         // then
-        Category expected = new Category();
-        expected.setParent(null);
-        Assertions.assertThat(category.getParent()).isEqualTo(expected.getParent());
+        Assertions.assertThat(category.getParent()).isNull();
     }
 
     @Test
