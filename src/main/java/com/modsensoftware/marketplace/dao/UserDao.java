@@ -42,6 +42,7 @@ import static java.lang.String.format;
 public class UserDao implements Dao<User, UUID> {
 
     private final SessionFactory sessionFactory;
+    private final CompanyDao companyDao;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -165,37 +166,38 @@ public class UserDao implements Dao<User, UUID> {
         if (log.isDebugEnabled()) {
             log.debug("Updating user entity with id {} with values from: {}", id, updatedFields);
         }
-        Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaUpdate<User> update = cb.createCriteriaUpdate(User.class);
-        Root<User> root = update.from(User.class);
+        try (Session session = sessionFactory.openSession()) {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaUpdate<User> update = cb.createCriteriaUpdate(User.class);
+            Root<User> root = update.from(User.class);
 
-        int totalFieldsUpdated = 0;
-        if (setIfNotNull(USER_USERNAME, updatedFields.getUsername(), update::set)) {
-            totalFieldsUpdated++;
-        }
-        if (setIfNotNull(USER_EMAIL, updatedFields.getEmail(), update::set)) {
-            totalFieldsUpdated++;
-        }
-        if (setIfNotNull(USER_NAME, updatedFields.getName(), update::set)) {
-            totalFieldsUpdated++;
-        }
-        if (setIfNotNull(USER_UPDATED, updatedFields.getUpdated(), update::set)) {
-            totalFieldsUpdated++;
-        }
-        if (updatedFields.getCompany().getId() != null) {
-            update.set(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID),
-                    updatedFields.getCompany().getId());
-            totalFieldsUpdated++;
-        }
-        if (totalFieldsUpdated > 0) {
-            update.where(cb.equal(root.get(USER_ID), id));
+            int totalFieldsUpdated = 0;
+            if (setIfNotNull(USER_USERNAME, updatedFields.getUsername(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (setIfNotNull(USER_EMAIL, updatedFields.getEmail(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (setIfNotNull(USER_NAME, updatedFields.getName(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (setIfNotNull(USER_UPDATED, updatedFields.getUpdated(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (updatedFields.getCompany().getId() != null) {
+                // Here exception will be thrown in case company is not found or is soft deleted
+                Company updCompany = companyDao.get(updatedFields.getCompany().getId());
+                update.set(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID), updCompany.getId());
+                totalFieldsUpdated++;
+            }
+            if (totalFieldsUpdated > 0) {
+                update.where(cb.equal(root.get(USER_ID), id));
 
-            Transaction transaction = session.beginTransaction();
-            session.createQuery(update).executeUpdate();
-            transaction.commit();
+                Transaction transaction = session.beginTransaction();
+                session.createQuery(update).executeUpdate();
+                transaction.commit();
+            }
         }
-        session.close();
     }
 
     @Override
