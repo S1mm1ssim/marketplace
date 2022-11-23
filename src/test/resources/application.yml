@@ -15,7 +15,7 @@ spring:
 
 logging:
   level:
-    root: info
+    com.modsensoftware.marketplace: debug
 
 default:
   page:
