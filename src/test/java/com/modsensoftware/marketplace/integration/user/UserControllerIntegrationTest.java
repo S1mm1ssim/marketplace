@@ -35,7 +35,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     @AfterAll
     static void afterAll() {
-        ScriptUtils.runInitScript(dbDelegate, "integration/user/afterUserIntegrationTest.sql");
+        ScriptUtils.runInitScript(dbDelegate, "integration/user/userIntegrationTestTeardown.sql");
     }
 
     @Test
