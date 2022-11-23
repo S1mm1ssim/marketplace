@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.dao;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -35,6 +36,7 @@ import static java.lang.String.format;
 public class ItemDao implements Dao<Item, UUID> {
 
     private final SessionFactory sessionFactory;
+    private final CategoryDao categoryDao;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -112,20 +114,19 @@ public class ItemDao implements Dao<Item, UUID> {
         }
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
-        Item item = session.find(Item.class, id, LockModeType.OPTIMISTIC);
-
-        if (updatedFields.getName() != null) {
-            item.setName(updatedFields.getName());
+        try {
+            Item item = session.find(Item.class, id, LockModeType.OPTIMISTIC);
+            Utils.setIfNotNull(updatedFields.getName(), item::setName);
+            Utils.setIfNotNull(updatedFields.getDescription(), item::setDescription);
+            if (updatedFields.getCategory().getId() != null) {
+                Category updCategory = categoryDao.get(updatedFields.getCategory().getId());
+                item.setCategory(updCategory);
+            }
+            session.merge(item);
+        } finally {
+            transaction.commit();
+            session.close();
         }
-        if (updatedFields.getDescription() != null) {
-            item.setDescription(updatedFields.getDescription());
-        }
-        if (updatedFields.getCategory().getId() != null) {
-            item.getCategory().setId(updatedFields.getCategory().getId());
-        }
-        session.merge(item);
-        transaction.commit();
-        session.close();
     }
 
     @Override

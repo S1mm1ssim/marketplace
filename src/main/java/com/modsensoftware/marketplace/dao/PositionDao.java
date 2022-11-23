@@ -1,8 +1,11 @@
 package com.modsensoftware.marketplace.dao;
 
+import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
+import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -21,6 +24,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -33,6 +37,9 @@ import static java.lang.String.format;
 public class PositionDao implements Dao<Position, Long> {
 
     private final SessionFactory sessionFactory;
+    private final ItemDao itemDao;
+    private final CompanyDao companyDao;
+    private final UserDao userDao;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -119,23 +126,26 @@ public class PositionDao implements Dao<Position, Long> {
         }
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
-        Position position = session.find(Position.class, id, LockModeType.OPTIMISTIC);
-        if (updatedFields.getItem().getId() != null) {
-            position.getItem().setId(updatedFields.getItem().getId());
+        try {
+            Position position = session.find(Position.class, id, LockModeType.OPTIMISTIC);
+            if (updatedFields.getItem().getId() != null) {
+                Item updItem = itemDao.get(updatedFields.getItem().getId());
+                position.setItem(updItem);
+            }
+            if (updatedFields.getCompany().getId() != null) {
+                Company updCompany = companyDao.get(updatedFields.getCompany().getId());
+                position.setCompany(updCompany);
+            }
+            if (updatedFields.getCreatedBy().getId() != null) {
+                User updUser = userDao.get(updatedFields.getCreatedBy().getId());
+                position.setCreatedBy(updUser);
+            }
+            Utils.setIfNotNull(updatedFields.getAmount(), position::setAmount);
+            session.merge(position);
+        } finally {
+            transaction.commit();
+            session.close();
         }
-        if (updatedFields.getCompany().getId() != null) {
-            position.getCompany().setId(updatedFields.getCompany().getId());
-        }
-        if (updatedFields.getCreatedBy().getId() != null) {
-            position.getCreatedBy().setId(updatedFields.getCreatedBy().getId());
-        }
-        if (updatedFields.getAmount() != null) {
-            position.setAmount(updatedFields.getAmount());
-        }
-
-        session.merge(position);
-        transaction.commit();
-        session.close();
     }
 
     @Override
