@@ -28,19 +28,8 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     private UserDao userDao;
 
     @BeforeAll
-    static void beforeAll() {
-        String port = System.getProperty("server.port");
-        if (port == null) {
-            RestAssured.port = 8081;
-        } else {
-            RestAssured.port = Integer.parseInt(port);
-        }
-
-        String basePath = System.getProperty("server.base");
-        if (basePath == null) {
-            basePath = "/api/v1";
-        }
-        RestAssured.basePath = basePath;
+    protected static void beforeAll() {
+        AbstractIntegrationTest.beforeAll();
         ScriptUtils.runInitScript(dbDelegate, "integration/user/userIntegrationTestData.sql");
     }
 

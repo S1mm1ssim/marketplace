@@ -27,7 +27,7 @@ public abstract class AbstractIntegrationTest {
             = new JdbcDatabaseDelegate(postgreSQLContainer, "");
 
     @BeforeAll
-    static void beforeAll() {
+    protected static void beforeAll() {
         String port = System.getProperty("server.port");
         if (port == null) {
             RestAssured.port = 8081;
