@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users",
+					"raw": "http://localhost:8080/api/v1/users?page=0",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -22,6 +22,32 @@
 						"api",
 						"v1",
 						"users"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "name",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": "3",
+							"disabled": true
+						},
+						{
+							"key": "companyId",
+							"value": "4",
+							"disabled": true
+						},
+						{
+							"key": "created",
+							"value": "2022-11-04T12:00:00,2022-11-18T12:00:00",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -33,7 +59,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/2ffb91a6-1a45-4f8a-9a87-ea01a4eb6b48",
+					"raw": "http://localhost:8080/api/v1/users/fc252447-049e-48b7-b442-3ac5176640c2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -43,7 +69,7 @@
 						"api",
 						"v1",
 						"users",
-						"2ffb91a6-1a45-4f8a-9a87-ea01a4eb6b48"
+						"fc252447-049e-48b7-b442-3ac5176640c2"
 					]
 				}
 			},
@@ -56,7 +82,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"User\",\r\n    \"email\": \"user@gmail.com\",\r\n    \"name\": \"Username\",\r\n    \"role\": \"MANAGER\",\r\n    \"created\": \"2022-11-03T20:27:00\",\r\n    \"updated\": \"2022-11-03T20:27:00\",\r\n    \"companyId\": 2\r\n}",
+					"raw": "{\r\n    \"username\": \"User\",\r\n    \"email\": \"user3@gmail.com\",\r\n    \"name\": \"Usernam2e\",\r\n    \"companyId\": 2\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -85,7 +111,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/350d83ce-ce0c-455e-9c5e-58513802cd02",
+					"raw": "http://localhost:8080/api/v1/users/c127b0de-53bc-467b-914a-fc4aab217bff",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -95,7 +121,7 @@
 						"api",
 						"v1",
 						"users",
-						"350d83ce-ce0c-455e-9c5e-58513802cd02"
+						"c127b0de-53bc-467b-914a-fc4aab217bff"
 					]
 				}
 			},
@@ -108,7 +134,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"Updated\"\r\n}",
+					"raw": "{\r\n    \"companyId\": 999\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -116,7 +142,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/2ffb91a6-1a45-4f8a-9a87-ea01a4eb6b48",
+					"raw": "http://localhost:8080/api/v1/users/fc252447-049e-48b7-b442-3ac5176640c2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -126,7 +152,7 @@
 						"api",
 						"v1",
 						"users",
-						"2ffb91a6-1a45-4f8a-9a87-ea01a4eb6b48"
+						"fc252447-049e-48b7-b442-3ac5176640c2"
 					]
 				}
 			},
