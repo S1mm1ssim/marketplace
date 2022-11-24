@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
             itemDao.update(id, itemMapper.toItem(updatedFields));
         } else {
             log.error("Item versions do not match. Provided: {}, in the database: {}",
-                    item.getVersion(), updatedFields.getVersion());
+                    updatedFields.getVersion(), item.getVersion());
             throw new OptimisticLockException("Provided item version "
                     + "does not match with the one in the database");
         }

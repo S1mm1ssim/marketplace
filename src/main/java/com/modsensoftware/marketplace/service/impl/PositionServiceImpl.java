@@ -73,7 +73,7 @@ public class PositionServiceImpl implements PositionService {
             positionDao.update(id, positionMapper.toPosition(updatedFields));
         } else {
             log.error("Position versions do not match. Provided: {}, in the database: {}",
-                    position.getVersion(), updatedFields.getVersion());
+                    updatedFields.getVersion(), position.getVersion());
             throw new OptimisticLockException("Provided position version "
                     + "does not match with the one in the database");
         }
