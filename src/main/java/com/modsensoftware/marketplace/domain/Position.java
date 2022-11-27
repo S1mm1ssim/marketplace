@@ -77,6 +77,10 @@ public class Position {
     @Column(name = "amount", nullable = false)
     private Double amount;
 
+    // Positive value. Values start at 0.01
+    @Column(name = "min_amount", nullable = false)
+    private Double minAmount;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;

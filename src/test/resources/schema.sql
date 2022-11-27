@@ -69,6 +69,7 @@ create table position
     created    timestamp        not null,
     amount     double precision not null,
     version    bigint default 1 not null,
+    min_amount double precision not null,
     constraint position_pkey
         primary key (id),
     constraint fk_position_item
@@ -81,5 +82,7 @@ create table position
         foreign key (created_by) references "user"
             on delete cascade,
     constraint amount_check
-        check (amount >= (0.01)::double precision)
+        check (amount >= (0.01)::double precision),
+    constraint min_amount_check
+        check (min_amount >= (0.01)::double precision)
 );
