@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
+import javax.validation.Valid;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
@@ -62,7 +63,7 @@ public class CompanyController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCompany(@RequestBody CompanyDto companyDto) {
+    public void createCompany(@Valid @RequestBody CompanyDto companyDto) {
         log.debug("Creating new company from dto: {}", companyDto);
         companyService.createCompany(companyDto);
     }
@@ -76,7 +77,7 @@ public class CompanyController {
 
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
-                              @RequestBody CompanyDto updatedFields) {
+                              @Valid @RequestBody CompanyDto updatedFields) {
         log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);
     }

@@ -20,8 +20,11 @@ public class PositionDto {
     private UUID itemId;
     private Long companyId;
     private UUID createdBy;
-    // Positive value. Values start at 0.01
+
     @DecimalMin(value = "0.01")
     private BigDecimal amount;
+
+    @DecimalMin(value = "0.01")
+    private BigDecimal minAmount;
     private Long version;
 }
