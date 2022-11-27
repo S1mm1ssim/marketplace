@@ -2,7 +2,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
-    <include file="v.1.0/changelog-v.1.0-cumulative.xml" relativeToChangelogFile="true"/>
-    <include file="v.2.0/changelog-v.2.0-cumulative.xml" relativeToChangelogFile="true"/>
-    <include file="v.3.0/changelog-v.3.0-cumulative.xml" relativeToChangelogFile="true"/>
+
+    <changeSet id="2022-11-27-rename-user_transaction-userId-column" author="Andrdemyan4ik@gmail.com">
+        <renameColumn tableName="user_transaction" oldColumnName="userId" newColumnName="user_id"/>
+    </changeSet>
 </databaseChangeLog>
