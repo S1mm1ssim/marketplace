@@ -60,7 +60,8 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public void updateItem(@PathVariable(name = "id") UUID id, @RequestBody ItemDto updatedFields) {
+    public void updateItem(@PathVariable(name = "id") UUID id,
+                           @RequestBody ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         itemService.updateItem(id, updatedFields);
     }

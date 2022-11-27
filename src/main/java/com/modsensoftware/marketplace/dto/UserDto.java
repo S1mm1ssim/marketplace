@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Pattern;
+
 /**
  * @author andrey.demyanchik on 11/3/2022
  */
@@ -12,6 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDto {
     private String username;
+    @Pattern(regexp = "(\\w+)@(\\w+\\.)(\\w+)(\\.\\w+)*",
+            message = "Email must be valid.")
     private String email;
     private String name;
     private Long companyId;

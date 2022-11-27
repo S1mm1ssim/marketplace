@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.OptimisticLockException;
+import java.math.BigDecimal;
 
 /**
  * @author andrey.demyanchik on 11/18/2022
@@ -43,7 +44,7 @@ public class PositionServiceTest {
         // given
         long id = 1L;
         long version = 1L;
-        double amount = 10d;
+        BigDecimal amount = new BigDecimal(10);
         PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
         Position position = new Position(id, null, null, null, null, null, version);
         BDDMockito.given(positionDao.get(id)).willReturn(position);
@@ -61,7 +62,7 @@ public class PositionServiceTest {
         Long id = 1L;
         long version = 1L;
         long differentVersion = 2L;
-        double amount = 10d;
+        BigDecimal amount = new BigDecimal(10);
         PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
         Position position = new Position(id, null, null, null, null, null, differentVersion);
         BDDMockito.given(positionDao.get(id)).willReturn(position);

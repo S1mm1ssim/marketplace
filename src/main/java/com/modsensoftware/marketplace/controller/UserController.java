@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createUser(@RequestBody UserDto userDto) {
+    public void createUser(@Valid @RequestBody UserDto userDto) {
         log.debug("Creating new user from dto: {}", userDto);
         userService.createUser(userDto);
     }
@@ -70,7 +71,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public void updateUser(@PathVariable(name = "id") UUID id, @RequestBody UserDto updatedFields) {
+    public void updateUser(@PathVariable(name = "id") UUID id,
+                           @Valid @RequestBody UserDto updatedFields) {
         log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
         userService.updateUser(id, updatedFields);
     }

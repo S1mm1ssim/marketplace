@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -46,7 +47,7 @@ public class PositionController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createPosition(@RequestBody PositionDto positionDto) {
+    public void createPosition(@Valid @RequestBody PositionDto positionDto) {
         log.debug("Creating new position from dto: {}", positionDto);
         positionService.createPosition(positionDto);
     }
@@ -59,7 +60,8 @@ public class PositionController {
     }
 
     @PutMapping("/{id}")
-    public void updatePosition(@PathVariable Long id, @RequestBody PositionDto updatedFields) {
+    public void updatePosition(@PathVariable Long id,
+                               @Valid @RequestBody PositionDto updatedFields) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         positionService.updatePosition(id, updatedFields);
     }
