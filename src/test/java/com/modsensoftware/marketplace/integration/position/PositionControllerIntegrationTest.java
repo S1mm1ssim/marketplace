@@ -52,6 +52,7 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         position.put("companyId", companyId);
         position.put("createdBy", userUuid);
         position.put("amount", "2");
+        position.put("minAmount", "1");
 
         RestAssured.given()
                 .contentType("application/json")
