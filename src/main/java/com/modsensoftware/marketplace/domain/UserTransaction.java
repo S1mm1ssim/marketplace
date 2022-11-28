@@ -5,16 +5,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -25,6 +29,20 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "user_transaction")
+@NamedEntityGraph(
+        name = "graph.UserTransaction.orders.position",
+        attributeNodes = {
+                @NamedAttributeNode(value = "orderLine", subgraph = "subgraph.orders.position")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "subgraph.orders.position",
+                        attributeNodes = {
+                                @NamedAttributeNode("position")
+                        }
+                )
+        }
+)
 public class UserTransaction {
 
     @Id
@@ -38,6 +56,6 @@ public class UserTransaction {
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
 
-    @OneToMany(mappedBy = "userTransaction", fetch = FetchType.LAZY)
-    private Set<Order> orderLine;
+    @OneToMany(mappedBy = "userTransaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Order> orderLine;
 }
