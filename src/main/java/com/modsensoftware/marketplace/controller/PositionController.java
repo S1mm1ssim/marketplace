@@ -42,13 +42,13 @@ public class PositionController {
     public List<Position> getAllPositions(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
             @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
-        log.debug("Fetching all positions");
+        log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Position getPositionById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
-        log.debug("Fetching position by id={}", id);
+        log.debug("Fetching position by id: {}", id);
         return positionService.getPositionById(id);
     }
 

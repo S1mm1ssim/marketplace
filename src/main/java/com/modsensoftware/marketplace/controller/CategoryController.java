@@ -41,13 +41,13 @@ public class CategoryController {
     public List<Category> getAllCategories(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
             @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
-        log.debug("Fetching all categories");
+        log.debug("Fetching all categories for page {}", pageNumber);
         return categoryService.getAllCategories(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Category getCategoryById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
-        log.debug("Fetching category by id={}", id);
+        log.debug("Fetching category by id: {}", id);
         return categoryService.getCategoryById(id);
     }
 
