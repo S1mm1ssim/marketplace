@@ -19,13 +19,17 @@ import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.exception.ConstraintViolationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.persistence.PersistenceException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -101,6 +105,49 @@ public class UserTransactionDaoTest {
 
         userTransaction.getOrderLine().forEach(session::delete);
         session.delete(userTransaction);
+        session.delete(savedPosition);
+        session.delete(savedPosition.getItem());
+        session.delete(savedPosition.getItem().getCategory());
+        session.delete(savedPosition.getCreatedBy());
+        session.delete(savedPosition.getCompany());
+
+        transaction.commit();
+        session.close();
+    }
+
+    @DisplayName("Saving UserTransaction with orders' position.version having null values "
+            + "should throw org.hibernate.exception.ConstraintViolationException with message "
+            + "ERROR: null value in column \"position_id\" of relation \"order\" violates not-null constraint")
+    @Test
+    public void userTransactionSaveShouldFailWithConstraintViolationException() {
+        // given
+        Position savedPosition = generatePosition();
+
+        Position transactionPosition = new Position();
+        transactionPosition.setId(savedPosition.getId());
+        // Null version of position
+        transactionPosition.setVersion(null);
+
+        UserTransaction userTransaction = new UserTransaction(
+                null,
+                savedPosition.getCreatedBy().getId(),
+                now().truncatedTo(SECONDS),
+                List.of(new Order(null, 5d, transactionPosition, null))
+        );
+
+        // when
+        // then
+        Assertions.assertThatThrownBy(() -> underTest.save(userTransaction))
+                .isInstanceOf(PersistenceException.class)
+                .getCause().isInstanceOf(ConstraintViolationException.class)
+                .getCause().isInstanceOf(PSQLException.class)
+                .hasMessageContaining("ERROR: null value in column \"position_id\" of "
+                        + "relation \"order\" violates not-null constraint");
+
+        // clean up
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+
         session.delete(savedPosition);
         session.delete(savedPosition.getItem());
         session.delete(savedPosition.getItem().getCategory());
