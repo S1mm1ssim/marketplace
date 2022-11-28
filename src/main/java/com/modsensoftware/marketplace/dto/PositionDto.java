@@ -18,6 +18,7 @@ import java.util.UUID;
 @Builder
 public class PositionDto {
     private UUID itemId;
+    private Long itemVersion;
     private Long companyId;
     private UUID createdBy;
 

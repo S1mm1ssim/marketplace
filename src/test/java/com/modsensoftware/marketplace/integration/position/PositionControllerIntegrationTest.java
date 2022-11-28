@@ -49,6 +49,7 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         String userUuid = "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d";
         Map<String, String> position = new HashMap<>();
         position.put("itemId", itemUuid);
+        position.put("itemVersion", "0");
         position.put("companyId", companyId);
         position.put("createdBy", userUuid);
         position.put("amount", "2");
@@ -60,6 +61,28 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
                 .body(position)
                 .post("/positions")
                 .then().statusCode(201);
+    }
+
+    @Test
+    public void shouldReturn400StatusOnSaveOperation() {
+        // given
+        String itemUuid = "b6b7764c-ed62-47a4-a68d-3cad4da1e187";
+        String companyId = "999";
+        String userUuid = "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d";
+        Map<String, String> position = new HashMap<>();
+        // No item version in params
+        position.put("itemId", itemUuid);
+        position.put("companyId", companyId);
+        position.put("createdBy", userUuid);
+        position.put("amount", "2");
+        position.put("minAmount", "1");
+
+        RestAssured.given()
+                .contentType("application/json")
+                .when()
+                .body(position)
+                .post("/positions")
+                .then().statusCode(400);
     }
 
     @Test
