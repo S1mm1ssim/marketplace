@@ -12,8 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 
 /**
@@ -24,12 +22,6 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Entity
 @Table(name = "\"order\"")
-@NamedEntityGraph(
-        name = "graph.Order.position",
-        attributeNodes = {
-                @NamedAttributeNode(value = "position")
-        }
-)
 public class Order {
 
     @Id
@@ -43,7 +35,7 @@ public class Order {
     @JoinColumn(name = "position_id")
     private Position position;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_transaction_id")
     private UserTransaction userTransaction;
 }
