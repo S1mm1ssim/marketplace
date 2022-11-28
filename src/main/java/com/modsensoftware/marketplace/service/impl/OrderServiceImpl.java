@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.service.impl;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.OrderDto;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
 import com.modsensoftware.marketplace.service.OrderService;
@@ -32,6 +33,11 @@ public class OrderServiceImpl implements OrderService {
         orders.forEach(orderDto -> {
             if (log.isDebugEnabled()) {
                 log.debug("Validating order: {}", orderDto);
+            }
+            if (orderDto.getPositionVersion() == null) {
+                log.error("Provided order didn't contain position's version");
+                throw new EntityNotFoundException(format("No version for position with id %s was provided",
+                        orderDto.getPositionId()));
             }
             Position position = positionDao.get(orderDto.getPositionId());
             if (position.getAmount() < orderDto.getAmount().doubleValue()) {
