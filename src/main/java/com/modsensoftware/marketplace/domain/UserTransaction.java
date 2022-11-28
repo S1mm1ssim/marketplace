@@ -31,15 +31,28 @@ import java.util.UUID;
 @Table(name = "user_transaction")
 @NamedEntityGraph(
         name = "graph.UserTransaction.orders.position",
-        attributeNodes = {
-                @NamedAttributeNode(value = "orderLine", subgraph = "subgraph.orders.position")
-        },
+        attributeNodes = @NamedAttributeNode(value = "orderLine", subgraph = "subgraph.order"),
         subgraphs = {
                 @NamedSubgraph(
-                        name = "subgraph.orders.position",
+                        name = "subgraph.order",
+                        attributeNodes = @NamedAttributeNode(value = "position", subgraph = "subgraph.position")
+
+                ),
+                @NamedSubgraph(
+                        name = "subgraph.position",
                         attributeNodes = {
-                                @NamedAttributeNode("position")
+                                @NamedAttributeNode("company"),
+                                @NamedAttributeNode(value = "createdBy", subgraph = "subgraph.user"),
+                                @NamedAttributeNode(value = "item", subgraph = "subgraph.category")
                         }
+                ),
+                @NamedSubgraph(
+                        name = "subgraph.user",
+                        attributeNodes = @NamedAttributeNode(value = "company")
+                ),
+                @NamedSubgraph(
+                        name = "subgraph.category",
+                        attributeNodes = @NamedAttributeNode(value = "category")
                 )
         }
 )
