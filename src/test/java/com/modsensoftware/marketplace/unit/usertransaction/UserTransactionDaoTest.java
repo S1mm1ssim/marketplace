@@ -32,7 +32,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.persistence.PersistenceException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -105,11 +109,7 @@ public class UserTransactionDaoTest {
 
         userTransaction.getOrderLine().forEach(session::delete);
         session.delete(userTransaction);
-        session.delete(savedPosition);
-        session.delete(savedPosition.getItem());
-        session.delete(savedPosition.getItem().getCategory());
-        session.delete(savedPosition.getCreatedBy());
-        session.delete(savedPosition.getCompany());
+        deletePositionAndItsEntities(session, savedPosition);
 
         transaction.commit();
         session.close();
@@ -147,13 +147,58 @@ public class UserTransactionDaoTest {
         // clean up
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
+        deletePositionAndItsEntities(session, savedPosition);
+        transaction.commit();
+        session.close();
+    }
 
-        session.delete(savedPosition);
-        session.delete(savedPosition.getItem());
-        session.delete(savedPosition.getItem().getCategory());
-        session.delete(savedPosition.getCreatedBy());
-        session.delete(savedPosition.getCompany());
+    @Test
+    public void canGetAllTransactionsForUserWithPagination() {
+        // given
+        Company company = new Company(null, "company", "customerCompany@company.com",
+                now().truncatedTo(SECONDS), "description", false);
+        companyDao.save(company);
+        User user1 = new User(null, "username", "customer1@email.com", "full name",
+                Role.MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+        User user2 = new User(null, "username", "customer2@email.com", "full name",
+                Role.MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+        userDao.save(user1);
+        userDao.save(user2);
 
+        Position savedPosition = generatePosition();
+        Position transactionPosition = new Position();
+        transactionPosition.setId(savedPosition.getId());
+        transactionPosition.setVersion(savedPosition.getVersion());
+
+        List<UserTransaction> userTransactions
+                = generatePersistentTransactionsForUsers(transactionPosition, user1, user2);
+
+        UUID userId = user1.getId();
+        Map<String, String> filterProps = new HashMap<>();
+        filterProps.put("userId", userId.toString());
+        int pageNumber = 0;
+
+        // when
+        List<UserTransaction> firstPage = underTest.getAll(pageNumber, filterProps);
+        List<UserTransaction> secondPage = underTest.getAll(pageNumber + 1, filterProps);
+
+        // then
+        Assertions.assertThat(firstPage.size()).isEqualTo(pageSize);
+        firstPage.forEach(transaction -> Assertions.assertThat(transaction.getUserId()).isEqualTo(userId));
+        Assertions.assertThat(secondPage.size()).isEqualTo(userTransactions.size() / 2 - pageSize);
+        secondPage.forEach(transaction -> Assertions.assertThat(transaction.getUserId()).isEqualTo(userId));
+
+        // clean up
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        userTransactions.forEach(userTransaction -> {
+            userTransaction.getOrderLine().forEach(session::delete);
+            session.delete(userTransaction);
+        });
+        deletePositionAndItsEntities(session, savedPosition);
+        session.delete(user1);
+        session.delete(user2);
+        session.delete(company);
         transaction.commit();
         session.close();
     }
@@ -163,7 +208,7 @@ public class UserTransactionDaoTest {
                 now().truncatedTo(SECONDS), "description", false);
         companyDao.save(company);
         User user = new User(null, "username", "email@email.com", "full name",
-                Role.MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+                Role.STORAGE_MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
         userDao.save(user);
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
@@ -173,5 +218,34 @@ public class UserTransactionDaoTest {
         Position position = new Position(null, item, company, user, now().truncatedTo(SECONDS), 120d, 0.1d, 0L);
         positionDao.save(position);
         return position;
+    }
+
+    private void deletePositionAndItsEntities(Session sessionWithTransaction, Position position) {
+        sessionWithTransaction.delete(position);
+        sessionWithTransaction.delete(position.getItem());
+        sessionWithTransaction.delete(position.getItem().getCategory());
+        sessionWithTransaction.delete(position.getCreatedBy());
+        sessionWithTransaction.delete(position.getCompany());
+    }
+
+    private List<UserTransaction> generatePersistentTransactionsForUsers(
+            Position transactionPosition, User user1, User user2) {
+
+        List<UserTransaction> userTransactions = new ArrayList<>();
+
+        // Generating pageSize + 1 userTransactions for each user
+        for (int i = 0; i < pageSize + 1; i++) {
+            UserTransaction userTransaction1 = new UserTransaction(
+                    null, user1.getId(), now().truncatedTo(SECONDS),
+                    List.of(new Order(null, 3d, transactionPosition, null)));
+            UserTransaction userTransaction2 = new UserTransaction(
+                    null, user2.getId(), now().truncatedTo(SECONDS),
+                    List.of(new Order(null, 3d, transactionPosition, null)));
+            userTransactions.add(userTransaction1);
+            userTransactions.add(userTransaction2);
+            underTest.save(userTransaction1);
+            underTest.save(userTransaction2);
+        }
+        return userTransactions;
     }
 }
