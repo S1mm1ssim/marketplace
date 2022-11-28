@@ -9,6 +9,7 @@ import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.UserTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public class UserTransactionServiceImpl implements UserTransactionService {
 
     private final UserDao userDao;
     private final UserTransactionDao transactionDao;
-    private final UserTransactionMapper transactionMapper;
+    private final UserTransactionMapper transactionMapper = Mappers.getMapper(UserTransactionMapper.class);
     private final OrderService orderService;
 
     @Override
