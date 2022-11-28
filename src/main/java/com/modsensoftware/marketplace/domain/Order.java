@@ -1,5 +1,6 @@
 package com.modsensoftware.marketplace.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public class Order {
     @JoinColumn(name = "position_id")
     private Position position;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_transaction_id")
     private UserTransaction userTransaction;
