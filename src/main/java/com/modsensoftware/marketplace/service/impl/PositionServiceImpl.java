@@ -4,6 +4,7 @@ import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
+import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import javax.persistence.OptimisticLockException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -44,6 +47,11 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public void createPosition(PositionDto positionDto) {
         log.debug("Creating new position from dto: {}", positionDto);
+        if (positionDto.getItemVersion() == null) {
+            log.error("Provided positionDto didn't contain item's version");
+            throw new NoVersionProvidedException(format("No version for item with id %s was provided",
+                    positionDto.getItemId()));
+        }
         Position position = positionMapper.toPosition(positionDto);
         position.setCreated(LocalDateTime.now());
         log.debug("Mapping result: {}", position);

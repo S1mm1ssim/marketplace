@@ -16,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class PositionDto {
     private UUID itemId;
+    private Long itemVersion;
     private Long companyId;
     private UUID createdBy;
 
