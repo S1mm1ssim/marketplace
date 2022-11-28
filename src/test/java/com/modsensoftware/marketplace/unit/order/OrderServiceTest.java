@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.unit.order;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.OrderDto;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
 import com.modsensoftware.marketplace.service.OrderService;
@@ -40,8 +41,8 @@ public class OrderServiceTest {
     @Test
     public void shouldNotThrowAnyException() {
         // given
-        Position pos1 = new Position(15L, null, null, null, null, 30d, 1d, null);
-        Position pos2 = new Position(16L, null, null, null, null, 30d, 1d, null);
+        Position pos1 = new Position(15L, null, null, null, null, 30d, 1d, 0L);
+        Position pos2 = new Position(16L, null, null, null, null, 30d, 1d, 0L);
         List<OrderDto> orders = new ArrayList<>();
         orders.add(new OrderDto(15L, new BigDecimal(5), 0L));
         orders.add(new OrderDto(16L, new BigDecimal(2), 0L));
@@ -56,9 +57,26 @@ public class OrderServiceTest {
     }
 
     @Test
+    public void shouldThrowEntityNotFoundExceptionIfNoPositionVersionProvided() {
+        // given
+        Long positionId = 16L;
+        List<OrderDto> orders = new ArrayList<>();
+        // Null version provided
+        orders.add(new OrderDto(positionId, new BigDecimal(4), null));
+
+        // when
+        // then
+        Assertions.assertThatThrownBy(() -> underTest.validateOrders(orders))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage(format("No version for position with id %s was provided", positionId));
+        BDDMockito.verify(positionDao, BDDMockito.never()).get(BDDMockito.any());
+        BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
+    }
+
+    @Test
     public void shouldThrowInsufficientItemsInStockException() {
         // given
-        Position pos = new Position(16L, null, null, null, null, 3d, 1d, null);
+        Position pos = new Position(16L, null, null, null, null, 3d, 1d, 0L);
         List<OrderDto> orders = new ArrayList<>();
         orders.add(new OrderDto(16L, new BigDecimal(4), 0L));
         BDDMockito.when(positionDao.get(16L)).thenReturn(pos);
@@ -76,7 +94,7 @@ public class OrderServiceTest {
     @Test
     public void shouldThrowInsufficientOrderAmountException() {
         // given
-        Position pos = new Position(16L, null, null, null, null, 30d, 5d, null);
+        Position pos = new Position(16L, null, null, null, null, 30d, 5d, 0L);
         List<OrderDto> orders = new ArrayList<>();
         orders.add(new OrderDto(16L, new BigDecimal(4), 0L));
         BDDMockito.when(positionDao.get(16L)).thenReturn(pos);
