@@ -55,7 +55,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     }
 
     @Test
-    public void shouldReturn404StatusOnCreateUserTransactionWithoutPositionVersion() {
+    public void shouldReturn400StatusOnCreateUserTransactionWithoutPositionVersion() {
         // given
         Long positionId = 999L;
         String invalidPayload = format("{\n"
@@ -75,7 +75,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                 .when()
                 .body(invalidPayload)
                 .post("/users/transactions")
-                .then().statusCode(404)
+                .then().statusCode(400)
                 .extract().response().asString();
 
 
