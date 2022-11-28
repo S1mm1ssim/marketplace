@@ -3,9 +3,9 @@ package com.modsensoftware.marketplace.unit.order;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.OrderDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
+import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.impl.OrderServiceImpl;
 import org.assertj.core.api.Assertions;
@@ -67,7 +67,7 @@ public class OrderServiceTest {
         // when
         // then
         Assertions.assertThatThrownBy(() -> underTest.validateOrders(orders))
-                .isInstanceOf(EntityNotFoundException.class)
+                .isInstanceOf(NoVersionProvidedException.class)
                 .hasMessage(format("No version for position with id %s was provided", positionId));
         BDDMockito.verify(positionDao, BDDMockito.never()).get(BDDMockito.any());
         BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());

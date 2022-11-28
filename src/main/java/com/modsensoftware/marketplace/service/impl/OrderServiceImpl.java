@@ -3,9 +3,9 @@ package com.modsensoftware.marketplace.service.impl;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.OrderDto;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
+import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
             }
             if (orderDto.getPositionVersion() == null) {
                 log.error("Provided order didn't contain position's version");
-                throw new EntityNotFoundException(format("No version for position with id %s was provided",
+                throw new NoVersionProvidedException(format("No version for position with id %s was provided",
                         orderDto.getPositionId()));
             }
             Position position = positionDao.get(orderDto.getPositionId());
