@@ -35,13 +35,13 @@ public class ItemController {
     @GetMapping(produces = {"application/json"})
     public List<Item> getAllItems(@RequestParam(name = "page",
             defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
-        log.debug("Fetching all items");
+        log.debug("Fetching all items for page {}", pageNumber);
         return itemService.getAllItems(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Item getItemById(@PathVariable(name = "id") UUID id) {
-        log.debug("Fetching item by id={}", id);
+        log.debug("Fetching item by id: {}", id);
         return itemService.getItemById(id);
     }
 

@@ -35,13 +35,13 @@ public class PositionController {
     @GetMapping(produces = {"application/json"})
     public List<Position> getAllPositions(@RequestParam(name = "page",
             defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
-        log.debug("Fetching all positions");
+        log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Position getPositionById(@PathVariable(name = "id") Long id) {
-        log.debug("Fetching position by id={}", id);
+        log.debug("Fetching position by id: {}", id);
         return positionService.getPositionById(id);
     }
 

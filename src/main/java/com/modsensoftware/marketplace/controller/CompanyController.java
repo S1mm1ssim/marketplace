@@ -41,13 +41,14 @@ public class CompanyController {
             @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
             @RequestParam(name = NAME_FILTER_NAME, required = false) String name
     ) {
-        log.debug("Fetching all companies");
+        log.debug("Fetching all companies for page {}. "
+                    + "Filter by email: {}, name: {}", pageNumber, email, name);
         return companyService.getAllCompanies(pageNumber, email, name);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Company getCompanyById(@PathVariable(name = "id") Long id) {
-        log.debug("Fetching company by id={}", id);
+        log.debug("Fetching company by id: {}", id);
         return companyService.getCompanyById(id);
     }
 

@@ -46,13 +46,15 @@ public class UserController {
             @RequestParam(name = CREATED_BETWEEN_FILTER_NAME, required = false) String createdBetween,
             @RequestParam(name = COMPANY_ID_FILTER_NAME, required = false) Long companyId
     ) {
-        log.debug("Fetching all users");
+        log.debug("Fetching all users for page {}. "
+                            + "Filter by email: {}, name: {}, created between: {}, company id: {}",
+                    pageNumber, email, name, createdBetween, companyId);
         return userService.getAllUsers(pageNumber, email, name, createdBetween, companyId);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public User getUserById(@PathVariable(name = "id") UUID id) {
-        log.debug("Fetching user by id={}", id);
+        log.debug("Fetching user by id: {}", id);
         return userService.getUserById(id);
     }
 

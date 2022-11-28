@@ -34,13 +34,13 @@ public class CategoryController {
     @GetMapping(produces = {"application/json"})
     public List<Category> getAllCategories(@RequestParam(name = "page",
             defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
-        log.debug("Fetching all categories");
+        log.debug("Fetching all categories for page {}", pageNumber);
         return categoryService.getAllCategories(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Category getCategoryById(@PathVariable(name = "id") Long id) {
-        log.debug("Fetching category by id={}", id);
+        log.debug("Fetching category by id: {}", id);
         return categoryService.getCategoryById(id);
     }
 
