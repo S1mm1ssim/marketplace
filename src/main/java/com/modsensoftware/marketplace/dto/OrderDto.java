@@ -19,4 +19,6 @@ public class OrderDto {
 
     @DecimalMin(value = "0.01")
     private BigDecimal amount;
+
+    private Long positionVersion;
 }
