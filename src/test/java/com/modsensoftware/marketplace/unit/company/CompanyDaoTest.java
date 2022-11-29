@@ -52,8 +52,7 @@ public class CompanyDaoTest {
     @Test
     public void canSaveCompany() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
 
         // when
         underTest.save(company);
@@ -69,11 +68,10 @@ public class CompanyDaoTest {
     @Test
     public void canSoftDeleteById() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
+        underTest.save(company);
 
         // when
-        underTest.save(company);
         underTest.deleteById(company.getId());
 
         // then
@@ -87,8 +85,7 @@ public class CompanyDaoTest {
     @Test
     public void canGetById() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
         underTest.save(company);
 
         // when
@@ -104,8 +101,7 @@ public class CompanyDaoTest {
     @Test
     public void getByIdShouldThrowEntityNotFoundExceptionIfSoftDeleted() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", true);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(true);
         underTest.save(company);
 
         // when
@@ -121,8 +117,7 @@ public class CompanyDaoTest {
     @Test
     public void shouldExistByEmail() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
         underTest.save(company);
 
         // when
@@ -138,8 +133,7 @@ public class CompanyDaoTest {
     @Test
     public void existsByEmailShouldBeFalseIfSoftDeleted() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", true);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(true);
         underTest.save(company);
 
         // when
@@ -155,8 +149,7 @@ public class CompanyDaoTest {
     @Test
     public void existsByEmailShouldBeFalseIfEntityNotFound() {
         // given
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
         underTest.save(company);
 
         // when
@@ -177,10 +170,8 @@ public class CompanyDaoTest {
         Company softDeleted;
         Random random = new Random();
         for (int i = 0; i < pageSize + 1; i++) {
-            company = new Company(null, "name", format("email%s@email.com", random.nextInt()),
-                    now().truncatedTo(SECONDS), "description", false);
-            softDeleted = new Company(null, "name", format("email%s@email.com", random.nextInt()),
-                    now().truncatedTo(SECONDS), "description", true);
+            company = generateCompanyWithRandomEmailAndIsSoftDeleted(random, false);
+            softDeleted = generateCompanyWithRandomEmailAndIsSoftDeleted(random, true);
             companies.add(company);
             companies.add(softDeleted);
             underTest.save(company);
@@ -209,10 +200,8 @@ public class CompanyDaoTest {
         Company company2;
         Random random = new Random();
         for (int i = 0; i < pageSize / 2; i++) {
-            company = new Company(null, "name", format("email%s@email.com", random.nextInt()),
-                    now().truncatedTo(SECONDS), "description", false);
-            company2 = new Company(null, "name", format("company%s@company.com", random.nextInt()),
-                    now().truncatedTo(SECONDS), "description", false);
+            company = generateCompanyWithRandomizedEmail(random, "email%s@email.com");
+            company2 = generateCompanyWithRandomizedEmail(random, "company%s@company.com");
             companies.add(company);
             companies.add(company2);
             underTest.save(company);
@@ -241,10 +230,8 @@ public class CompanyDaoTest {
         Company company2;
         Random random = new Random();
         for (int i = 0; i < pageSize / 2; i++) {
-            company = new Company(null, "name", format("email%s@email.com", random.nextInt()),
-                    now().truncatedTo(SECONDS), "description", false);
-            company2 = new Company(null, "absolutely different name", format("email%s@email.com", random.nextInt()),
-                    now().truncatedTo(SECONDS), "description", false);
+            company = generateCompanyWithRandomEmailAndName(random, "name");
+            company2 = generateCompanyWithRandomEmailAndName(random, "absolutely different name");
             companies.add(company);
             companies.add(company2);
             underTest.save(company);
@@ -270,8 +257,7 @@ public class CompanyDaoTest {
         // given
         Company updatedFields = new Company(null, "upd name",
                 "updEmail@email.com", null, "upd description", null);
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
         underTest.save(company);
 
         Company expected = new Company(company.getId(), updatedFields.getName(),
@@ -293,8 +279,7 @@ public class CompanyDaoTest {
     public void noUpdateShouldBeExecutedIfNoUpdatedFieldsAreProvided() {
         // given
         Company updatedFields = new Company();
-        Company company = new Company(null, "name", "email@email.com",
-                now().truncatedTo(SECONDS), "description", false);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
         underTest.save(company);
 
         // when
@@ -323,5 +308,25 @@ public class CompanyDaoTest {
         companies.forEach(session::delete);
         transaction.commit();
         session.close();
+    }
+
+    private Company generateDefaultCompanyWithIsSoftDeleted(boolean isDeleted) {
+        return new Company(null, "name", "email@email.com",
+                now().truncatedTo(SECONDS), "description", isDeleted);
+    }
+
+    private Company generateCompanyWithRandomEmailAndIsSoftDeleted(Random random, boolean isDeleted) {
+        return new Company(null, "name", format("email%s@email.com", random.nextInt()),
+                now().truncatedTo(SECONDS), "description", isDeleted);
+    }
+
+    private Company generateCompanyWithRandomizedEmail(Random random, String emailFormat) {
+        return new Company(null, "name", format(emailFormat, random.nextInt()),
+                now().truncatedTo(SECONDS), "description", false);
+    }
+
+    private Company generateCompanyWithRandomEmailAndName(Random random, String name) {
+        return new Company(null, name, format("email%s@email.com", random.nextInt()),
+                now().truncatedTo(SECONDS), "description", false);
     }
 }
