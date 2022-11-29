@@ -8,8 +8,12 @@ import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testcontainers.ext.ScriptUtils;
 
 import java.util.HashMap;
@@ -26,6 +30,9 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private UserDao userDao;
+
+    @Value("${exception.message.userNotFound}")
+    private String userNotFoundMessage;
 
     @BeforeAll
     protected static void beforeAll() {
@@ -55,7 +62,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldReturnAllUsers() {
+    public void shouldReturnAllUsersWhoseCompanyIsNotDeleted() {
         // given
         final String userWithSoftDeletedCompany = "softDeleted@user.com";
 
@@ -106,11 +113,14 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         Assertions.assertThat(response).isEqualTo(expected);
     }
 
-    @Test
-    public void noSoftDeletedUserShouldBeReturned() {
+    @ValueSource(strings = {
+            "c048ef0e-fe46-4c65-9c01-d88af74ba0ab",
+            "c999ef9e-fe99-9c99-9c99-d99af99ba9ab"
+    })
+    @ParameterizedTest
+    @DisplayName("Should return 404 status on getById operation if user not found or their company is soft deleted")
+    public void shouldReturn404StatusOnGetByIdNotFound(String userUuid) {
         // given
-        final String userUuid = "c048ef0e-fe46-4c65-9c01-d88af74ba0ab";
-
         // when
         // then
         String response = RestAssured.given()
@@ -120,24 +130,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
                 .statusCode(404)
                 .extract().response().asString();
         Assertions.assertThat(response)
-                .isEqualTo(format("User entity with uuid=%s is not found.", userUuid));
-    }
-
-    @Test
-    public void shouldReturn404StatusIfUserNotFoundById() {
-        // given
-        final String nonExistentUserUuid = "c999ef9e-fe99-9c99-9c99-d99af99ba9ab";
-
-        // when
-        // then
-        String response = RestAssured.given()
-                .contentType("application/json")
-                .when()
-                .get(String.format("/users/%s", nonExistentUserUuid)).then()
-                .statusCode(404)
-                .extract().response().asString();
-        Assertions.assertThat(response)
-                .isEqualTo(format("User entity with uuid=%s is not found.", nonExistentUserUuid));
+                .isEqualTo(format(userNotFoundMessage, userUuid));
     }
 
     @Test

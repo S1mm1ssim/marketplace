@@ -8,7 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testcontainers.ext.ScriptUtils;
 
 import java.util.HashMap;
@@ -23,6 +26,9 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private PositionDao positionDao;
+
+    @Value("${exception.message.positionVersionsMismatch}")
+    private String positionVersionsMismatch;
 
     @BeforeAll
     protected static void beforeAll() {
@@ -81,19 +87,9 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         Assertions.assertThat(result).isEqualTo(expected);
     }
 
-    @Test
-    public void shouldReturn404StatusIfPositionNotFoundById() {
-        String positionId = "9999";
-        RestAssured.given()
-                .contentType("application/json")
-                .when()
-                .get(format("/positions/%s", positionId))
-                .then().statusCode(404);
-    }
-
-    @Test
-    public void shouldReturn404StatusIfPositionsCompanyIsSoftDeleted() {
-        String positionId = "1001";
+    @ParameterizedTest
+    @ValueSource(strings = {"1001", "99999"})
+    public void shouldReturn404StatusIfPositionNotFoundOrItsCompanyIsSoftDeleted(String positionId) {
         RestAssured.given()
                 .contentType("application/json")
                 .when()
@@ -114,12 +110,13 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void canUpdatePosition() {
         String positionId = "999";
-        String updatedFields = ""
+        String itemId = "b6b7764c-ed62-47a4-a68d-3cad4da1e187";
+        String updatedFields = format(""
                 + "{\n"
-                + "    \"itemId\": \"b6b7764c-ed62-47a4-a68d-3cad4da1e187\",\n"
+                + "    \"itemId\": \"%s\",\n"
                 + "    \"amount\": 4,\n"
                 + "    \"version\": 1\n"
-                + "}";
+                + "}", itemId);
         RestAssured.given()
                 .contentType("application/json")
                 .body(updatedFields)
@@ -131,8 +128,7 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         Assertions.assertThat(result)
                 .hasFieldOrPropertyWithValue("amount", 4.0)
                 .hasFieldOrPropertyWithValue("version", 2L);
-        Assertions.assertThat(result.getItem().getId().toString())
-                .isEqualTo("b6b7764c-ed62-47a4-a68d-3cad4da1e187");
+        Assertions.assertThat(result.getItem().getId().toString()).isEqualTo(itemId);
     }
 
     @Test
@@ -152,8 +148,7 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
                 .put(format("/positions/%s", positionId))
                 .then().statusCode(400)
                 .extract().response().asString();
-        Assertions.assertThat(response).isEqualTo("Provided position version "
-                + "does not match with the one in the database");
+        Assertions.assertThat(response).isEqualTo(positionVersionsMismatch);
 
         Position latest = positionDao.get(Long.valueOf(positionId));
         Assertions.assertThat(latest).isEqualTo(initial);
