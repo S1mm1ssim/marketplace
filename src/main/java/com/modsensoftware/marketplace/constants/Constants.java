@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.controller;
+package com.modsensoftware.marketplace.constants;
 
 /**
  * @author andrey.demyanchik on 11/29/2022

@@ -1,5 +1,6 @@
 package com.modsensoftware.marketplace.controller;
 
+import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
 import com.modsensoftware.marketplace.service.PositionService;
