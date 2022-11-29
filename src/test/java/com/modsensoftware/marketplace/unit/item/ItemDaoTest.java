@@ -18,9 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +28,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 /**
  * @author andrey.demyanchik on 11/22/2022
@@ -52,6 +53,8 @@ public class ItemDaoTest {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.itemNotFound}")
+    private String itemNotFoundMessage;
 
     @Test
     public void canSaveItem() {
@@ -59,17 +62,19 @@ public class ItemDaoTest {
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         Item item = new Item(null, "name", "description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, 1L);
+                now().truncatedTo(SECONDS), category, 1L);
+
         // when
         underTest.save(item);
+
         // then
         Session session = sessionFactory.openSession();
-        Item result = session.get(Item.class, item.getId());
-        Assertions.assertThat(item).isEqualTo(result);
+        Item actual = session.get(Item.class, item.getId());
+        Assertions.assertThat(item).isEqualTo(actual);
         session.close();
+
         // clean up
-        underTest.deleteById(item.getId());
-        categoryDao.deleteById(category.getId());
+        deleteItem(item);
     }
 
     @Test
@@ -77,20 +82,17 @@ public class ItemDaoTest {
         // given
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
-        Item item = new Item(null, "name", "description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, 1L);
+        Item item = new Item(null, "name", "description", now().truncatedTo(SECONDS), category, 1L);
         underTest.save(item);
+
         // when
-        Item result = underTest.get(item.getId());
+        Item actual = underTest.get(item.getId());
+
         // then
-        Assertions.assertThat(result).isEqualTo(item);
+        Assertions.assertThat(actual).isEqualTo(item);
+
         // clean up
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.delete(item);
-        session.delete(category);
-        transaction.commit();
-        session.close();
+        deleteItem(item);
     }
 
     @Test
@@ -101,7 +103,7 @@ public class ItemDaoTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.get(UUID.fromString(nonExistentUuid)))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage(format("Item entity with uuid=%s is not present.", nonExistentUuid));
+                .hasMessage(format(itemNotFoundMessage, nonExistentUuid));
     }
 
     @Test
@@ -111,7 +113,7 @@ public class ItemDaoTest {
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         for (int i = 0; i < pageSize + 1; i++) {
-            Item item = new Item(null, "name", "description", LocalDateTime.now(), category, 1L);
+            Item item = new Item(null, "name", "description", now(), category, 1L);
             items.add(item);
             underTest.save(item);
         }
@@ -124,12 +126,7 @@ public class ItemDaoTest {
         Assertions.assertThat(secondPage.size()).isEqualTo(items.size() - pageSize);
 
         // clean up
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        items.forEach(session::delete);
-        session.delete(category);
-        transaction.commit();
-        session.close();
+        deleteAllItems(items, category);
     }
 
     @Test
@@ -142,9 +139,9 @@ public class ItemDaoTest {
 
         long itemVersion = 1L;
         Item updatedFields = new Item(null, "upd name", "upd description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), updCategory, itemVersion);
+                now().truncatedTo(SECONDS), updCategory, itemVersion);
         Item item = new Item(null, "name", "description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, itemVersion);
+                now().truncatedTo(SECONDS), category, itemVersion);
         underTest.save(item);
 
         Item expected = new Item(item.getId(), updatedFields.getName(),
@@ -155,17 +152,12 @@ public class ItemDaoTest {
         underTest.update(item.getId(), updatedFields);
 
         // then
-        Item result = underTest.get(item.getId());
-        Assertions.assertThat(result).isEqualTo(expected);
+        Item actual = underTest.get(item.getId());
+        Assertions.assertThat(actual).isEqualTo(expected);
 
         // clean up
         underTest.deleteById(item.getId());
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.delete(category);
-        session.delete(updCategory);
-        transaction.commit();
-        session.close();
+        deleteAllCategories(List.of(category, updCategory));
     }
 
     @Test
@@ -180,8 +172,7 @@ public class ItemDaoTest {
         long itemVersion = 1L;
         Item updatedFields1 = new Item(null, "upd name", "upd description", null, category, itemVersion);
         Item updatedFields2 = new Item(null, "upd upd name", "upd upd description", null, updCategory, itemVersion);
-        Item item = new Item(null, "name", "description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, itemVersion);
+        Item item = new Item(null, "name", "description", now().truncatedTo(SECONDS), category, itemVersion);
         underTest.save(item);
 
         Item expected = new Item(item.getId(), updatedFields1.getName(),
@@ -198,17 +189,12 @@ public class ItemDaoTest {
         executor.awaitTermination(1, TimeUnit.MINUTES);
 
         // then
-        Item result = underTest.get(item.getId());
-        Assertions.assertThat(result).isEqualTo(expected);
+        Item actual = underTest.get(item.getId());
+        Assertions.assertThat(actual).isEqualTo(expected);
 
         // clean up
         underTest.deleteById(item.getId());
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.delete(category);
-        session.delete(updCategory);
-        transaction.commit();
-        session.close();
+        deleteAllCategories(List.of(category, updCategory));
     }
 
     @Test
@@ -222,7 +208,7 @@ public class ItemDaoTest {
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         Item item = new Item(null, "name", "description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, itemVersion);
+                now().truncatedTo(SECONDS), category, itemVersion);
         underTest.save(item);
 
         // when
@@ -247,17 +233,45 @@ public class ItemDaoTest {
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         Item item = new Item(null, "name", "description",
-                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, 1L);
+                now().truncatedTo(SECONDS), category, 1L);
         underTest.save(item);
+
         // when
         underTest.deleteById(item.getId());
+
         // then
         Session session = sessionFactory.openSession();
         Item result = session.get(Item.class, item.getId());
         Assertions.assertThat(result).isNull();
         session.close();
+
         // clean up
         categoryDao.deleteById(category.getId());
     }
 
+    private void deleteItem(Item item) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.delete(item);
+        session.delete(item.getCategory());
+        transaction.commit();
+        session.close();
+    }
+
+    private void deleteAllItems(Collection<Item> items, Category category) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        items.forEach(session::delete);
+        session.delete(category);
+        transaction.commit();
+        session.close();
+    }
+
+    private void deleteAllCategories(List<Category> categories) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        categories.forEach(session::delete);
+        transaction.commit();
+        session.close();
+    }
 }
