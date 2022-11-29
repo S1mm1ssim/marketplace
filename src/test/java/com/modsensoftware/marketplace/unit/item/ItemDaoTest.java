@@ -201,10 +201,7 @@ public class ItemDaoTest {
     public void noUpdateShouldBeExecutedIfNoUpdatedFieldsAreProvided() {
         // given
         long itemVersion = 1L;
-        Item updatedFields = new Item();
-        updatedFields.setVersion(itemVersion);
-        updatedFields.setCategory(new Category());
-
+        Item updatedFields = new Item(null, null, null, null, new Category(), itemVersion);
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         Item item = new Item(null, "name", "description",
@@ -219,12 +216,7 @@ public class ItemDaoTest {
         Assertions.assertThat(result).isEqualTo(item);
 
         // clean up
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.delete(item);
-        session.delete(category);
-        transaction.commit();
-        session.close();
+        deleteItem(item);
     }
 
     @Test

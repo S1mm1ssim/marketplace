@@ -9,6 +9,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -130,30 +132,18 @@ public class CompanyDaoTest {
         deleteCompany(company);
     }
 
-    @Test
-    public void existsByEmailShouldBeFalseIfSoftDeleted() {
+    @CsvSource({
+            "true, ",
+            "false, sdshdagsjdbhauysdhbjaskdbakjshj",
+    })
+    @ParameterizedTest
+    public void companyShouldNotExistByEmail(boolean isSoftDeleted, String appendValueToGuaranteeEmailNotFound) {
         // given
-        Company company = generateDefaultCompanyWithIsSoftDeleted(true);
+        Company company = generateDefaultCompanyWithIsSoftDeleted(isSoftDeleted);
         underTest.save(company);
 
         // when
-        boolean existsByEmail = underTest.existsByEmail(company.getEmail());
-
-        // then
-        Assertions.assertThat(existsByEmail).isFalse();
-
-        // clean up
-        deleteCompany(company);
-    }
-
-    @Test
-    public void existsByEmailShouldBeFalseIfEntityNotFound() {
-        // given
-        Company company = generateDefaultCompanyWithIsSoftDeleted(false);
-        underTest.save(company);
-
-        // when
-        boolean existsByEmail = underTest.existsByEmail(company.getEmail() + "dsahjshfjdskfd");
+        boolean existsByEmail = underTest.existsByEmail(company.getEmail() + appendValueToGuaranteeEmailNotFound);
 
         // then
         Assertions.assertThat(existsByEmail).isFalse();

@@ -13,6 +13,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,7 +64,7 @@ public class UserDaoTest {
     private String invalidCreatedBetweenFilterMessage;
 
     @Test
-    public void canSaveUser() {
+    public void canSaveAndGetUserByUuid() {
         // given
         User user = generateDefaultTestUser();
 
@@ -75,23 +77,6 @@ public class UserDaoTest {
 
         // clean up
         deleteUser(user);
-    }
-
-    @Test
-    public void canGetUserByUuid() {
-        // given
-        User user = generateDefaultTestUser();
-        underTest.save(user);
-
-        // when
-        User result = underTest.get(user.getId());
-
-        // then
-        Assertions.assertThat(result).isEqualTo(user);
-
-        // clean up
-        underTest.deleteById(user.getId());
-        deleteCompany(user.getCompany());
     }
 
     @Test
@@ -251,27 +236,17 @@ public class UserDaoTest {
         deleteCompany(company);
     }
 
-    @Test
-    @DisplayName("Should throw InvalidFilterException if 'created' filter contains separator amount > 1")
-    public void shouldThrowInvalidFilterExceptionDuringFilterByCreatedMoreSeparatorsThanNeeded() {
+    @ValueSource(strings = {
+            "2022-11-04T12:00:00,,2022-11-18T12:00:00",
+            "2022-11-04T12:00:00|2022-11-18T12:00:00",
+            "2022-11-04T12:00:00,2022-11-18T12:00:00,2022-11-22T12:00:00",
+            "2022-11-04T12:00:00"
+    })
+    @ParameterizedTest
+    @DisplayName("Should throw InvalidFilterException if provided filter contains wrong separator or too many timestamps")
+    public void shouldThrowInvalidFilterException(String filterValue) {
         // given
         Map<String, String> createdBetweenFilter = new HashMap<>();
-        String filterValue = "2022-11-04T12:00:00,,2022-11-18T12:00:00";
-        createdBetweenFilter.put("created", filterValue);
-
-        // when
-        // then
-        Assertions.assertThatThrownBy(() -> underTest.getAll(0, createdBetweenFilter))
-                .isInstanceOf(InvalidFilterException.class)
-                .hasMessage(format(invalidCreatedBetweenFilterMessage, filterValue));
-    }
-
-    @Test
-    @DisplayName("Should throw InvalidFilterException if 'created' filter doesn't contain a specified separator")
-    public void shouldThrowInvalidFilterExceptionDuringFilterByCreatedNoSeparatorProvided() {
-        // given
-        Map<String, String> createdBetweenFilter = new HashMap<>();
-        String filterValue = "2022-11-04T12:00:00|2022-11-18T12:00:00";
         createdBetweenFilter.put("created", filterValue);
 
         // when
