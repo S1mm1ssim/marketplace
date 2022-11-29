@@ -47,6 +47,11 @@ public class UserDao implements Dao<User, UUID> {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.userNotFound}")
+    private String userNotFoundMessage;
+    @Value("${exception.message.invalidCreatedBetweenFilter}")
+    private String invalidCreatedBetweenFilterMessage;
+
     private static final String USER_ENTITY_GRAPH = "graph.User.company";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
     private static final String CREATED_BETWEEN_DELIMITER = ",";
@@ -61,11 +66,6 @@ public class UserDao implements Dao<User, UUID> {
     private static final String USER_UPDATED = "updated";
 
     private static final int TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER = 2;
-
-    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
-            = "User entity with uuid=%s is not found.";
-    private static final String INVALID_FILTER_EXCEPTION_MESSAGE
-            = "Filter 'created' = %s is invalid";
 
     @Override
     public User get(UUID id) {
@@ -90,7 +90,7 @@ public class UserDao implements Dao<User, UUID> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("User entity with uuid {} not found", id);
-            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
+            throw new EntityNotFoundException(format(userNotFoundMessage, id), e);
         } finally {
             session.close();
         }
@@ -235,7 +235,7 @@ public class UserDao implements Dao<User, UUID> {
         Map<String, String> borders = new HashMap<>();
         String[] parsed = createdBetween.split(CREATED_BETWEEN_DELIMITER);
         if (parsed.length != TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER) {
-            throw new InvalidFilterException(format(INVALID_FILTER_EXCEPTION_MESSAGE, createdBetween));
+            throw new InvalidFilterException(format(invalidCreatedBetweenFilterMessage, createdBetween));
         }
         borders.put(parsed[0], parsed[1]);
         return borders.entrySet().iterator().next();

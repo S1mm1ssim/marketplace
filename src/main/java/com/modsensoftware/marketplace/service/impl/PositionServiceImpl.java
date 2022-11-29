@@ -7,6 +7,7 @@ import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.OptimisticLockException;
@@ -25,8 +26,8 @@ public class PositionServiceImpl implements PositionService {
     private final PositionDao positionDao;
     private final PositionMapper positionMapper;
 
-    private static final String OPTIMISTIC_LOCK_EXCEPTION_MESSAGE
-            = "Provided position version does not match with the one in the database";
+    @Value("${exception.message.positionVersionsMismatch}")
+    private String positionVersionsMismatch;
 
     @Override
     public Position getPositionById(Long id) {
@@ -65,7 +66,7 @@ public class PositionServiceImpl implements PositionService {
         } else {
             log.error("Position versions do not match. Provided: {}, in the database: {}",
                     updatedFields.getVersion(), position.getVersion());
-            throw new OptimisticLockException(OPTIMISTIC_LOCK_EXCEPTION_MESSAGE);
+            throw new OptimisticLockException(positionVersionsMismatch);
         }
     }
 }

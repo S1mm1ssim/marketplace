@@ -7,6 +7,7 @@ import com.modsensoftware.marketplace.dto.mapper.ItemMapper;
 import com.modsensoftware.marketplace.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.OptimisticLockException;
@@ -26,8 +27,8 @@ public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final ItemMapper itemMapper;
 
-    private static final String OPTIMISTIC_LOCK_EXCEPTION_MESSAGE
-            = "Provided item version does not match with the one in the database";
+    @Value("${exception.message.itemVersionsMismatch}")
+    private String itemVersionsMismatchMessage;
 
     @Override
     public Item getItemById(UUID id) {
@@ -66,7 +67,7 @@ public class ItemServiceImpl implements ItemService {
         } else {
             log.error("Item versions do not match. Provided: {}, in the database: {}",
                     updatedFields.getVersion(), item.getVersion());
-            throw new OptimisticLockException(OPTIMISTIC_LOCK_EXCEPTION_MESSAGE);
+            throw new OptimisticLockException(itemVersionsMismatchMessage);
         }
     }
 }

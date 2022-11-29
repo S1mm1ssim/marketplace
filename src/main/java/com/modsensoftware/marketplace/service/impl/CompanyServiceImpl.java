@@ -9,6 +9,7 @@ import com.modsensoftware.marketplace.service.CompanyService;
 import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,8 +32,8 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyDao companyDao;
     private final CompanyMapper companyMapper;
 
-    private static final String ENTITY_ALREADY_EXISTS_EXCEPTION_MESSAGE
-            = "Company with email %s already exists";
+    @Value("${exception.message.companyEmailTaken}")
+    private String companyEmailTakenMessage;
 
     @Override
     public Company getCompanyById(Long id) {
@@ -59,7 +60,7 @@ public class CompanyServiceImpl implements CompanyService {
             log.debug("Mapping result: {}", company);
             companyDao.save(company);
         } else {
-            throw new EntityAlreadyExistsException(format(ENTITY_ALREADY_EXISTS_EXCEPTION_MESSAGE,
+            throw new EntityAlreadyExistsException(format(companyEmailTakenMessage,
                     companyDto.getEmail()));
         }
     }

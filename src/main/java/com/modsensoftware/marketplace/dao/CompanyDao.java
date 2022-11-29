@@ -39,14 +39,14 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.companyNotFound}")
+    private String companyNotFoundMessage;
+
     private static final String ID_COLUMN_NAME = "id";
     private static final String NAME_COLUMN_NAME = "name";
     private static final String EMAIL_COLUMN_NAME = "email";
     private static final String DESCRIPTION_COLUMN_NAME = "description";
     private static final String IS_SOFT_DELETED = "isDeleted";
-
-    private static final String ENTITY_NOT_FOUND_MESSAGE
-            = "Company entity with id=%s is not present.";
 
     @Override
     public Company get(Long id) {
@@ -67,7 +67,7 @@ public class CompanyDao implements Dao<Company, Long> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Company entity with id {} not found", id);
-            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_MESSAGE, id), e);
+            throw new EntityNotFoundException(format(companyNotFoundMessage, id), e);
         } finally {
             session.close();
         }

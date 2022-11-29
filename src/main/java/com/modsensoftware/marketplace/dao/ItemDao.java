@@ -40,14 +40,14 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.itemNotFound}")
+    private String itemNotFoundMessage;
+
     private static final String ITEM_ENTITY_GRAPH = "graph.Item.category.parent";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
     private static final String ITEM_CATEGORY_COLUMN_NAME = "category";
     private static final String ITEM_ID = "id";
-
-    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
-            = "Item entity with uuid=%s is not present.";
 
     @Override
     public Item get(UUID id) {
@@ -67,7 +67,7 @@ public class ItemDao implements Dao<Item, UUID> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Item with uuid {} not found", id);
-            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
+            throw new EntityNotFoundException(format(itemNotFoundMessage, id), e);
         } finally {
             session.close();
         }

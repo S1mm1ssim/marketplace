@@ -32,8 +32,8 @@ public class SessionFactoryConfig {
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
-    private static final String COULD_NOT_INSTANTIATE_SESSION_FACTORY_EXCEPTION_MESSAGE
-            = "Initialization of SessionFactory failed";
+    @Value("${exception.message.sessionFactoryInitFail}")
+    private String sessionFactoryInitFailMessage;
 
     @Bean
     public SessionFactory sessionFactory() {
@@ -51,7 +51,7 @@ public class SessionFactoryConfig {
             return metadata.getSessionFactoryBuilder().build();
         } catch (Exception e) {
             StandardServiceRegistryBuilder.destroy(serviceRegistry);
-            throw new ExceptionInInitializerError(COULD_NOT_INSTANTIATE_SESSION_FACTORY_EXCEPTION_MESSAGE + e);
+            throw new ExceptionInInitializerError(sessionFactoryInitFailMessage + e);
         }
     }
 

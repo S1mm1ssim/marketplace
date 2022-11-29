@@ -37,14 +37,14 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.categoryNotFound}")
+    private String categoryNotFoundMessage;
+
     private static final String CATEGORY_PARENT_FIELD_NAME = "parent";
     private static final String PARENT_ID = "id";
     private static final String CATEGORY_ID = "id";
     private static final String CATEGORY_NAME = "name";
     private static final String CATEGORY_DESCRIPTION = "description";
-
-    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
-            = "Category entity with id=%s is not present.";
 
     @Override
     public Category get(Long id) {
@@ -63,7 +63,7 @@ public class CategoryDao implements Dao<Category, Long> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Category with id {} not found", id);
-            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
+            throw new EntityNotFoundException(format(categoryNotFoundMessage, id), e);
         } finally {
             session.close();
         }

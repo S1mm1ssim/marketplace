@@ -42,6 +42,9 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.positionNotFound}")
+    private String positionNotFoundMessage;
+
     private static final String POSITION_GRAPH = "graph.Position.item.company.user";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
@@ -49,9 +52,6 @@ public class PositionDao implements Dao<Position, Long> {
     private static final String IS_COMPANY_SOFT_DELETED = "isDeleted";
     private static final String ITEM_ID = "id";
     private static final String POSITION_ID = "id";
-
-    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
-            = "Position entity with id=%s is not found.";
 
     @Override
     public Position get(Long id) {
@@ -75,7 +75,7 @@ public class PositionDao implements Dao<Position, Long> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Position entity with id {} not found", id);
-            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
+            throw new EntityNotFoundException(format(positionNotFoundMessage, id), e);
         } finally {
             session.close();
         }
