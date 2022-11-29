@@ -235,6 +235,8 @@ public class UserDao implements Dao<User, UUID> {
         Map<String, String> borders = new HashMap<>();
         String[] parsed = createdBetween.split(CREATED_BETWEEN_DELIMITER);
         if (parsed.length != TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER) {
+            log.error("Provided filter: {} is invalid", createdBetween);
+            log.debug("Timestamps provided: {}, expected: {}", parsed.length, TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER);
             throw new InvalidFilterException(format(invalidCreatedBetweenFilterMessage, createdBetween));
         }
         borders.put(parsed[0], parsed[1]);
