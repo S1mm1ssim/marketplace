@@ -20,7 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-import static com.modsensoftware.marketplace.constants.Constants.*;
+import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
