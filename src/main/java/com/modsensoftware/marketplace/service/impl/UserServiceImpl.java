@@ -37,9 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching user by id: {}", id);
-        }
+        log.debug("Fetching user by id: {}", id);
         return userDao.get(id);
     }
 
@@ -47,11 +45,9 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUsers(int pageNumber, String email,
                                   String name, String createdBetween,
                                   Long companyId) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all users for page {}. "
-                            + "Filter by email: {}, name: {}, created between: {}, company id: {}",
-                    pageNumber, email, name, createdBetween, companyId);
-        }
+        log.debug("Fetching all users for page {}. "
+                        + "Filter by email: {}, name: {}, created between: {}, company id: {}",
+                pageNumber, email, name, createdBetween, companyId);
         Map<String, String> filterProperties = new HashMap<>();
         Utils.putIfNotNull("email", email, filterProperties::put);
         Utils.putIfNotNull("name", name, filterProperties::put);
@@ -66,17 +62,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserDto userDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new user from dto: {}", userDto);
-        }
+        log.debug("Creating new user from dto: {}", userDto);
         if (!userDao.existsByEmail(userDto.getEmail())) {
             User user = userMapper.toUser(userDto);
             user.setRole(Role.valueOf(defaultRole));
             user.setCreated(LocalDateTime.now());
             user.setUpdated(LocalDateTime.now());
-            if (log.isDebugEnabled()) {
-                log.debug("Mapping result: {}", user);
-            }
+            log.debug("Mapping result: {}", user);
             userDao.save(user);
         } else {
             throw new EntityAlreadyExistsException(format("User with email %s already exists",
@@ -86,17 +78,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting user by id: {}", id);
-        }
+        log.debug("Deleting user by id: {}", id);
         userDao.deleteById(id);
     }
 
     @Override
     public void updateUser(UUID id, UserDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
         User user = userMapper.toUser(updatedFields);
         user.setUpdated(LocalDateTime.now());
         userDao.update(id, user);

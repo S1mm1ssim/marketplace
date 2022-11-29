@@ -35,44 +35,34 @@ public class CategoryController {
     @GetMapping(produces = {"application/json"})
     public List<Category> getAllCategories(@RequestParam(name = "page",
             defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all categories");
-        }
+        log.debug("Fetching all categories");
         return categoryService.getAllCategories(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Category getCategoryById(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching category by id={}", id);
-        }
+        log.debug("Fetching category by id={}", id);
         return categoryService.getCategoryById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createCategory(@RequestBody CategoryDto categoryDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new category dto: {}", categoryDto);
-        }
+        log.debug("Creating new category dto: {}", categoryDto);
         categoryService.createCategory(categoryDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting category by id: {}", id);
-        }
+        log.debug("Deleting category by id: {}", id);
         categoryService.deleteCategory(id);
     }
 
     @PutMapping("/{id}")
     public void updateCategory(@PathVariable(name = "id") Long id,
                                @RequestBody CategoryDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
         categoryService.updateCategory(id, updatedFields);
     }
 }

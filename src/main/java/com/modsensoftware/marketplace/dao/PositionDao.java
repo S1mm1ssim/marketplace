@@ -24,7 +24,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -53,9 +52,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public Position get(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching position entity with id {}", id);
-        }
+        log.debug("Fetching position entity with id {}", id);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(POSITION_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -83,9 +80,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public List<Position> getAll(int pageNumber, Map<String, String> filterProperties) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all positions for page {}", pageNumber);
-        }
+        log.debug("Fetching all positions for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(POSITION_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -107,9 +102,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public void save(Position position) {
-        if (log.isDebugEnabled()) {
-            log.debug("Saving position entity: {}", position);
-        }
+        log.debug("Saving position entity: {}", position);
         Session session = sessionFactory.openSession();
         Item item = session.get(Item.class, position.getItem().getId());
         position.setItem(item);
@@ -121,9 +114,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public void update(Long id, Position updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);
-        }
+        log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         try {
@@ -150,9 +141,7 @@ public class PositionDao implements Dao<Position, Long> {
 
     @Override
     public void deleteById(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting position entity with id: {}", id);
-        }
+        log.debug("Deleting position entity with id: {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Position> delete = cb.createCriteriaDelete(Position.class);

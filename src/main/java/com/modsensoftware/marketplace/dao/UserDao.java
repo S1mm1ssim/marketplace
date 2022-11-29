@@ -63,9 +63,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public User get(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching user entity with uuid {}", id);
-        }
+        log.debug("Fetching user entity with uuid {}", id);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -93,9 +91,7 @@ public class UserDao implements Dao<User, UUID> {
     }
 
     public boolean existsByEmail(String email) {
-        if (log.isDebugEnabled()) {
-            log.debug("Checking if user with email {} exists", email);
-        }
+        log.debug("Checking if user with email {} exists", email);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> byId = cb.createQuery(User.class);
@@ -123,9 +119,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public List<User> getAll(int pageNumber, Map<String, String> filterProperties) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all users for page {}", pageNumber);
-        }
+        log.debug("Fetching all users for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -151,9 +145,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void save(User user) {
-        if (log.isDebugEnabled()) {
-            log.debug("Saving user entity: {}", user);
-        }
+        log.debug("Saving user entity: {}", user);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(user);
@@ -163,9 +155,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void update(UUID id, User updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating user entity with id {} with values from: {}", id, updatedFields);
-        }
+        log.debug("Updating user entity with id {} with values from: {}", id, updatedFields);
         try (Session session = sessionFactory.openSession()) {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaUpdate<User> update = cb.createCriteriaUpdate(User.class);
@@ -202,9 +192,7 @@ public class UserDao implements Dao<User, UUID> {
 
     @Override
     public void deleteById(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting user entity with id: {}", id);
-        }
+        log.debug("Deleting user entity with id: {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<User> delete = cb.createCriteriaDelete(User.class);

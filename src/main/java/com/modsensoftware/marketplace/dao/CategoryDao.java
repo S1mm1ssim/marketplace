@@ -45,9 +45,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public Category get(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching category entity with id {}", id);
-        }
+        log.debug("Fetching category entity with id {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Category> byId = cb.createQuery(Category.class);
@@ -71,9 +69,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public List<Category> getAll(int pageNumber, Map<String, String> filterProperties) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all categories for page {}", pageNumber);
-        }
+        log.debug("Fetching all categories for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Category> getAll = cb.createQuery(Category.class);
@@ -93,9 +89,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public void save(Category category) {
-        if (log.isDebugEnabled()) {
-            log.debug("Saving category entity: {}", category);
-        }
+        log.debug("Saving category entity: {}", category);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(category);
@@ -105,9 +99,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public void update(Long id, Category updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating category entity with id {} with values from: {}", id, updatedFields);
-        }
+        log.debug("Updating category entity with id {} with values from: {}", id, updatedFields);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Category> update = cb.createCriteriaUpdate(Category.class);
@@ -136,9 +128,7 @@ public class CategoryDao implements Dao<Category, Long> {
 
     @Override
     public void deleteById(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting category entity with id: {}", id);
-        }
+        log.debug("Deleting category entity with id: {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Category> delete = cb.createCriteriaDelete(Category.class);

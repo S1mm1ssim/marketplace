@@ -31,18 +31,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Company getCompanyById(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching company by id: {}", id);
-        }
+        log.debug("Fetching company by id: {}", id);
         return companyDao.get(id);
     }
 
     @Override
     public List<Company> getAllCompanies(int pageNumber, String email, String name) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all companies for page {}. Filter by email: {} and name: {}",
-                    pageNumber, email, name);
-        }
+        log.debug("Fetching all companies for page {}. Filter by email: {} and name: {}",
+                pageNumber, email, name);
         Map<String, String> filterProperties = new HashMap<>();
         Utils.putIfNotNull("email", email, filterProperties::put);
         Utils.putIfNotNull("name", name, filterProperties::put);
@@ -51,15 +47,11 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void createCompany(CompanyDto companyDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new company from dto: {}", companyDto);
-        }
+        log.debug("Creating new company from dto: {}", companyDto);
         if (!companyDao.existsByEmail(companyDto.getEmail())) {
             Company company = companyMapper.toCompany(companyDto);
             company.setCreated(LocalDateTime.now());
-            if (log.isDebugEnabled()) {
-                log.debug("Mapping result: {}", company);
-            }
+            log.debug("Mapping result: {}", company);
             companyDao.save(company);
         } else {
             throw new EntityAlreadyExistsException(format("Company with email %s already exists",
@@ -69,17 +61,13 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void deleteCompany(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting company by id: {}", id);
-        }
+        log.debug("Deleting company by id: {}", id);
         companyDao.deleteById(id);
     }
 
     @Override
     public void updateCompany(Long id, CompanyDto company) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating company with id: {}\nwith params: {}", id, company);
-        }
+        log.debug("Updating company with id: {}\nwith params: {}", id, company);
         companyDao.update(id, companyMapper.toCompany(company));
     }
 }

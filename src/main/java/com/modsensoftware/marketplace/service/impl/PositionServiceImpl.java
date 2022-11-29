@@ -27,46 +27,34 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public Position getPositionById(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching company by id: {}", id);
-        }
+        log.debug("Fetching company by id: {}", id);
         return positionDao.get(id);
     }
 
     @Override
     public List<Position> getAllPositions(int pageNumber) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all positions for page {}", pageNumber);
-        }
+        log.debug("Fetching all positions for page {}", pageNumber);
         return positionDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override
     public void createPosition(PositionDto positionDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new position from dto: {}", positionDto);
-        }
+        log.debug("Creating new position from dto: {}", positionDto);
         Position position = positionMapper.toPosition(positionDto);
         position.setCreated(LocalDateTime.now());
-        if (log.isDebugEnabled()) {
-            log.debug("Mapping result: {}", position);
-        }
+        log.debug("Mapping result: {}", position);
         positionDao.save(position);
     }
 
     @Override
     public void deletePosition(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting position by id: {}", id);
-        }
+        log.debug("Deleting position by id: {}", id);
         positionDao.deleteById(id);
     }
 
     @Override
     public void updatePosition(Long id, PositionDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         Position position = positionDao.get(id);
         if (position.getVersion().equals(updatedFields.getVersion())) {
             log.debug("Position versions match");

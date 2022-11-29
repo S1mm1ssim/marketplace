@@ -41,43 +41,33 @@ public class UserController {
             @RequestParam(name = "created", required = false) String createdBetween,
             @RequestParam(name = "companyId", required = false) Long companyId
     ) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all users");
-        }
+        log.debug("Fetching all users");
         return userService.getAllUsers(pageNumber, email, name, createdBetween, companyId);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public User getUserById(@PathVariable(name = "id") UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching user by id={}", id);
-        }
+        log.debug("Fetching user by id={}", id);
         return userService.getUserById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createUser(@RequestBody UserDto userDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new user from dto: {}", userDto);
-        }
+        log.debug("Creating new user from dto: {}", userDto);
         userService.createUser(userDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting user by id: {}", id);
-        }
+        log.debug("Deleting user by id: {}", id);
         userService.deleteUser(id);
     }
 
     @PutMapping("/{id}")
     public void updateUser(@PathVariable(name = "id") UUID id, @RequestBody UserDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
         userService.updateUser(id, updatedFields);
     }
 }

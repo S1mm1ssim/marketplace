@@ -38,44 +38,34 @@ public class CompanyController {
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "name", required = false) String name
     ) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all companies");
-        }
+        log.debug("Fetching all companies");
         return companyService.getAllCompanies(pageNumber, email, name);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Company getCompanyById(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching company by id={}", id);
-        }
+        log.debug("Fetching company by id={}", id);
         return companyService.getCompanyById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createCompany(@RequestBody CompanyDto companyDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new company from dto: {}", companyDto);
-        }
+        log.debug("Creating new company from dto: {}", companyDto);
         companyService.createCompany(companyDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteCompany(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting company by id: {}", id);
-        }
+        log.debug("Deleting company by id: {}", id);
         companyService.deleteCompany(id);
     }
 
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = "id") Long id,
                               @RequestBody CompanyDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);
     }
 }

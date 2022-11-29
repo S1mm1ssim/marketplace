@@ -45,9 +45,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public Company get(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching company entity with id {}", id);
-        }
+        log.debug("Fetching company entity with id {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> byId = cb.createQuery(Company.class);
@@ -71,9 +69,7 @@ public class CompanyDao implements Dao<Company, Long> {
     }
 
     public boolean existsByEmail(String email) {
-        if (log.isDebugEnabled()) {
-            log.debug("Checking if company with email {} exists", email);
-        }
+        log.debug("Checking if company with email {} exists", email);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> byId = cb.createQuery(Company.class);
@@ -101,9 +97,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public List<Company> getAll(int pageNumber, Map<String, String> filterProperties) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all companies for page {}", pageNumber);
-        }
+        log.debug("Fetching all companies for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Company> getAll = cb.createQuery(Company.class);
@@ -126,9 +120,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public void save(Company company) {
-        if (log.isDebugEnabled()) {
-            log.debug("Saving company entity: {}", company);
-        }
+        log.debug("Saving company entity: {}", company);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(company);
@@ -138,9 +130,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public void update(Long id, Company updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating company entity with id {} with values from: {}", id, updatedFields);
-        }
+        log.debug("Updating company entity with id {} with values from: {}", id, updatedFields);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Company> update = cb.createCriteriaUpdate(Company.class);
@@ -173,9 +163,7 @@ public class CompanyDao implements Dao<Company, Long> {
 
     @Override
     public void deleteById(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting company entity with id: {}", id);
-        }
+        log.debug("Deleting company entity with id: {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Company> softDelete = cb.createCriteriaUpdate(Company.class);

@@ -35,43 +35,33 @@ public class PositionController {
     @GetMapping(produces = {"application/json"})
     public List<Position> getAllPositions(@RequestParam(name = "page",
             defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all positions");
-        }
+        log.debug("Fetching all positions");
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Position getPositionById(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching position by id={}", id);
-        }
+        log.debug("Fetching position by id={}", id);
         return positionService.getPositionById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createPosition(@RequestBody PositionDto positionDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new position from dto: {}", positionDto);
-        }
+        log.debug("Creating new position from dto: {}", positionDto);
         positionService.createPosition(positionDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deletePosition(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting position by id: {}", id);
-        }
+        log.debug("Deleting position by id: {}", id);
         positionService.deletePosition(id);
     }
 
     @PutMapping("/{id}")
     public void updatePosition(@PathVariable Long id, @RequestBody PositionDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         positionService.updatePosition(id, updatedFields);
     }
 }

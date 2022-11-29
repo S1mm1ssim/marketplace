@@ -25,45 +25,33 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category getCategoryById(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching category by id: {}", id);
-        }
+        log.debug("Fetching category by id: {}", id);
         return categoryDao.get(id);
     }
 
     @Override
     public List<Category> getAllCategories(int pageNumber) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all categories for page {}", pageNumber);
-        }
+        log.debug("Fetching all categories for page {}", pageNumber);
         return categoryDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override
     public void createCategory(CategoryDto categoryDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new category from dto: {}", categoryDto);
-        }
+        log.debug("Creating new category from dto: {}", categoryDto);
         Category category = categoryMapper.toCategory(categoryDto);
-        if (log.isDebugEnabled()) {
-            log.debug("Mapping result: {}", category);
-        }
+        log.debug("Mapping result: {}", category);
         categoryDao.save(category);
     }
 
     @Override
     public void deleteCategory(Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting category by id: {}", id);
-        }
+        log.debug("Deleting category by id: {}", id);
         categoryDao.deleteById(id);
     }
 
     @Override
     public void updateCategory(Long id, CategoryDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
         categoryDao.update(id, categoryMapper.toCategory(updatedFields));
     }
 }

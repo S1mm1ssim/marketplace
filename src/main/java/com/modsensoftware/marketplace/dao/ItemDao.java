@@ -48,9 +48,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public Item get(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching item entity with id {}", id);
-        }
+        log.debug("Fetching item entity with id {}", id);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -74,9 +72,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public List<Item> getAll(int pageNumber, Map<String, String> filterProperties) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all items for page {}", pageNumber);
-        }
+        log.debug("Fetching all items for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -97,9 +93,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public void save(Item item) {
-        if (log.isDebugEnabled()) {
-            log.debug("Saving item entity: {}", item);
-        }
+        log.debug("Saving item entity: {}", item);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(item);
@@ -109,9 +103,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public void update(UUID id, Item updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating item entity with id {} with values from: {}", id, updatedFields);
-        }
+        log.debug("Updating item entity with id {} with values from: {}", id, updatedFields);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         try {
@@ -131,9 +123,7 @@ public class ItemDao implements Dao<Item, UUID> {
 
     @Override
     public void deleteById(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting item entity with id: {}", id);
-        }
+        log.debug("Deleting item entity with id: {}", id);
         Session session = sessionFactory.openSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Item> delete = cb.createCriteriaDelete(Item.class);

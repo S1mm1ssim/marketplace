@@ -28,46 +28,34 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item getItemById(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching item by id: {}", id);
-        }
+        log.debug("Fetching item by id: {}", id);
         return itemDao.get(id);
     }
 
     @Override
     public List<Item> getAllItems(int pageNumber) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all items for page {}", pageNumber);
-        }
+        log.debug("Fetching all items for page {}", pageNumber);
         return itemDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override
     public void createItem(ItemDto itemDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new item from dto: {}", itemDto);
-        }
+        log.debug("Creating new item from dto: {}", itemDto);
         Item item = itemMapper.toItem(itemDto);
         item.setCreated(LocalDateTime.now());
-        if (log.isDebugEnabled()) {
-            log.debug("Mapping result: {}", item);
-        }
+        log.debug("Mapping result: {}", item);
         itemDao.save(item);
     }
 
     @Override
     public void deleteItem(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting item by id: {}", id);
-        }
+        log.debug("Deleting item by id: {}", id);
         itemDao.deleteById(id);
     }
 
     @Override
     public void updateItem(UUID id, ItemDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
-        }
+        log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         Item item = itemDao.get(id);
         if (item.getVersion().equals(updatedFields.getVersion())) {
             log.debug("Item versions match");
