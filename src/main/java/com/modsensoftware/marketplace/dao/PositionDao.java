@@ -25,6 +25,9 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
 
+import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Position.COMPANY_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Position.ID_FIELD_NAME;
 import static java.lang.String.format;
 
 /**
@@ -48,11 +51,6 @@ public class PositionDao implements Dao<Position, Long> {
     private static final String POSITION_GRAPH = "graph.Position.item.company.user";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
-    private static final String COMPANY_FIELD_NAME = "company";
-    private static final String IS_COMPANY_SOFT_DELETED = "isDeleted";
-    private static final String ITEM_ID = "id";
-    private static final String POSITION_ID = "id";
-
     @Override
     public Position get(Long id) {
         log.debug("Fetching position entity with id {}", id);
@@ -64,8 +62,8 @@ public class PositionDao implements Dao<Position, Long> {
 
         byId.select(root).where(
                 cb.and(
-                        cb.equal(root.get(ITEM_ID), id),
-                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_COMPANY_SOFT_DELETED))
+                        cb.equal(root.get(ID_FIELD_NAME), id),
+                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
                 )
         );
 
@@ -91,7 +89,7 @@ public class PositionDao implements Dao<Position, Long> {
         Root<Position> root = getAll.from(Position.class);
 
         getAll.select(root).where(
-                cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_COMPANY_SOFT_DELETED))
+                cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
         );
 
         Query<Position> query = session.createQuery(getAll);
@@ -149,7 +147,7 @@ public class PositionDao implements Dao<Position, Long> {
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Position> delete = cb.createCriteriaDelete(Position.class);
         Root<Position> root = delete.from(Position.class);
-        delete.where(cb.equal(root.get(POSITION_ID), id));
+        delete.where(cb.equal(root.get(ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(delete).executeUpdate();

@@ -24,6 +24,11 @@ import javax.persistence.Table;
 @Table(name = "category")
 public class Category {
 
+    public static final String ID_FIELD_NAME = "id";
+    public static final String NAME_FIELD_NAME = "name";
+    public static final String DESCRIPTION_FIELD_NAME = "description";
+    public static final String PARENT_CATEGORY_FIELD_NAME = "parent";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

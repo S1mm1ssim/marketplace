@@ -29,7 +29,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.modsensoftware.marketplace.constants.Constants.*;
+import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.domain.Company.ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.COMPANY_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.CREATED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.EMAIL_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.FULL_NAME_FIELD_NAME;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 import static com.modsensoftware.marketplace.utils.Utils.wrapIn;
 import static java.lang.String.format;
@@ -54,17 +63,8 @@ public class UserDao implements Dao<User, UUID> {
 
     private static final String USER_ENTITY_GRAPH = "graph.User.company";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
-    private static final String CREATED_BETWEEN_DELIMITER = ",";
-    private static final String COMPANY_FIELD_NAME = "company";
-    private static final String COMPANY_ID = "id";
-    private static final String IS_COMPANY_SOFT_DELETED = "isDeleted";
-    private static final String USER_ID = "id";
-    private static final String USER_USERNAME = "username";
-    private static final String USER_EMAIL = "email";
-    private static final String USER_NAME = "name";
-    private static final String USER_CREATED = "created";
-    private static final String USER_UPDATED = "updated";
 
+    private static final String CREATED_BETWEEN_DELIMITER = ",";
     private static final int TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER = 2;
 
     @Override
@@ -79,8 +79,8 @@ public class UserDao implements Dao<User, UUID> {
 
         byId.select(root).where(
                 cb.and(
-                        cb.equal(root.get(USER_ID), id),
-                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_COMPANY_SOFT_DELETED))
+                        cb.equal(root.get(User.ID_FIELD_NAME), id),
+                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
                 )
         );
 
@@ -104,8 +104,8 @@ public class UserDao implements Dao<User, UUID> {
         Root<User> root = byId.from(User.class);
         byId.select(root).where(
                 cb.and(
-                        cb.equal(root.get(USER_EMAIL), email),
-                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_COMPANY_SOFT_DELETED))
+                        cb.equal(root.get(EMAIL_FIELD_NAME), email),
+                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
                 )
         );
 
@@ -131,12 +131,12 @@ public class UserDao implements Dao<User, UUID> {
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> getAll = cb.createQuery(User.class);
         Root<User> root = getAll.from(User.class);
-        Join<User, Company> category = root.join(COMPANY_FIELD_NAME);
+        Join<User, Company> company = root.join(COMPANY_FIELD_NAME);
 
         // Filtering
         List<Predicate> predicates
                 = constructPredicatesFromProps(filterProperties, cb, root);
-        predicates.add(cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_COMPANY_SOFT_DELETED)));
+        predicates.add(cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME)));
         getAll.select(root).where(predicates.toArray(new Predicate[0]));
 
         // Paging
@@ -168,26 +168,26 @@ public class UserDao implements Dao<User, UUID> {
             Root<User> root = update.from(User.class);
 
             int totalFieldsUpdated = 0;
-            if (setIfNotNull(USER_USERNAME, updatedFields.getUsername(), update::set)) {
+            if (setIfNotNull(User.USERNAME_FIELD_NAME, updatedFields.getUsername(), update::set)) {
                 totalFieldsUpdated++;
             }
-            if (setIfNotNull(USER_EMAIL, updatedFields.getEmail(), update::set)) {
+            if (setIfNotNull(EMAIL_FIELD_NAME, updatedFields.getEmail(), update::set)) {
                 totalFieldsUpdated++;
             }
-            if (setIfNotNull(USER_NAME, updatedFields.getName(), update::set)) {
+            if (setIfNotNull(FULL_NAME_FIELD_NAME, updatedFields.getName(), update::set)) {
                 totalFieldsUpdated++;
             }
-            if (setIfNotNull(USER_UPDATED, updatedFields.getUpdated(), update::set)) {
+            if (setIfNotNull(User.UPDATED_FIELD_NAME, updatedFields.getUpdated(), update::set)) {
                 totalFieldsUpdated++;
             }
             if (updatedFields.getCompany().getId() != null) {
                 // Here exception will be thrown in case company is not found or is soft deleted
                 Company updCompany = companyDao.get(updatedFields.getCompany().getId());
-                update.set(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID), updCompany.getId());
+                update.set(root.get(COMPANY_FIELD_NAME).get(ID_FIELD_NAME), updCompany.getId());
                 totalFieldsUpdated++;
             }
             if (totalFieldsUpdated > 0) {
-                update.where(cb.equal(root.get(USER_ID), id));
+                update.where(cb.equal(root.get(User.ID_FIELD_NAME), id));
 
                 Transaction transaction = session.beginTransaction();
                 session.createQuery(update).executeUpdate();
@@ -203,7 +203,7 @@ public class UserDao implements Dao<User, UUID> {
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<User> delete = cb.createCriteriaDelete(User.class);
         Root<User> root = delete.from(User.class);
-        delete.where(cb.equal(root.get(USER_ID), id));
+        delete.where(cb.equal(root.get(User.ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(delete).executeUpdate();
@@ -216,16 +216,16 @@ public class UserDao implements Dao<User, UUID> {
         List<Predicate> predicates = new ArrayList<>();
         filterProperties.forEach((key, value) -> {
             if (key.equals(EMAIL_FILTER_NAME)) {
-                predicates.add(cb.like(root.get(USER_EMAIL), wrapIn(value, "%")));
+                predicates.add(cb.like(root.get(EMAIL_FIELD_NAME), wrapIn(value, "%")));
             } else if (key.equals(NAME_FILTER_NAME)) {
-                predicates.add(cb.like(root.get(USER_NAME), wrapIn(value, "%")));
+                predicates.add(cb.like(root.get(FULL_NAME_FIELD_NAME), wrapIn(value, "%")));
             } else if (key.equals(CREATED_BETWEEN_FILTER_NAME)) {
                 Map.Entry<String, String> borders = parseCreatedBetween(value);
-                predicates.add(cb.between(root.get(USER_CREATED),
+                predicates.add(cb.between(root.get(CREATED_FIELD_NAME),
                         LocalDateTime.parse(borders.getKey()),
                         LocalDateTime.parse(borders.getValue())));
             } else if (key.equals(COMPANY_ID_FILTER_NAME)) {
-                predicates.add(cb.equal(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID), Long.parseLong(value)));
+                predicates.add(cb.equal(root.get(COMPANY_FIELD_NAME).get(ID_FIELD_NAME), Long.parseLong(value)));
             }
         });
         return predicates;

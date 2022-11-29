@@ -22,6 +22,10 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
 
+import static com.modsensoftware.marketplace.domain.Category.DESCRIPTION_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Category.ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Category.NAME_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Category.PARENT_CATEGORY_FIELD_NAME;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 import static java.lang.String.format;
 
@@ -40,12 +44,6 @@ public class CategoryDao implements Dao<Category, Long> {
     @Value("${exception.message.categoryNotFound}")
     private String categoryNotFoundMessage;
 
-    private static final String CATEGORY_PARENT_FIELD_NAME = "parent";
-    private static final String PARENT_ID = "id";
-    private static final String CATEGORY_ID = "id";
-    private static final String CATEGORY_NAME = "name";
-    private static final String CATEGORY_DESCRIPTION = "description";
-
     @Override
     public Category get(Long id) {
         log.debug("Fetching category entity with id {}", id);
@@ -54,9 +52,9 @@ public class CategoryDao implements Dao<Category, Long> {
         CriteriaQuery<Category> byId = cb.createQuery(Category.class);
         Root<Category> root = byId.from(Category.class);
         Join<Category, Category> parentCategory =
-                root.join(CATEGORY_PARENT_FIELD_NAME, JoinType.LEFT);
+                root.join(PARENT_CATEGORY_FIELD_NAME, JoinType.LEFT);
 
-        byId.select(root).where(cb.equal(root.get(CATEGORY_ID), id));
+        byId.select(root).where(cb.equal(root.get(ID_FIELD_NAME), id));
 
         Query<Category> query = session.createQuery(byId);
         try {
@@ -78,7 +76,7 @@ public class CategoryDao implements Dao<Category, Long> {
         CriteriaQuery<Category> getAll = cb.createQuery(Category.class);
         Root<Category> root = getAll.from(Category.class);
         Join<Category, Category> parentCategory =
-                root.join(CATEGORY_PARENT_FIELD_NAME, JoinType.LEFT);
+                root.join(PARENT_CATEGORY_FIELD_NAME, JoinType.LEFT);
 
         getAll.select(root);
 
@@ -109,18 +107,18 @@ public class CategoryDao implements Dao<Category, Long> {
         Root<Category> root = update.from(Category.class);
 
         int totalFieldsUpdated = 0;
-        if (setIfNotNull(CATEGORY_NAME, updatedFields.getName(), update::set)) {
+        if (setIfNotNull(NAME_FIELD_NAME, updatedFields.getName(), update::set)) {
             totalFieldsUpdated++;
         }
-        if (setIfNotNull(CATEGORY_DESCRIPTION, updatedFields.getDescription(), update::set)) {
+        if (setIfNotNull(DESCRIPTION_FIELD_NAME, updatedFields.getDescription(), update::set)) {
             totalFieldsUpdated++;
         }
         if (updatedFields.getParent() != null) {
-            update.set(root.get(CATEGORY_PARENT_FIELD_NAME).get(PARENT_ID), updatedFields.getParent().getId());
+            update.set(root.get(PARENT_CATEGORY_FIELD_NAME).get(ID_FIELD_NAME), updatedFields.getParent().getId());
             totalFieldsUpdated++;
         }
         if (totalFieldsUpdated > 0) {
-            update.where(cb.equal(root.get(CATEGORY_ID), id));
+            update.where(cb.equal(root.get(ID_FIELD_NAME), id));
 
             Transaction transaction = session.beginTransaction();
             session.createQuery(update).executeUpdate();
@@ -136,7 +134,7 @@ public class CategoryDao implements Dao<Category, Long> {
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaDelete<Category> delete = cb.createCriteriaDelete(Category.class);
         Root<Category> root = delete.from(Category.class);
-        delete.where(cb.equal(root.get(CATEGORY_ID), id));
+        delete.where(cb.equal(root.get(ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(delete).executeUpdate();

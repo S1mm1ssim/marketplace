@@ -51,6 +51,9 @@ import java.time.LocalDateTime;
 @Table(name = "position")
 public class Position {
 
+    public static final String ID_FIELD_NAME = "id";
+    public static final String COMPANY_FIELD_NAME = "company";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

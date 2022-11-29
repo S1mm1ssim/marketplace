@@ -22,6 +22,12 @@ import java.time.LocalDateTime;
 @Table(name = "company")
 public class Company {
 
+    public static final String ID_FIELD_NAME = "id";
+    public static final String NAME_FIELD_NAME = "name";
+    public static final String EMAIL_FIELD_NAME = "email";
+    public static final String DESCRIPTION_FIELD_NAME = "description";
+    public static final String IS_SOFT_DELETED_FIELD_NAME = "isDeleted";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

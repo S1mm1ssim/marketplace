@@ -45,6 +45,9 @@ import java.util.UUID;
 )
 public class Item {
 
+    public static final String ID_FIELD_NAME = "id";
+    public static final String CATEGORY_FIELD_NAME = "category";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Type(type = "pg-uuid")

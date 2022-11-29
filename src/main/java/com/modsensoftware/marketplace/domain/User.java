@@ -43,6 +43,14 @@ import java.util.UUID;
 )
 public class User {
 
+    public static final String ID_FIELD_NAME = "id";
+    public static final String USERNAME_FIELD_NAME = "username";
+    public static final String EMAIL_FIELD_NAME = "email";
+    public static final String FULL_NAME_FIELD_NAME = "name";
+    public static final String CREATED_FIELD_NAME = "created";
+    public static final String UPDATED_FIELD_NAME = "updated";
+    public static final String COMPANY_FIELD_NAME = "company";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Type(type = "pg-uuid")

@@ -23,6 +23,11 @@ import java.util.Map;
 
 import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.domain.Company.DESCRIPTION_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.EMAIL_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.NAME_FIELD_NAME;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 import static com.modsensoftware.marketplace.utils.Utils.wrapIn;
 import static java.lang.String.format;
@@ -42,12 +47,6 @@ public class CompanyDao implements Dao<Company, Long> {
     @Value("${exception.message.companyNotFound}")
     private String companyNotFoundMessage;
 
-    private static final String ID_COLUMN_NAME = "id";
-    private static final String NAME_COLUMN_NAME = "name";
-    private static final String EMAIL_COLUMN_NAME = "email";
-    private static final String DESCRIPTION_COLUMN_NAME = "description";
-    private static final String IS_SOFT_DELETED = "isDeleted";
-
     @Override
     public Company get(Long id) {
         log.debug("Fetching company entity with id {}", id);
@@ -57,8 +56,8 @@ public class CompanyDao implements Dao<Company, Long> {
         Root<Company> root = byId.from(Company.class);
         byId.select(root).where(
                 cb.and(
-                        cb.equal(root.get(ID_COLUMN_NAME), id),
-                        cb.isFalse(root.get(IS_SOFT_DELETED))
+                        cb.equal(root.get(ID_FIELD_NAME), id),
+                        cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME))
                 )
         );
 
@@ -81,8 +80,8 @@ public class CompanyDao implements Dao<Company, Long> {
         Root<Company> root = byId.from(Company.class);
         byId.select(root).where(
                 cb.and(
-                        cb.equal(root.get(EMAIL_COLUMN_NAME), email),
-                        cb.isFalse(root.get(IS_SOFT_DELETED))
+                        cb.equal(root.get(EMAIL_FIELD_NAME), email),
+                        cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME))
                 )
         );
 
@@ -111,7 +110,7 @@ public class CompanyDao implements Dao<Company, Long> {
         // Filtering
         List<Predicate> predicates
                 = constructPredicatesFromProps(filterProperties, cb, root);
-        predicates.add(cb.isFalse(root.get(IS_SOFT_DELETED)));
+        predicates.add(cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME)));
         getAll.select(root).where(predicates.toArray(new Predicate[0]));
 
         // Paging
@@ -142,20 +141,20 @@ public class CompanyDao implements Dao<Company, Long> {
         Root<Company> root = update.from(Company.class);
 
         int totalFieldsUpdated = 0;
-        if (setIfNotNull(NAME_COLUMN_NAME, updatedFields.getName(), update::set)) {
+        if (setIfNotNull(NAME_FIELD_NAME, updatedFields.getName(), update::set)) {
             totalFieldsUpdated++;
         }
-        if (setIfNotNull(EMAIL_COLUMN_NAME, updatedFields.getEmail(), update::set)) {
+        if (setIfNotNull(EMAIL_FIELD_NAME, updatedFields.getEmail(), update::set)) {
             totalFieldsUpdated++;
         }
-        if (setIfNotNull(DESCRIPTION_COLUMN_NAME, updatedFields.getDescription(), update::set)) {
+        if (setIfNotNull(DESCRIPTION_FIELD_NAME, updatedFields.getDescription(), update::set)) {
             totalFieldsUpdated++;
         }
         if (totalFieldsUpdated > 0) {
             update.where(
                     cb.and(
-                            cb.equal(root.get(ID_COLUMN_NAME), id),
-                            cb.isFalse(root.get(IS_SOFT_DELETED))
+                            cb.equal(root.get(ID_FIELD_NAME), id),
+                            cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME))
                     )
             );
 
@@ -173,8 +172,8 @@ public class CompanyDao implements Dao<Company, Long> {
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaUpdate<Company> softDelete = cb.createCriteriaUpdate(Company.class);
         Root<Company> root = softDelete.from(Company.class);
-        softDelete.set(IS_SOFT_DELETED, true);
-        softDelete.where(cb.equal(root.get(ID_COLUMN_NAME), id));
+        softDelete.set(IS_SOFT_DELETED_FIELD_NAME, true);
+        softDelete.where(cb.equal(root.get(ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(softDelete).executeUpdate();
@@ -187,9 +186,9 @@ public class CompanyDao implements Dao<Company, Long> {
         List<Predicate> predicates = new ArrayList<>();
         filterProperties.forEach((key, value) -> {
             if (key.equals(EMAIL_FILTER_NAME)) {
-                predicates.add(cb.like(root.get(EMAIL_COLUMN_NAME), wrapIn(value, "%")));
+                predicates.add(cb.like(root.get(EMAIL_FIELD_NAME), wrapIn(value, "%")));
             } else if (key.equals(NAME_FILTER_NAME)) {
-                predicates.add(cb.like(root.get(NAME_COLUMN_NAME), wrapIn(value, "%")));
+                predicates.add(cb.like(root.get(NAME_FIELD_NAME), wrapIn(value, "%")));
             }
         });
         return predicates;
