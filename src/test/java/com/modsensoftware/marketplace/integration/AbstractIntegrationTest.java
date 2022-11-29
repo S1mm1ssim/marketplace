@@ -19,6 +19,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         })
 public abstract class AbstractIntegrationTest {
 
+    private static final int DEFAULT_PORT = 8081;
+    private static final String BASE_PATH = "/api/v1";
+
     @Container
     public static CustomPostgreSQLContainer postgreSQLContainer
             = CustomPostgreSQLContainer.getInstance();
@@ -30,14 +33,14 @@ public abstract class AbstractIntegrationTest {
     protected static void beforeAll() {
         String port = System.getProperty("server.port");
         if (port == null) {
-            RestAssured.port = 8081;
+            RestAssured.port = DEFAULT_PORT;
         } else {
             RestAssured.port = Integer.parseInt(port);
         }
 
         String basePath = System.getProperty("server.base");
         if (basePath == null) {
-            basePath = "/api/v1";
+            basePath = BASE_PATH;
         }
         RestAssured.basePath = basePath;
     }
