@@ -40,14 +40,14 @@ public class CategoryDaoTest {
 
     @Value("${default.page.size}")
     private int pageSize;
+    @Value("${exception.message.categoryNotFound}")
+    private String categoryNotFoundMessage;
 
     @Test
     public void canSaveCategory() {
         // given
-        Category category = new Category();
-        category.setName("root");
-        category.setDescription("Root category");
-        category.setParent(null);
+        String categoryName = "root";
+        Category category = new Category(null, categoryName, "Root category", null);
 
         // when
         underTest.save(category);
@@ -55,7 +55,7 @@ public class CategoryDaoTest {
         // then
         Session session = sessionFactory.openSession();
         Query<Category> query = session.createQuery("from Category where name = :root", Category.class);
-        query.setParameter("root", "root");
+        query.setParameter("root", categoryName);
         List<Category> resultList = query.getResultList();
         Assertions.assertThat(resultList).hasSize(1);
 
@@ -66,17 +66,13 @@ public class CategoryDaoTest {
     @Test
     public void canDeleteCategory() {
         // given
-        Category category = new Category();
-        category.setName("root");
-        category.setDescription("Root category");
-        category.setParent(null);
+        Category category = new Category(null, "root", "Root category", null);
 
         // when
         underTest.save(category);
         underTest.deleteById(category.getId());
 
         // then
-
         Session session = sessionFactory.openSession();
         Query<Category> query = session.createQuery("from Category", Category.class);
         List<Category> resultList = query.getResultList();
@@ -86,17 +82,9 @@ public class CategoryDaoTest {
     @Test
     public void canGetAll() {
         // given
-        Category category1 = new Category();
-        category1.setName("root");
-        category1.setDescription("Root category");
-        category1.setParent(null);
-
-        Category category2 = new Category();
-        category2.setName("category");
-        category2.setDescription("Category with parent");
-        category2.setParent(category1);
+        Category category1 = new Category(null, "root", "Root category", null);
+        Category category2 = new Category(null, "category", "Category with parent", category1);
         List<Category> expected = List.of(category1, category2);
-
         underTest.save(category1);
         underTest.save(category2);
 
@@ -118,8 +106,7 @@ public class CategoryDaoTest {
         List<Category> categories = new ArrayList<>();
         Category testCategory;
         for (int i = 0; i < pageSize + 1; i++) {
-            testCategory = new Category();
-            testCategory.setName("category" + i);
+            testCategory = new Category(null, "category" + i, "", null);
             categories.add(testCategory);
             underTest.save(testCategory);
         }
@@ -139,11 +126,7 @@ public class CategoryDaoTest {
     @Test
     public void canGetById() {
         // given
-        Category category = new Category();
-        category.setName("root");
-        category.setDescription("Root category");
-        category.setParent(null);
-
+        Category category = new Category(null, "root", "Root category", null);
         underTest.save(category);
 
         // when
@@ -165,40 +148,28 @@ public class CategoryDaoTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.get(nonexistentId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage(format("Category entity with id=%s is not present.", nonexistentId));
+                .hasMessage(format(categoryNotFoundMessage, nonexistentId));
     }
 
     @Test
     public void canUpdateCategory() {
         // given
-        Category parent1 = new Category();
-        parent1.setName("parent1");
-
-        Category parent2 = new Category();
-        parent2.setName("parent2");
-
-        Category category = new Category();
-        category.setName("category");
-        category.setParent(parent1);
-
-        Category updatedFields = new Category();
-        updatedFields.setName("updatedCategory");
-        updatedFields.setDescription("description");
-        updatedFields.setParent(parent2);
-
+        Category parent1 = new Category(null, "parent1", "description", null);
+        Category parent2 = new Category(null, "parent2", "description", null);
+        Category category = new Category(null, "category", "description", parent1);
+        Category updatedFields = new Category(null, "updatedCategory", "description", parent2);
         underTest.save(parent1);
         underTest.save(parent2);
         underTest.save(category);
-
         Category expected = new Category(category.getId(),
                 updatedFields.getName(), updatedFields.getDescription(), parent2);
 
         // when
         underTest.update(category.getId(), updatedFields);
-        Category result = underTest.get(category.getId());
+        Category actual = underTest.get(category.getId());
 
         // then
-        Assertions.assertThat(result).isEqualTo(expected);
+        Assertions.assertThat(actual).isEqualTo(expected);
 
         // clean up
         underTest.deleteById(category.getId());
@@ -209,24 +180,17 @@ public class CategoryDaoTest {
     @Test
     public void noMutationOnNoUpdateFieldsProvided() {
         // given
-        Category parent = new Category();
-        parent.setName("parent");
-
-        Category category = new Category();
-        category.setName("category");
-        category.setParent(parent);
-
-        Category updatedFields = new Category();
-
+        Category parent = new Category(null, "parent", "description", null);
+        Category category = new Category(null, "category", "description", parent);
         underTest.save(parent);
         underTest.save(category);
 
         // when
-        underTest.update(category.getId(), updatedFields);
-        Category result = underTest.get(category.getId());
+        underTest.update(category.getId(), new Category());
+        Category actual = underTest.get(category.getId());
 
         // then
-        Assertions.assertThat(result).isEqualTo(category);
+        Assertions.assertThat(actual).isEqualTo(category);
 
         // clean up
         underTest.deleteById(category.getId());
