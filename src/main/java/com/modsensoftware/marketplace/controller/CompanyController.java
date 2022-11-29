@@ -30,11 +30,9 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
-    private static final String DEFAULT_PAGE_NUMBER = "0";
-
     @GetMapping(produces = {"application/json"})
     public List<Company> getAllCompanies(
-            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "name", required = false) String name
     ) {

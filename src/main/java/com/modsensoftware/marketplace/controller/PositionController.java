@@ -30,11 +30,9 @@ public class PositionController {
 
     private final PositionService positionService;
 
-    private static final String DEFAULT_PAGE_NUMBER = "0";
-
     @GetMapping(produces = {"application/json"})
     public List<Position> getAllPositions(@RequestParam(name = "page",
-            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all positions");
         return positionService.getAllPositions(pageNumber);
     }

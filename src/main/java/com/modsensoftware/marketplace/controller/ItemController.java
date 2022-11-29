@@ -31,11 +31,9 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    private static final String DEFAULT_PAGE_NUMBER = "0";
-
     @GetMapping(produces = {"application/json"})
     public List<Item> getAllItems(@RequestParam(name = "page",
-            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all items");
         return itemService.getAllItems(pageNumber);
     }

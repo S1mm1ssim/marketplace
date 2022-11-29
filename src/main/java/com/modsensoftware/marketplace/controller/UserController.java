@@ -31,11 +31,9 @@ public class UserController {
 
     private final UserService userService;
 
-    private static final String DEFAULT_PAGE_NUMBER = "0";
-
     @GetMapping(produces = {"application/json"})
     public List<User> getAllUsers(
-            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "created", required = false) String createdBetween,

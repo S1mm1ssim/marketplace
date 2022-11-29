@@ -30,11 +30,9 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private static final String DEFAULT_PAGE_NUMBER = "0";
-
     @GetMapping(produces = {"application/json"})
     public List<Category> getAllCategories(@RequestParam(name = "page",
-            defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all categories");
         return categoryService.getAllCategories(pageNumber);
     }
