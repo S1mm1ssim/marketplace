@@ -14,8 +14,8 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,9 +33,12 @@ public class CompanyServiceTest {
 
     private CompanyServiceImpl underTest;
 
+    private static final String COMPANY_EMAIL_TAKEN_MESSAGE = "Company with email %s already exists";
+
     @BeforeEach
     void setUp() {
         underTest = new CompanyServiceImpl(companyDao, companyMapper);
+        ReflectionTestUtils.setField(underTest, "companyEmailTakenMessage", COMPANY_EMAIL_TAKEN_MESSAGE);
     }
 
     @Test
@@ -58,10 +61,11 @@ public class CompanyServiceTest {
     public void canCreateCompany() {
         // given
         CompanyDto dto = new CompanyDto("Name", "Email", "Description");
-        BDDMockito.given(companyDao.existsByEmail(Mockito.any())).willReturn(false);
+        BDDMockito.given(companyDao.existsByEmail(BDDMockito.any())).willReturn(false);
 
         // when
         underTest.createCompany(dto);
+
         // then
         ArgumentCaptor<Company> companyCaptor = ArgumentCaptor.forClass(Company.class);
         BDDMockito.verify(companyDao).save(companyCaptor.capture());
@@ -81,7 +85,7 @@ public class CompanyServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.createCompany(dto))
                 .isInstanceOf(EntityAlreadyExistsException.class)
-                .hasMessage(String.format("Company with email %s already exists", dto.getEmail()));
+                .hasMessage(String.format(COMPANY_EMAIL_TAKEN_MESSAGE, dto.getEmail()));
         BDDMockito.verify(companyDao, BDDMockito.never()).save(BDDMockito.any());
     }
 }

@@ -13,6 +13,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.OptimisticLockException;
 import java.util.UUID;
@@ -30,9 +31,13 @@ public class ItemServiceTest {
 
     private ItemServiceImpl underTest;
 
+    private static final String ITEM_VERSIONS_MISMATCH_MESSAGE
+            = "Provided item version does not match with the one in the database";
+
     @BeforeEach
     void setUp() {
         underTest = new ItemServiceImpl(itemDao, itemMapper);
+        ReflectionTestUtils.setField(underTest, "itemVersionsMismatchMessage", ITEM_VERSIONS_MISMATCH_MESSAGE);
     }
 
     @Test
@@ -40,12 +45,8 @@ public class ItemServiceTest {
         // given
         UUID id = UUID.randomUUID();
         long version = 1L;
-        ItemDto updatedFields = new ItemDto();
-        updatedFields.setVersion(version);
-        updatedFields.setDescription("description");
-        Item item = new Item();
-        item.setId(id);
-        item.setVersion(version);
+        ItemDto updatedFields = new ItemDto(null, "description", null, version);
+        Item item = new Item(id, null, null, null, null, version);
         BDDMockito.given(itemDao.get(id)).willReturn(item);
 
         // when
@@ -56,24 +57,20 @@ public class ItemServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenVersionsMismatch() {
+    public void shouldThrowExceptionWhenItemVersionsMismatch() {
         // given
         UUID id = UUID.randomUUID();
         long version = 1L;
         long differentVersion = 2L;
-        ItemDto updatedFields = new ItemDto();
-        updatedFields.setVersion(version);
-        updatedFields.setDescription("description");
-        Item item = new Item();
-        item.setId(id);
-        item.setVersion(differentVersion);
+        ItemDto updatedFields = new ItemDto(null, "description", null, version);
+        Item item = new Item(id, null, null, null, null, differentVersion);
         BDDMockito.given(itemDao.get(id)).willReturn(item);
 
         // when
         // then
         Assertions.assertThatThrownBy(() -> underTest.updateItem(id, updatedFields))
                 .isInstanceOf(OptimisticLockException.class)
-                .hasMessage("Provided item version does not match with the one in the database");
+                .hasMessage(ITEM_VERSIONS_MISMATCH_MESSAGE);
         BDDMockito.verify(itemDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
     }
 }

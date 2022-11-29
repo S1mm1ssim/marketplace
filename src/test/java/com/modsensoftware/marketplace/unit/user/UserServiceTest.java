@@ -30,14 +30,15 @@ public class UserServiceTest {
     private UserDao userDao;
     private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
-    private String defaultRole;
-
     private UserServiceImpl underTest;
+
+    private static final String USER_EMAIL_TAKEN_MESSAGE = "User with email %s already exists";
 
     @BeforeEach
     void setUp() {
         underTest = new UserServiceImpl(userDao, userMapper);
         ReflectionTestUtils.setField(underTest, "defaultRole", "MANAGER");
+        ReflectionTestUtils.setField(underTest, "userEmailTakenMessage", USER_EMAIL_TAKEN_MESSAGE);
     }
 
     @Test
@@ -89,7 +90,7 @@ public class UserServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.createUser(dto))
                 .isInstanceOf(EntityAlreadyExistsException.class)
-                .hasMessage(String.format("User with email %s already exists", dto.getEmail()));
+                .hasMessage(String.format(USER_EMAIL_TAKEN_MESSAGE, dto.getEmail()));
         BDDMockito.verify(userDao, BDDMockito.never()).save(BDDMockito.any());
     }
 }

@@ -13,6 +13,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.OptimisticLockException;
 
@@ -28,23 +29,23 @@ public class PositionServiceTest {
 
     private PositionServiceImpl underTest;
 
+    private static final String POSITION_VERSIONS_MISMATCH_MESSAGE
+            = "Provided position version does not match with the one in the database";
+
     @BeforeEach
     void setUp() {
         underTest = new PositionServiceImpl(positionDao, positionMapper);
+        ReflectionTestUtils.setField(underTest, "positionVersionsMismatch", POSITION_VERSIONS_MISMATCH_MESSAGE);
     }
 
     @Test
-    public void canUpdateItem() {
+    public void canUpdatePosition() {
         // given
         long id = 1L;
         long version = 1L;
         double amount = 10d;
-        PositionDto updatedFields = new PositionDto();
-        updatedFields.setVersion(version);
-        updatedFields.setAmount(amount);
-        Position position = new Position();
-        position.setId(id);
-        position.setVersion(version);
+        PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
+        Position position = new Position(id, null, null, null, null, null, version);
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
@@ -55,25 +56,21 @@ public class PositionServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenVersionsMismatch() {
+    public void shouldThrowExceptionWhenPositionVersionsMismatch() {
         // given
         Long id = 1L;
         long version = 1L;
         long differentVersion = 2L;
         double amount = 10d;
-        PositionDto updatedFields = new PositionDto();
-        updatedFields.setVersion(version);
-        updatedFields.setAmount(amount);
-        Position position = new Position();
-        position.setId(id);
-        position.setVersion(differentVersion);
+        PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
+        Position position = new Position(id, null, null, null, null, null, differentVersion);
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
         // then
         Assertions.assertThatThrownBy(() -> underTest.updatePosition(id, updatedFields))
                 .isInstanceOf(OptimisticLockException.class)
-                .hasMessage("Provided position version does not match with the one in the database");
+                .hasMessage(POSITION_VERSIONS_MISMATCH_MESSAGE);
         BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
     }
 }
