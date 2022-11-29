@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.UserDto;
 import com.modsensoftware.marketplace.service.UserService;
@@ -21,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+import static com.modsensoftware.marketplace.constants.Constants.*;
+
 /**
  * @author andrey.demyanchik on 11/2/2022
  */
@@ -34,11 +35,11 @@ public class UserController {
 
     @GetMapping(produces = {"application/json"})
     public List<User> getAllUsers(
-            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber,
-            @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "created", required = false) String createdBetween,
-            @RequestParam(name = "companyId", required = false) Long companyId
+            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
+            @RequestParam(name = NAME_FILTER_NAME, required = false) String name,
+            @RequestParam(name = CREATED_BETWEEN_FILTER_NAME, required = false) String createdBetween,
+            @RequestParam(name = COMPANY_ID_FILTER_NAME, required = false) Long companyId
     ) {
         log.debug("Fetching all users");
         return userService.getAllUsers(pageNumber, email, name, createdBetween, companyId);

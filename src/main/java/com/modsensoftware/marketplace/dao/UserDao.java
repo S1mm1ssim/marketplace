@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.modsensoftware.marketplace.constants.Constants.*;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 import static com.modsensoftware.marketplace.utils.Utils.wrapIn;
 import static java.lang.String.format;
@@ -48,9 +49,7 @@ public class UserDao implements Dao<User, UUID> {
     private int pageSize;
     private static final String USER_ENTITY_GRAPH = "graph.User.company";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
-
-    private static final String COMPANY_ID_FILTER_PROP = "companyId";
-    private static final String CREATED_BETWEEN_SPLIT_CHAR = ",";
+    private static final String CREATED_BETWEEN_DELIMITER = ",";
     private static final String COMPANY_FIELD_NAME = "company";
     private static final String COMPANY_ID = "id";
     private static final String IS_COMPANY_SOFT_DELETED = "isDeleted";
@@ -209,16 +208,16 @@ public class UserDao implements Dao<User, UUID> {
             CriteriaBuilder cb, Root<User> root) {
         List<Predicate> predicates = new ArrayList<>();
         filterProperties.forEach((key, value) -> {
-            if (key.equals(USER_EMAIL)) {
+            if (key.equals(EMAIL_FILTER_NAME)) {
                 predicates.add(cb.like(root.get(USER_EMAIL), wrapIn(value, "%")));
-            } else if (key.equals(USER_NAME)) {
+            } else if (key.equals(NAME_FILTER_NAME)) {
                 predicates.add(cb.like(root.get(USER_NAME), wrapIn(value, "%")));
-            } else if (key.equals(USER_CREATED)) {
+            } else if (key.equals(CREATED_BETWEEN_FILTER_NAME)) {
                 Map.Entry<String, String> borders = parseCreatedBetween(value);
                 predicates.add(cb.between(root.get(USER_CREATED),
                         LocalDateTime.parse(borders.getKey()),
                         LocalDateTime.parse(borders.getValue())));
-            } else if (key.equals(COMPANY_ID_FILTER_PROP)) {
+            } else if (key.equals(COMPANY_ID_FILTER_NAME)) {
                 predicates.add(cb.equal(root.get(COMPANY_FIELD_NAME).get(COMPANY_ID), Long.parseLong(value)));
             }
         });
@@ -227,7 +226,7 @@ public class UserDao implements Dao<User, UUID> {
 
     private Map.Entry<String, String> parseCreatedBetween(String createdBetween) {
         Map<String, String> borders = new HashMap<>();
-        String[] parsed = createdBetween.split(CREATED_BETWEEN_SPLIT_CHAR);
+        String[] parsed = createdBetween.split(CREATED_BETWEEN_DELIMITER);
         if (parsed.length != 2) {
             throw new InvalidFilterException(format("Filter 'created' = %s is invalid", createdBetween));
         }

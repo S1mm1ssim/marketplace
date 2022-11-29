@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.dto.CompanyDto;
 import com.modsensoftware.marketplace.service.CompanyService;
@@ -20,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.modsensoftware.marketplace.constants.Constants.*;
+
 /**
  * @author andrey.demyanchik on 11/3/2022
  */
@@ -33,9 +34,9 @@ public class CompanyController {
 
     @GetMapping(produces = {"application/json"})
     public List<Company> getAllCompanies(
-            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber,
-            @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "name", required = false) String name
+            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
+            @RequestParam(name = NAME_FILTER_NAME, required = false) String name
     ) {
         log.debug("Fetching all companies");
         return companyService.getAllCompanies(pageNumber, email, name);

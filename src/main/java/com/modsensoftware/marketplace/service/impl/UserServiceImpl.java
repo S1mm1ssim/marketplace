@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.modsensoftware.marketplace.constants.Constants.*;
 import static java.lang.String.format;
 
 /**
@@ -49,13 +50,13 @@ public class UserServiceImpl implements UserService {
                         + "Filter by email: {}, name: {}, created between: {}, company id: {}",
                 pageNumber, email, name, createdBetween, companyId);
         Map<String, String> filterProperties = new HashMap<>();
-        Utils.putIfNotNull("email", email, filterProperties::put);
-        Utils.putIfNotNull("name", name, filterProperties::put);
+        Utils.putIfNotNull(EMAIL_FILTER_NAME, email, filterProperties::put);
+        Utils.putIfNotNull(NAME_FILTER_NAME, name, filterProperties::put);
         if (createdBetween != null) {
-            filterProperties.put("created", createdBetween);
+            filterProperties.put(CREATED_BETWEEN_FILTER_NAME, createdBetween);
         }
         if (companyId != null) {
-            filterProperties.put("companyId", companyId.toString());
+            filterProperties.put(COMPANY_ID_FILTER_NAME, companyId.toString());
         }
         return userDao.getAll(pageNumber, filterProperties);
     }

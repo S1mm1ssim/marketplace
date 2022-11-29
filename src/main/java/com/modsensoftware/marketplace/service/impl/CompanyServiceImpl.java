@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
 import static java.lang.String.format;
 
 /**
@@ -40,8 +42,8 @@ public class CompanyServiceImpl implements CompanyService {
         log.debug("Fetching all companies for page {}. Filter by email: {} and name: {}",
                 pageNumber, email, name);
         Map<String, String> filterProperties = new HashMap<>();
-        Utils.putIfNotNull("email", email, filterProperties::put);
-        Utils.putIfNotNull("name", name, filterProperties::put);
+        Utils.putIfNotNull(EMAIL_FILTER_NAME, email, filterProperties::put);
+        Utils.putIfNotNull(NAME_FILTER_NAME, name, filterProperties::put);
         return companyDao.getAll(pageNumber, filterProperties);
     }
 

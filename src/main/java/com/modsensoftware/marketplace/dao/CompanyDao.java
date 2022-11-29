@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
 import static com.modsensoftware.marketplace.utils.Utils.wrapIn;
 import static java.lang.String.format;
@@ -181,9 +183,9 @@ public class CompanyDao implements Dao<Company, Long> {
             CriteriaBuilder cb, Root<Company> root) {
         List<Predicate> predicates = new ArrayList<>();
         filterProperties.forEach((key, value) -> {
-            if (key.equals(EMAIL_COLUMN_NAME)) {
+            if (key.equals(EMAIL_FILTER_NAME)) {
                 predicates.add(cb.like(root.get(EMAIL_COLUMN_NAME), wrapIn(value, "%")));
-            } else if (key.equals(NAME_COLUMN_NAME)) {
+            } else if (key.equals(NAME_FILTER_NAME)) {
                 predicates.add(cb.like(root.get(NAME_COLUMN_NAME), wrapIn(value, "%")));
             }
         });
