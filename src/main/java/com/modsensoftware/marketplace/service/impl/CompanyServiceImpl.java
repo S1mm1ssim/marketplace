@@ -31,6 +31,9 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyDao companyDao;
     private final CompanyMapper companyMapper;
 
+    private static final String ENTITY_ALREADY_EXISTS_EXCEPTION_MESSAGE
+            = "Company with email %s already exists";
+
     @Override
     public Company getCompanyById(Long id) {
         log.debug("Fetching company by id: {}", id);
@@ -56,7 +59,7 @@ public class CompanyServiceImpl implements CompanyService {
             log.debug("Mapping result: {}", company);
             companyDao.save(company);
         } else {
-            throw new EntityAlreadyExistsException(format("Company with email %s already exists",
+            throw new EntityAlreadyExistsException(format(ENTITY_ALREADY_EXISTS_EXCEPTION_MESSAGE,
                     companyDto.getEmail()));
         }
     }

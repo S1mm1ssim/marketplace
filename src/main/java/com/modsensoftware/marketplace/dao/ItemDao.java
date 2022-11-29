@@ -46,6 +46,9 @@ public class ItemDao implements Dao<Item, UUID> {
     private static final String ITEM_CATEGORY_COLUMN_NAME = "category";
     private static final String ITEM_ID = "id";
 
+    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
+            = "Item entity with uuid=%s is not present.";
+
     @Override
     public Item get(UUID id) {
         log.debug("Fetching item entity with id {}", id);
@@ -64,7 +67,7 @@ public class ItemDao implements Dao<Item, UUID> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Item with uuid {} not found", id);
-            throw new EntityNotFoundException(format("Item entity with uuid=%s is not present.", id), e);
+            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
         } finally {
             session.close();
         }

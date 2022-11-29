@@ -43,6 +43,9 @@ public class CategoryDao implements Dao<Category, Long> {
     private static final String CATEGORY_NAME = "name";
     private static final String CATEGORY_DESCRIPTION = "description";
 
+    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
+            = "Category entity with id=%s is not present.";
+
     @Override
     public Category get(Long id) {
         log.debug("Fetching category entity with id {}", id);
@@ -60,7 +63,7 @@ public class CategoryDao implements Dao<Category, Long> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Category with id {} not found", id);
-            throw new EntityNotFoundException(format("Category entity with id=%s is not present.", id), e);
+            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
         } finally {
             session.close();
         }

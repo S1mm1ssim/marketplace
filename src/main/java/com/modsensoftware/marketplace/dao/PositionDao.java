@@ -50,6 +50,9 @@ public class PositionDao implements Dao<Position, Long> {
     private static final String ITEM_ID = "id";
     private static final String POSITION_ID = "id";
 
+    private static final String ENTITY_NOT_FOUND_EXCEPTION_MESSAGE
+            = "Position entity with id=%s is not found.";
+
     @Override
     public Position get(Long id) {
         log.debug("Fetching position entity with id {}", id);
@@ -72,7 +75,7 @@ public class PositionDao implements Dao<Position, Long> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Position entity with id {} not found", id);
-            throw new EntityNotFoundException(format("Position entity with id=%s is not found.", id), e);
+            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_EXCEPTION_MESSAGE, id), e);
         } finally {
             session.close();
         }

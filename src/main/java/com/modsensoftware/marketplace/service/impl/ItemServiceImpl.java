@@ -26,6 +26,9 @@ public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final ItemMapper itemMapper;
 
+    private static final String OPTIMISTIC_LOCK_EXCEPTION_MESSAGE
+            = "Provided item version does not match with the one in the database";
+
     @Override
     public Item getItemById(UUID id) {
         log.debug("Fetching item by id: {}", id);
@@ -63,8 +66,7 @@ public class ItemServiceImpl implements ItemService {
         } else {
             log.error("Item versions do not match. Provided: {}, in the database: {}",
                     updatedFields.getVersion(), item.getVersion());
-            throw new OptimisticLockException("Provided item version "
-                    + "does not match with the one in the database");
+            throw new OptimisticLockException(OPTIMISTIC_LOCK_EXCEPTION_MESSAGE);
         }
     }
 }

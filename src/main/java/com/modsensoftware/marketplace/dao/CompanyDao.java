@@ -45,6 +45,9 @@ public class CompanyDao implements Dao<Company, Long> {
     private static final String DESCRIPTION_COLUMN_NAME = "description";
     private static final String IS_SOFT_DELETED = "isDeleted";
 
+    private static final String ENTITY_NOT_FOUND_MESSAGE
+            = "Company entity with id=%s is not present.";
+
     @Override
     public Company get(Long id) {
         log.debug("Fetching company entity with id {}", id);
@@ -64,7 +67,7 @@ public class CompanyDao implements Dao<Company, Long> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Company entity with id {} not found", id);
-            throw new EntityNotFoundException(format("Company entity with id=%s is not present.", id), e);
+            throw new EntityNotFoundException(format(ENTITY_NOT_FOUND_MESSAGE, id), e);
         } finally {
             session.close();
         }

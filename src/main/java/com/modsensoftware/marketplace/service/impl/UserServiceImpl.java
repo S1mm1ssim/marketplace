@@ -33,6 +33,9 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final UserMapper userMapper;
 
+    private static final String ENTITY_ALREADY_EXISTS_EXCEPTION
+            = "User with email %s already exists";
+
     @Value("${default.role}")
     private String defaultRole;
 
@@ -72,8 +75,9 @@ public class UserServiceImpl implements UserService {
             log.debug("Mapping result: {}", user);
             userDao.save(user);
         } else {
-            throw new EntityAlreadyExistsException(format("User with email %s already exists",
-                    userDto.getEmail()));
+            throw new EntityAlreadyExistsException(
+                    format(ENTITY_ALREADY_EXISTS_EXCEPTION, userDto.getEmail())
+            );
         }
     }
 

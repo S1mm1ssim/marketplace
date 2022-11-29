@@ -25,6 +25,9 @@ public class PositionServiceImpl implements PositionService {
     private final PositionDao positionDao;
     private final PositionMapper positionMapper;
 
+    private static final String OPTIMISTIC_LOCK_EXCEPTION_MESSAGE
+            = "Provided position version does not match with the one in the database";
+
     @Override
     public Position getPositionById(Long id) {
         log.debug("Fetching company by id: {}", id);
@@ -62,8 +65,7 @@ public class PositionServiceImpl implements PositionService {
         } else {
             log.error("Position versions do not match. Provided: {}, in the database: {}",
                     updatedFields.getVersion(), position.getVersion());
-            throw new OptimisticLockException("Provided position version "
-                    + "does not match with the one in the database");
+            throw new OptimisticLockException(OPTIMISTIC_LOCK_EXCEPTION_MESSAGE);
         }
     }
 }
