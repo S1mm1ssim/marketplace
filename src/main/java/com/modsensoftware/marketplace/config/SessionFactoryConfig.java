@@ -13,7 +13,6 @@ import org.hibernate.service.ServiceRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +32,10 @@ public class SessionFactoryConfig {
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
+    private static final String COULD_NOT_INSTANTIATE_SESSION_FACTORY_EXCEPTION_MESSAGE
+            = "Initialization of SessionFactory failed";
+
     @Bean
-    @DependsOn("hibernateProperties")
     public SessionFactory sessionFactory() {
         final ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(hibernateProperties())
@@ -50,12 +51,11 @@ public class SessionFactoryConfig {
             return metadata.getSessionFactoryBuilder().build();
         } catch (Exception e) {
             StandardServiceRegistryBuilder.destroy(serviceRegistry);
-            throw new ExceptionInInitializerError("Initialization of SessionFactory failed" + e);
+            throw new ExceptionInInitializerError(COULD_NOT_INSTANTIATE_SESSION_FACTORY_EXCEPTION_MESSAGE + e);
         }
     }
 
-    @Bean
-    public Map<String, String> hibernateProperties() {
+    private Map<String, String> hibernateProperties() {
         Map<String, String> settings = new HashMap<>();
         settings.put("connection.driver_class", driverClassName);
         settings.put("connection.url", url);
