@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,9 +34,19 @@ public class OrderServiceTest {
 
     private OrderService underTest;
 
+    private static final String NO_POSITION_VERSION_PROVIDED_MESSAGE
+            = "No version for position with id %s was provided";
+    private static final String INSUFFICIENT_ITEMS_IN_STOCK_MESSAGE
+            = "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s";
+    private static final String INSUFFICIENT_ORDER_AMOUNT_MESSAGE
+            = "Wanted amount=%s is less than position's(id=%s) minimum amount=%s";
+
     @BeforeEach
     void setUp() {
         underTest = new OrderServiceImpl(positionDao);
+        ReflectionTestUtils.setField(underTest, "noPositionVersionProvidedMessage", NO_POSITION_VERSION_PROVIDED_MESSAGE);
+        ReflectionTestUtils.setField(underTest, "insufficientItemsInStockMessage", INSUFFICIENT_ITEMS_IN_STOCK_MESSAGE);
+        ReflectionTestUtils.setField(underTest, "insufficientOrderAmountMessage", INSUFFICIENT_ORDER_AMOUNT_MESSAGE);
     }
 
     @Test
@@ -68,7 +79,7 @@ public class OrderServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.validateOrders(orders))
                 .isInstanceOf(NoVersionProvidedException.class)
-                .hasMessage(format("No version for position with id %s was provided", positionId));
+                .hasMessage(format(NO_POSITION_VERSION_PROVIDED_MESSAGE, positionId));
         BDDMockito.verify(positionDao, BDDMockito.never()).get(BDDMockito.any());
         BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
     }
@@ -85,8 +96,7 @@ public class OrderServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.validateOrders(orders))
                 .isInstanceOf(InsufficientItemsInStockException.class)
-                .hasMessage(format("Not enough items in stock for position with id=%s. Wanted amount=%s. "
-                                + "Currently in stock=%s", pos.getId(),
+                .hasMessage(format(INSUFFICIENT_ITEMS_IN_STOCK_MESSAGE, pos.getId(),
                         orders.get(0).getAmount(), pos.getAmount()));
         BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
     }
@@ -103,8 +113,8 @@ public class OrderServiceTest {
         // then
         Assertions.assertThatThrownBy(() -> underTest.validateOrders(orders))
                 .isInstanceOf(InsufficientOrderAmountException.class)
-                .hasMessage(format("Wanted amount=%s is less than position's(id=%s) minimum amount=%s",
-                        orders.get(0).getAmount(), pos.getId(), pos.getMinAmount()));
+                .hasMessage(format(INSUFFICIENT_ORDER_AMOUNT_MESSAGE, orders.get(0).getAmount(),
+                        pos.getId(), pos.getMinAmount()));
         BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
     }
 }
