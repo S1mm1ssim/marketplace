@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.modsensoftware.marketplace.domain.UserTransaction.CREATED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.UserTransaction.USER_ID_FIELD_NAME;
+
 /**
  * @author andrey.demyanchik on 11/27/2022
  */
@@ -32,9 +35,6 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
     private static final String TRANSACTION_ENTITY_GRAPH = "graph.UserTransaction.orders.position";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
-    private static final String TRANSACTION_USER_ID = "userId";
-    private static final String TIMESTAMP_CREATED = "created";
-
     @Value("${default.page.size}")
     private int pageSize;
 
@@ -45,11 +45,9 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
 
     @Override
     public List<UserTransaction> getAll(int pageNumber, Map<String, String> filterProperties) {
-        UUID userId = UUID.fromString(filterProperties.get(TRANSACTION_USER_ID));
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all transactions for page {} for user with id {}", pageNumber,
-                    filterProperties.get(TRANSACTION_USER_ID));
-        }
+        UUID userId = UUID.fromString(filterProperties.get(USER_ID_FIELD_NAME));
+        log.debug("Fetching all transactions for page {} for user with id {}", pageNumber,
+                filterProperties.get(USER_ID_FIELD_NAME));
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(TRANSACTION_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -57,9 +55,9 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
         Root<UserTransaction> root = getAll.from(UserTransaction.class);
 
         getAll.select(root).where(
-                cb.equal(root.get(TRANSACTION_USER_ID), userId)
+                cb.equal(root.get(USER_ID_FIELD_NAME), userId)
         ).orderBy(
-                cb.desc(root.get(TIMESTAMP_CREATED))
+                cb.desc(root.get(CREATED_FIELD_NAME))
         );
 
         Query<UserTransaction> query = session.createQuery(getAll);
@@ -73,9 +71,7 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
 
     @Override
     public void save(UserTransaction userTransaction) {
-        if (log.isDebugEnabled()) {
-            log.debug("Saving user transaction entity: {}", userTransaction);
-        }
+        log.debug("Saving user transaction entity: {}", userTransaction);
         List<Order> orderLine = userTransaction.getOrderLine();
         userTransaction.setOrderLine(null);
         orderLine.forEach(order -> order.setUserTransaction(userTransaction));
