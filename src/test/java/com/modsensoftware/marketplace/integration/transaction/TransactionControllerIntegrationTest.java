@@ -6,8 +6,11 @@ import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.testcontainers.ext.ScriptUtils;
 
 import java.util.UUID;
@@ -19,6 +22,13 @@ import static java.lang.String.format;
  */
 public class TransactionControllerIntegrationTest extends AbstractIntegrationTest {
 
+    @Value("${exception.message.noPositionVersionProvided}")
+    private String noPositionVersionProvidedMessage;
+    @Value("${exception.message.insufficientItemsInStock}")
+    private String insufficientItemsInStockMessage;
+    @Value("${exception.message.insufficientOrderAmount}")
+    private String insufficientOrderAmountMessage;
+
     @BeforeAll
     protected static void beforeAll() {
         AbstractIntegrationTest.beforeAll();
@@ -28,6 +38,13 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     @AfterAll
     static void afterAll() {
         ScriptUtils.runInitScript(dbDelegate, "integration/transaction/userTransactionIntegrationTestTearDown.sql");
+    }
+
+    @BeforeEach
+    void setUp() {
+        OrderArgumentsProvider.insufficientItemsInStockMessage = this.insufficientItemsInStockMessage;
+        OrderArgumentsProvider.insufficientOrderAmountMessage = this.insufficientOrderAmountMessage;
+        OrderArgumentsProvider.noPositionVersionProvidedMessage = this.noPositionVersionProvidedMessage;
     }
 
     @Test
@@ -54,20 +71,24 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                 .then().statusCode(201);
     }
 
-    @Test
-    public void shouldReturn400StatusOnCreateUserTransactionWithoutPositionVersion() {
+    @ParameterizedTest
+    @ArgumentsSource(OrderArgumentsProvider.class)
+    public void shouldReturn400StatusOnCreateTransactionWithInvalidOrder(Long positionId,
+                                                         Double amount,
+                                                         Long positionVersion,
+                                                         String exceptionMessage) {
         // given
-        Long positionId = 999L;
         String invalidPayload = format("{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
                 + "    \"orderLine\":\n"
                 + "    [\n"
                 + "        {\n"
                 + "            \"positionId\": %s,\n"
-                + "            \"amount\": 6\n"
+                + "            \"amount\": %s,\n"
+                + "            \"positionVersion\": %s\n"
                 + "        }\n"
                 + "    ]\n"
-                + "}", positionId);
+                + "}", positionId, amount, positionVersion);
 
         // when
         String response = RestAssured.given()
@@ -80,71 +101,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
 
 
         // then
-        Assertions.assertThat(response).isEqualTo(
-                format("No version for position with id %s was provided", positionId)
-        );
-    }
-
-    @Test
-    public void shouldReturn400StatusOnCreateUserTransactionWithTooBigAmount() {
-        // given
-        Long positionId = 999L;
-        double amount = 100000.0;
-        String invalidPayload = format("{\n"
-                + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
-                + "    \"orderLine\":\n"
-                + "    [\n"
-                + "        {\n"
-                + "            \"positionId\": %s,\n"
-                + "            \"amount\": %s,\n"
-                + "            \"positionVersion\": 0\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}", positionId, amount);
-
-        // when
-        String response = RestAssured.given()
-                .contentType("application/json")
-                .when()
-                .body(invalidPayload)
-                .post("/users/transactions")
-                .then().statusCode(400)
-                .extract().response().asString();
-
-        // then
-        Assertions.assertThat(response).contains(
-                format("Not enough items in stock for position with id=%s. Wanted amount=%s.",
-                        positionId, amount));
-    }
-
-    @DisplayName("Should return 400 status on creation of UserTransaction with order amount not big enough for this position")
-    @Test
-    public void shouldReturn400StatusOnCreateUserTransactionWithNotBigAmount() {
-        Long positionId = 999L;
-        double amount = 1d;
-        String invalidPayload = format("{\n"
-                + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
-                + "    \"orderLine\":\n"
-                + "    [\n"
-                + "        {\n"
-                + "            \"positionId\": %s,\n"
-                + "            \"amount\": %s,\n"
-                + "            \"positionVersion\": 0\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}", positionId, amount);
-
-        String response = RestAssured.given()
-                .contentType("application/json")
-                .when()
-                .body(invalidPayload)
-                .post("/users/transactions")
-                .then().statusCode(400)
-                .extract().response().asString();
-
-        Assertions.assertThat(response).contains(
-                format("Wanted amount=%s is less than position's(id=%s) minimum amount=",
-                        amount, positionId));
+        Assertions.assertThat(response).isEqualTo(exceptionMessage);
     }
 
     @Test
