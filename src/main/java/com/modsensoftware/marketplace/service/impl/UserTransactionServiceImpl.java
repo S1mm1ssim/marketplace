@@ -35,26 +35,20 @@ public class UserTransactionServiceImpl implements UserTransactionService {
         // If user doesn't exist EntityNotFoundException will be thrown
         // and caught by ExceptionHandler
         userDao.get(transactionDto.getUserId());
+        log.debug("Creating new transaction from dto: {}", transactionDto);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new transaction from dto: {}", transactionDto);
-        }
         // If validation fails, exception will be thrown and caught by ExceptionHandler
         orderService.validateOrders(transactionDto.getOrderLine());
 
         UserTransaction userTransaction = transactionMapper.toUserTransaction(transactionDto);
         userTransaction.setCreated(LocalDateTime.now());
-        if (log.isDebugEnabled()) {
-            log.debug("Mapping result: {}", userTransaction);
-        }
+        log.debug("Mapping result: {}", userTransaction);
         transactionDao.save(userTransaction);
     }
 
     @Override
     public List<UserTransaction> getAllTransactionsForUser(String userId, int pageNumber) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all transactions for page {} for user with id: {}", pageNumber, userId);
-        }
+        log.debug("Fetching all transactions for page {} for user with id: {}", pageNumber, userId);
         Map<String, String> filterProps = new HashMap<>();
         filterProps.put("userId", userId);
         return transactionDao.getAll(pageNumber, filterProps);

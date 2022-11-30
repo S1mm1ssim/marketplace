@@ -1,5 +1,6 @@
 package com.modsensoftware.marketplace.controller;
 
+import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.UserTransaction;
 import com.modsensoftware.marketplace.dto.UserTransactionDto;
 import com.modsensoftware.marketplace.service.UserTransactionService;
@@ -29,25 +30,20 @@ import java.util.UUID;
 public class TransactionController {
 
     private final UserTransactionService transactionService;
-    private static final String DEFAULT_PAGE_NUMBER = "0";
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transactions")
     public void createUserTransaction(@Valid @RequestBody UserTransactionDto transactionDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new transaction from dto: {}", transactionDto);
-        }
+        log.debug("Creating new transaction from dto: {}", transactionDto);
         transactionService.createUserTransaction(transactionDto);
     }
 
     @GetMapping("/{userId}/transactions")
     public List<UserTransaction> getAllTransactionsForUser(
             @PathVariable(name = "userId") UUID userId,
-            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber
+            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber
     ) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all transactions for page {} for user with id: {}", pageNumber, userId);
-        }
+        log.debug("Fetching all transactions for page {} for user with id: {}", pageNumber, userId);
         return transactionService.getAllTransactionsForUser(userId.toString(), pageNumber);
     }
 }
