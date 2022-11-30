@@ -7,7 +7,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +23,7 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 11/28/2022
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TransactionControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Value("${exception.message.noPositionVersionProvided}")
@@ -47,6 +51,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         OrderArgumentsProvider.noPositionVersionProvidedMessage = this.noPositionVersionProvidedMessage;
     }
 
+    @Order(1)
     @Test
     public void shouldReturn201StatusOnCreateValidUserTransaction() {
         // given
@@ -71,12 +76,13 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                 .then().statusCode(201);
     }
 
+    @Order(2)
     @ParameterizedTest
     @ArgumentsSource(OrderArgumentsProvider.class)
     public void shouldReturn400StatusOnCreateTransactionWithInvalidOrder(Long positionId,
-                                                         Double amount,
-                                                         Long positionVersion,
-                                                         String exceptionMessage) {
+                                                                         Double amount,
+                                                                         Long positionVersion,
+                                                                         String exceptionMessage) {
         // given
         String invalidPayload = format("{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
