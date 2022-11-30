@@ -45,8 +45,8 @@ public class PositionServiceTest {
         long id = 1L;
         long version = 1L;
         BigDecimal amount = new BigDecimal(10);
-        PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
-        Position position = new Position(id, null, null, null, null, null, version);
+        PositionDto updatedFields = new PositionDto(null, null, null, null, amount, null, version);
+        Position position = new Position(id, null, null, null, null, null, null, version);
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
@@ -63,8 +63,8 @@ public class PositionServiceTest {
         long version = 1L;
         long differentVersion = 2L;
         BigDecimal amount = new BigDecimal(10);
-        PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
-        Position position = new Position(id, null, null, null, null, null, differentVersion);
+        PositionDto updatedFields = new PositionDto(null, null, null, null, amount, null, version);
+        Position position = new Position(id, null, null, null, null, null, null, differentVersion);
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
