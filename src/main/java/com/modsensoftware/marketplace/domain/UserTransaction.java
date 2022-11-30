@@ -58,6 +58,9 @@ import java.util.UUID;
 )
 public class UserTransaction {
 
+    public static final String USER_ID_FIELD_NAME = "userId";
+    public static final String CREATED_FIELD_NAME = "created";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
