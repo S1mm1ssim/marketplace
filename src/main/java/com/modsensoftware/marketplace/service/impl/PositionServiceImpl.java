@@ -31,6 +31,8 @@ public class PositionServiceImpl implements PositionService {
 
     @Value("${exception.message.positionVersionsMismatch}")
     private String positionVersionsMismatch;
+    @Value("${exception.message.noItemVersionProvided}")
+    private String noItemVersionProvidedMessage;
 
     @Override
     public Position getPositionById(Long id) {
@@ -49,7 +51,7 @@ public class PositionServiceImpl implements PositionService {
         log.debug("Creating new position from dto: {}", positionDto);
         if (positionDto.getItemVersion() == null) {
             log.error("Provided positionDto didn't contain item's version");
-            throw new NoVersionProvidedException(format("No version for item with id %s was provided",
+            throw new NoVersionProvidedException(format(noItemVersionProvidedMessage,
                     positionDto.getItemId()));
         }
         Position position = positionMapper.toPosition(positionDto);
