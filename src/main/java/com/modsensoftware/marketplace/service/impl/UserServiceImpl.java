@@ -5,12 +5,15 @@ import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.UserDto;
 import com.modsensoftware.marketplace.dto.mapper.UserMapper;
 import com.modsensoftware.marketplace.enums.Role;
+import com.modsensoftware.marketplace.exception.AuthorizationException;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.UserService;
 import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,6 +38,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final UserMapper userMapper;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Value("${exception.message.userEmailTaken}")
     private String userEmailTakenMessage;
@@ -46,6 +50,15 @@ public class UserServiceImpl implements UserService {
     public User getUserById(UUID id) {
         log.debug("Fetching user by id: {}", id);
         return userDao.get(id);
+    }
+
+    public User getUserByEmail(String email) {
+        log.debug("Fetching user by email: {}", email);
+        try {
+            return userDao.getByEmail(email);
+        } catch (EntityNotFoundException e) {
+            throw new AuthorizationException(e.getMessage());
+        }
     }
 
     @Override
@@ -75,6 +88,7 @@ public class UserServiceImpl implements UserService {
             user.setRole(Role.valueOf(defaultRole));
             user.setCreated(LocalDateTime.now());
             user.setUpdated(LocalDateTime.now());
+            user.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
             log.debug("Mapping result: {}", user);
             userDao.save(user);
         } else {
