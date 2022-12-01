@@ -55,4 +55,8 @@ exception:
     noPositionVersionProvided: "No version for position with id %s was provided"
     insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
+    incorrectCredentialsException: "Provided credentials are incorrect"
+    userWithEmailNotFound: "User with email=%s is not found"
+    invalidJwt: "Provided JWT is invalid"
+
 
