@@ -1,5 +1,6 @@
 package com.modsensoftware.marketplace.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.modsensoftware.marketplace.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -64,6 +65,10 @@ public class User {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @JsonIgnore
+    @Column(name = "password", nullable = false)
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "user_role", name = "role", nullable = false)
