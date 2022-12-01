@@ -22,7 +22,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(value = {EntityAlreadyExistsException.class,
+    @ExceptionHandler(value = {
+            EntityAlreadyExistsException.class,
             InvalidFilterException.class,
             OptimisticLockException.class,
             InsufficientItemsInStockException.class,
@@ -32,5 +33,13 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleBadRequest(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(value = {
+            AuthorizationException.class
+    })
+    protected ResponseEntity<Object> handleFailAuth(RuntimeException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(),
+                new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
 }
