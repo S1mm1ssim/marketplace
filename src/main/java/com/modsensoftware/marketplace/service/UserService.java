@@ -13,6 +13,8 @@ public interface UserService {
 
     User getUserById(UUID id);
 
+    User getUserByEmail(String email);
+
     List<User> getAllUsers(int pageNumber, String email,
                            String name, String createdBetween, Long companyId);
 
