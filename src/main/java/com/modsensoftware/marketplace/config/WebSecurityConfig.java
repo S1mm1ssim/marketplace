@@ -31,14 +31,16 @@ public class WebSecurityConfig {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeHttpRequests(
-                        auth -> auth
-                                .antMatchers("/api/v1/auth/login", "/api/v1/auth/token").permitAll()
-                                .regexMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                                .anyRequest().authenticated()
-                                .and()
-                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                ).build();
+                .authorizeRequests()
+                .antMatchers("/api/v1/auth/login", "/api/v1/auth/token",
+                        "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .regexMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling().authenticationEntryPoint(new AppAuthenticationEntryPoint())
+                .and()
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
