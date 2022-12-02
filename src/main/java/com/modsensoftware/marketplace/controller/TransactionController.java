@@ -7,6 +7,7 @@ import com.modsensoftware.marketplace.service.UserTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ public class TransactionController {
 
     private final UserTransactionService transactionService;
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transactions")
     public void createUserTransaction(@Valid @RequestBody UserTransactionDto transactionDto) {
@@ -38,6 +40,7 @@ public class TransactionController {
         transactionService.createUserTransaction(transactionDto);
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @GetMapping("/{userId}/transactions")
     public List<UserTransaction> getAllTransactionsForUser(
             @PathVariable(name = "userId") UUID userId,

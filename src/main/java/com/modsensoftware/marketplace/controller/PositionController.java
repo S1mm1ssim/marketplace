@@ -7,6 +7,7 @@ import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +46,7 @@ public class PositionController {
         return positionService.getPositionById(id);
     }
 
+    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createPosition(@Valid @RequestBody PositionDto positionDto) {
@@ -52,6 +54,7 @@ public class PositionController {
         positionService.createPosition(positionDto);
     }
 
+    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deletePosition(@PathVariable(name = "id") Long id) {
@@ -59,6 +62,7 @@ public class PositionController {
         positionService.deletePosition(id);
     }
 
+    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
     @PutMapping("/{id}")
     public void updatePosition(@PathVariable Long id,
                                @Valid @RequestBody PositionDto updatedFields) {

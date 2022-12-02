@@ -6,6 +6,7 @@ import com.modsensoftware.marketplace.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,6 +53,7 @@ public class CompanyController {
         return companyService.getCompanyById(id);
     }
 
+    @PreAuthorize("hasAuthority('DIRECTOR')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createCompany(@Valid @RequestBody CompanyDto companyDto) {
@@ -59,6 +61,7 @@ public class CompanyController {
         companyService.createCompany(companyDto);
     }
 
+    @PreAuthorize("hasAuthority('DIRECTOR')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteCompany(@PathVariable(name = "id") Long id) {
@@ -66,6 +69,7 @@ public class CompanyController {
         companyService.deleteCompany(id);
     }
 
+    @PreAuthorize("hasAuthority('DIRECTOR')")
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = "id") Long id,
                               @Valid @RequestBody CompanyDto updatedFields) {
