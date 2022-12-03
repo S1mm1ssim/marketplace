@@ -62,32 +62,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtResponse getAccessToken(@NonNull String refreshToken) {
-        log.debug("Validating refresh token: {}", refreshToken);
-        if (jwtProvider.validateRefreshToken(refreshToken)) {
-            log.debug("Token is valid");
-            final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
-            final String userEmail = claims.getSubject();
-            List<RefreshToken> savedRefreshTokens = refreshTokenRepository.findByUserEmail(userEmail);
-            if (savedRefreshTokens.size() == MAX_TOKENS_SAVED_FOR_USER) {
-                log.debug("Token present in storage");
-                String token = savedRefreshTokens.get(FIRST_TOKEN_ID_IN_LIST).getRefreshToken();
-                if (token.equals(refreshToken)) {
-                    log.debug("Tokens match");
-                    final User user = userService.getUserByEmail(userEmail);
-                    final String accessToken = jwtProvider.generateAccessToken(user);
-                    log.debug("Sending new access token");
-                    return new JwtResponse(accessToken, null);
-                } else {
-                    log.debug("Tokens don't match");
-                }
-            }
-        }
-        log.debug("Validation failed");
-        throw new AuthorizationException(invalidJwtMessage);
-    }
-
-    @Override
     public JwtResponse refresh(@NonNull String refreshToken) {
         log.debug("Validating refresh token: {}", refreshToken);
         if (jwtProvider.validateRefreshToken(refreshToken)) {

@@ -29,11 +29,6 @@ public class AuthController {
         return authService.login(authRequest);
     }
 
-    @PostMapping("/token")
-    public JwtResponse getNewAccessToken(@Valid @RequestBody RefreshJwtRequest request) {
-        return authService.getAccessToken(request.getRefreshToken());
-    }
-
     @PostMapping("/refresh")
     public JwtResponse getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) {
         return authService.refresh(request.getRefreshToken());
