@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.domain;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
@@ -9,6 +10,7 @@ import org.springframework.data.redis.core.index.Indexed;
  * @author andrey.demyanchik on 12/2/2022
  */
 @Getter
+@Setter
 @RedisHash("RefreshToken")
 public class RefreshToken {
 
