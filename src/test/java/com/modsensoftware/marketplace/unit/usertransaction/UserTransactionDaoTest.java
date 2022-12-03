@@ -156,7 +156,7 @@ public class UserTransactionDaoTest {
     }
 
     private User generatePersistentUser(String email, Company company) {
-        User user = new User(null, "username", email, "full name",
+        User user = new User(null, "username", email, "full name", "password",
                 Role.MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
         userDao.save(user);
         return user;
