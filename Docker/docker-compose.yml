@@ -3,6 +3,7 @@ version: "3.8"
 services:
   modsen-marketplace-postgres:
     image: "postgres"
+    restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -11,7 +12,17 @@ services:
       - marketplace-postgres-data:/var/lib/postgresql/data
     ports:
       - "32768:5432"
+  redis-token-storage:
+    container_name: redis-token-store
+    image: "redis"
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - token-storage-data:/data
 
 volumes:
   marketplace-postgres-data:
+    driver: local
+  token-storage-data:
     driver: local
