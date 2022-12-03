@@ -60,6 +60,8 @@ public class UserDaoTest {
     private int pageSize;
     @Value("${exception.message.userNotFound}")
     private String userNotFoundMessage;
+    @Value("${exception.message.userWithEmailNotFound}")
+    private String userWithEmailNotFoundMessage;
     @Value("${exception.message.invalidCreatedBetweenFilter}")
     private String invalidCreatedBetweenFilterMessage;
 
@@ -88,6 +90,33 @@ public class UserDaoTest {
         Assertions.assertThatThrownBy(() -> underTest.get(UUID.fromString(nonExistentUuid)))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage(format(userNotFoundMessage, nonExistentUuid));
+    }
+
+    @Test
+    public void canSaveAndGetUserByEmail() {
+        // given
+        User user = generateDefaultTestUser();
+
+        // when
+        underTest.save(user);
+
+        // then
+        User result = underTest.getByEmail(user.getEmail());
+        Assertions.assertThat(result).isEqualTo(user);
+
+        // clean up
+        deleteUser(user);
+    }
+
+    @Test
+    public void getByNonExistentEmailShouldThrowEntityNotFoundException() {
+        // given
+        String nonExistentEmail = "hsadgsakjdbhabhsadbjskbhdashasdhj@fhdjfhjdksfnkjd.dashdaskjdsadkansl";
+        // when
+        // then
+        Assertions.assertThatThrownBy(() -> underTest.getByEmail(nonExistentEmail))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage(format(userWithEmailNotFoundMessage, nonExistentEmail));
     }
 
     @Test
