@@ -11,7 +11,5 @@ public interface AuthService {
 
     JwtResponse login(@NonNull JwtRequest authRequest);
 
-    JwtResponse getAccessToken(@NonNull String refreshToken);
-
     JwtResponse refresh(@NonNull String refreshToken);
 }
