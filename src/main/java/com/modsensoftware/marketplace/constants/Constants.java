@@ -8,6 +8,10 @@ public final class Constants {
     public static final String EMAIL_REGEX = "(\\w+)@(\\w+\\.)(\\w+)(\\.\\w+)*";
     public static final String INVALID_EMAIL_MESSAGE = "Email must be valid.";
 
+    public static final String INVALID_AMOUNT_MESSAGE = "Amount must be more or equal to 0.01.";
+    public static final String INVALID_MIN_AMOUNT_MESSAGE = "Minimal amount must be more or equal to 0.01.";
+    public static final String MIN_AMOUNT_VALUE = "0.01";
+
     public static final String PAGE_FILTER_NAME = "page";
     public static final String DEFAULT_PAGE_NUMBER = "0";
     public static final Long MIN_PAGE_NUMBER = 0L;
