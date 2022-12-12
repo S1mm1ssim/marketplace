@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -19,6 +21,7 @@ public class PositionDto {
     private Long companyId;
     private UUID createdBy;
     // Positive value. Values start at 0.01
-    private Double amount;
+    @DecimalMin(value = "0.01")
+    private BigDecimal amount;
     private Long version;
 }

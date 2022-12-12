@@ -17,12 +17,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
 import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_REGEX;
 import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.INVALID_EMAIL_MESSAGE;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
 import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -38,8 +44,10 @@ public class CompanyController {
 
     @GetMapping(produces = {"application/json"})
     public List<Company> getAllCompanies(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
-            @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber,
+            @RequestParam(name = EMAIL_FILTER_NAME, required = false)
+            @Email(regexp = EMAIL_REGEX, message = INVALID_EMAIL_MESSAGE) String email,
             @RequestParam(name = NAME_FILTER_NAME, required = false) String name
     ) {
         log.debug("Fetching all companies");

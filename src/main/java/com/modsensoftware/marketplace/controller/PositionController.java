@@ -17,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
 import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -36,7 +40,8 @@ public class PositionController {
 
     @GetMapping(produces = {"application/json"})
     public List<Position> getAllPositions(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
         log.debug("Fetching all positions");
         return positionService.getAllPositions(pageNumber);
     }
@@ -49,7 +54,7 @@ public class PositionController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createPosition(@RequestBody PositionDto positionDto) {
+    public void createPosition(@Valid @RequestBody PositionDto positionDto) {
         log.debug("Creating new position from dto: {}", positionDto);
         positionService.createPosition(positionDto);
     }
@@ -63,7 +68,7 @@ public class PositionController {
 
     @PutMapping("/{id}")
     public void updatePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
-                               @RequestBody PositionDto updatedFields) {
+                               @Valid @RequestBody PositionDto updatedFields) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         positionService.updatePosition(id, updatedFields);
     }
