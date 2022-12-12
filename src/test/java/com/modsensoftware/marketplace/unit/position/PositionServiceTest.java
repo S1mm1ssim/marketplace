@@ -44,8 +44,8 @@ public class PositionServiceTest {
         long id = 1L;
         long version = 1L;
         double amount = 10d;
-        PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
-        Position position = new Position(id, null, null, null, null, null, version);
+        PositionDto updatedFields = PositionDto.builder().amount(amount).version(version).build();
+        Position position = Position.builder().version(version).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
@@ -62,8 +62,8 @@ public class PositionServiceTest {
         long version = 1L;
         long differentVersion = 2L;
         double amount = 10d;
-        PositionDto updatedFields = new PositionDto(null, null, null, amount, version);
-        Position position = new Position(id, null, null, null, null, null, differentVersion);
+        PositionDto updatedFields = PositionDto.builder().amount(amount).version(version).build();
+        Position position = Position.builder().version(differentVersion).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when

@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -49,6 +50,7 @@ import java.time.LocalDateTime;
 )
 @Entity
 @Table(name = "position")
+@Builder
 public class Position {
 
     public static final String ID_FIELD_NAME = "id";
