@@ -19,7 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.modsensoftware.marketplace.constants.Constants.*;
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -43,7 +47,7 @@ public class CompanyController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Company getCompanyById(@PathVariable(name = "id") Long id) {
+    public Company getCompanyById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Fetching company by id={}", id);
         return companyService.getCompanyById(id);
     }
@@ -57,13 +61,13 @@ public class CompanyController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteCompany(@PathVariable(name = "id") Long id) {
+    public void deleteCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Deleting company by id: {}", id);
         companyService.deleteCompany(id);
     }
 
     @PutMapping("/{id}")
-    public void updateCompany(@PathVariable(name = "id") Long id,
+    public void updateCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
                               @RequestBody CompanyDto updatedFields) {
         log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);

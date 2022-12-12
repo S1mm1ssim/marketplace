@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
 import com.modsensoftware.marketplace.service.PositionService;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -42,7 +42,7 @@ public class PositionController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Position getPositionById(@PathVariable(name = "id") Long id) {
+    public Position getPositionById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Fetching position by id={}", id);
         return positionService.getPositionById(id);
     }
@@ -56,13 +56,14 @@ public class PositionController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deletePosition(@PathVariable(name = "id") Long id) {
+    public void deletePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Deleting position by id: {}", id);
         positionService.deletePosition(id);
     }
 
     @PutMapping("/{id}")
-    public void updatePosition(@PathVariable Long id, @RequestBody PositionDto updatedFields) {
+    public void updatePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
+                               @RequestBody PositionDto updatedFields) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         positionService.updatePosition(id, updatedFields);
     }

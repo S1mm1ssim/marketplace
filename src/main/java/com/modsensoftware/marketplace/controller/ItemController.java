@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -42,7 +43,7 @@ public class ItemController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Item getItemById(@PathVariable(name = "id") UUID id) {
+    public Item getItemById(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
         log.debug("Fetching item by id={}", id);
         return itemService.getItemById(id);
     }
@@ -56,13 +57,13 @@ public class ItemController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable UUID id) {
+    public void deleteItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
         log.debug("Deleting item by id: {}", id);
         itemService.deleteItem(id);
     }
 
     @PutMapping("/{id}")
-    public void updateItem(@PathVariable(name = "id") UUID id, @RequestBody ItemDto updatedFields) {
+    public void updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id, @RequestBody ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         itemService.updateItem(id, updatedFields);
     }

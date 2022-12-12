@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -41,7 +42,7 @@ public class CategoryController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Category getCategoryById(@PathVariable(name = "id") Long id) {
+    public Category getCategoryById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Fetching category by id={}", id);
         return categoryService.getCategoryById(id);
     }
@@ -55,13 +56,13 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable(name = "id") Long id) {
+    public void deleteCategory(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Deleting category by id: {}", id);
         categoryService.deleteCategory(id);
     }
 
     @PutMapping("/{id}")
-    public void updateCategory(@PathVariable(name = "id") Long id,
+    public void updateCategory(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
                                @RequestBody CategoryDto updatedFields) {
         log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
         categoryService.updateCategory(id, updatedFields);
