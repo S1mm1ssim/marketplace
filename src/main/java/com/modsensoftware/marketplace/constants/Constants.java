@@ -14,7 +14,7 @@ public final class Constants {
 
     public static final String PAGE_FILTER_NAME = "page";
     public static final String DEFAULT_PAGE_NUMBER = "0";
-    public static final Long MIN_PAGE_NUMBER = 0L;
+    public static final long MIN_PAGE_NUMBER = 0L;
     public static final String NEGATIVE_PAGE_NUMBER_MESSAGE = "Page number can not be negative.";
     public static final String EMAIL_FILTER_NAME = "email";
     public static final String NAME_FILTER_NAME = "name";
