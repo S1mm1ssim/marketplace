@@ -13,10 +13,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
 import java.util.List;
+
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_REGEX;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.INVALID_EMAIL_MESSAGE;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -30,45 +43,41 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Company> getAllCompanies() {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all companies");
-        }
-        return companyService.getAllCompanies();
+    public List<Company> getAllCompanies(
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber,
+            @RequestParam(name = EMAIL_FILTER_NAME, required = false)
+            @Email(regexp = EMAIL_REGEX, message = INVALID_EMAIL_MESSAGE) String email,
+            @RequestParam(name = NAME_FILTER_NAME, required = false) String name
+    ) {
+        log.debug("Fetching all companies");
+        return companyService.getAllCompanies(pageNumber, email, name);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Company getCompanyById(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching company by id={}", id);
-        }
+    public Company getCompanyById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
+        log.debug("Fetching company by id={}", id);
         return companyService.getCompanyById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCompany(@RequestBody Company company) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new company: {}", company);
-        }
-        companyService.createCompany(company);
+    public void createCompany(@RequestBody CompanyDto companyDto) {
+        log.debug("Creating new company from dto: {}", companyDto);
+        companyService.createCompany(companyDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteCompany(@PathVariable(name = "id") Long id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting company by id: {}", id);
-        }
+    public void deleteCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
+        log.debug("Deleting company by id: {}", id);
         companyService.deleteCompany(id);
     }
 
     @PutMapping("/{id}")
-    public void updateCompany(@PathVariable(name = "id") Long id,
-                                              @RequestBody CompanyDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
-        }
+    public void updateCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
+                              @RequestBody CompanyDto updatedFields) {
+        log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);
     }
 }

@@ -11,8 +11,9 @@ public interface CategoryMapper {
     /**
      * Maps <code>CategoryDto</code> object to <code>Category</code> object.
      * <code>Category</code> object may have name, description and parentId values populated.
-     * In case categoryDto.nullParent is true then Category's parentId will also be null.
-     * Else parentId value is checked and, if not null, set to Category.parent.id
+     * If categoryDto.parentId is not null, then category.parent.id value is set.
+     * If categoryDto.nullParent is true and categoryDto.parentId is null, then category.parent.id value is set to null.
+     * Otherwise, category.parent is null.
      *
      * @param categoryDto Object of CategoryDto type populated with values according to mapping contract
      * @return Mapped Category object

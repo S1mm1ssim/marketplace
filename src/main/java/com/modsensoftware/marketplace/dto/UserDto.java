@@ -1,11 +1,13 @@
 package com.modsensoftware.marketplace.dto;
 
-import com.modsensoftware.marketplace.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import javax.validation.constraints.Email;
+
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_REGEX;
+import static com.modsensoftware.marketplace.constants.Constants.INVALID_EMAIL_MESSAGE;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -15,10 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserDto {
     private String username;
+    @Email(regexp = EMAIL_REGEX, message = INVALID_EMAIL_MESSAGE)
     private String email;
     private String name;
-    private Role role;
-    private LocalDateTime created;
-    private LocalDateTime updated;
     private Long companyId;
 }

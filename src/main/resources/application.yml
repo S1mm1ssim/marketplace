@@ -9,3 +9,33 @@ spring:
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+
+logging:
+  level:
+    root: info
+
+default:
+  page:
+    size: 20
+  role: MANAGER
+
+exception:
+  message:
+    categoryNotFound: "Category entity with id=%s is not present."
+    companyNotFound: "Company entity with id=%s is not present."
+    itemNotFound: "Item entity with uuid=%s is not present."
+    positionNotFound: "Position entity with id=%s is not found."
+    userNotFound: "User entity with uuid=%s is not found."
+    invalidCreatedBetweenFilter: "Filter 'created' = %s is invalid"
+    companyEmailTaken: "Company with email %s already exists"
+    userEmailTaken: "User with email %s already exists"
+    itemVersionsMismatch: "Provided item version does not match with the one in the database"
+    positionVersionsMismatch: "Provided position version does not match with the one in the database"
+    sessionFactoryInitFail: "Initialization of SessionFactory failed"
+

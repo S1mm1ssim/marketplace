@@ -4,12 +4,15 @@ import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.ItemDto;
 import com.modsensoftware.marketplace.dto.mapper.ItemMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OptimisticLockException;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,43 +27,47 @@ public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final ItemMapper itemMapper;
 
+    @Value("${exception.message.itemVersionsMismatch}")
+    private String itemVersionsMismatchMessage;
+
     @Override
     public Item getItemById(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching item by id: {}", id);
-        }
-        return itemDao.get(id).orElseThrow(EntityNotFoundException::new);
+        log.debug("Fetching item by id: {}", id);
+        return itemDao.get(id);
     }
 
     @Override
-    public List<Item> getAllItems() {
-        if (log.isDebugEnabled()) {
-            log.debug("Fetching all items");
-        }
-        return itemDao.getAll();
+    public List<Item> getAllItems(int pageNumber) {
+        log.debug("Fetching all items for page {}", pageNumber);
+        return itemDao.getAll(pageNumber, Collections.emptyMap());
     }
 
     @Override
     public void createItem(ItemDto itemDto) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new item: {}", itemDto);
-        }
-        itemDao.save(itemMapper.toItem(itemDto));
+        log.debug("Creating new item from dto: {}", itemDto);
+        Item item = itemMapper.toItem(itemDto);
+        item.setCreated(LocalDateTime.now());
+        log.debug("Mapping result: {}", item);
+        itemDao.save(item);
     }
 
     @Override
     public void deleteItem(UUID id) {
-        if (log.isDebugEnabled()) {
-            log.debug("Deleting item by id: {}", id);
-        }
+        log.debug("Deleting item by id: {}", id);
         itemDao.deleteById(id);
     }
 
     @Override
     public void updateItem(UUID id, ItemDto updatedFields) {
-        if (log.isDebugEnabled()) {
-            log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
+        log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
+        Item item = itemDao.get(id);
+        if (item.getVersion().equals(updatedFields.getVersion())) {
+            log.debug("Item versions match");
+            itemDao.update(id, itemMapper.toItem(updatedFields));
+        } else {
+            log.error("Item versions do not match. Provided: {}, in the database: {}",
+                    updatedFields.getVersion(), item.getVersion());
+            throw new OptimisticLockException(itemVersionsMismatchMessage);
         }
-        itemDao.update(id, itemMapper.toItem(updatedFields));
     }
 }

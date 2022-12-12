@@ -1,150 +1,196 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Company;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.domain.Company.DESCRIPTION_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.EMAIL_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.NAME_FIELD_NAME;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
+import static com.modsensoftware.marketplace.utils.Utils.wrapIn;
 import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
  */
 @Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class CompanyDao implements Dao<Company, Long> {
 
-    private final DataSource dataSource;
+    private final SessionFactory sessionFactory;
 
-    private static final String COMPANY_TABLE_NAME = "company";
-    private static final String SELECT = format("SELECT id, name, email, created, description FROM %s",
-            COMPANY_TABLE_NAME);
-    private static final String SELECT_BY_ID = SELECT + " WHERE id=?";
-    private static final String INSERT = format("INSERT INTO %s(name, email, created, description) VALUES(?, ?, ?, ?)",
-            COMPANY_TABLE_NAME);
-    private static final String UPDATE = format("UPDATE %s SET name=?, email=?, created=?, description=? WHERE id=?",
-            COMPANY_TABLE_NAME);
-    private static final String DELETE = format("DELETE FROM %s WHERE id=?", COMPANY_TABLE_NAME);
-
-    private static final String ID_COLUMN_NAME = "id";
-    private static final String NAME_COLUMN_NAME = "name";
-    private static final String EMAIL_COLUMN_NAME = "email";
-    private static final String CREATED_COLUMN_NAME = "created";
-    private static final String DESCRIPTION_COLUMN_NAME = "description";
+    @Value("${default.page.size}")
+    private int pageSize;
+    @Value("${exception.message.companyNotFound}")
+    private String companyNotFoundMessage;
 
     @Override
-    public Optional<Company> get(Long id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
-            ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Company company = new Company(rs.getLong(ID_COLUMN_NAME), rs.getString(NAME_COLUMN_NAME),
-                        rs.getString(EMAIL_COLUMN_NAME), rs.getTimestamp(CREATED_COLUMN_NAME).toLocalDateTime(),
-                        rs.getString(DESCRIPTION_COLUMN_NAME)
-                );
-                return Optional.of(company);
-            }
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during SELECT by id={}.", id);
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
+    public Company get(Long id) {
+        log.debug("Fetching company entity with id {}", id);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Company> byId = cb.createQuery(Company.class);
+        Root<Company> root = byId.from(Company.class);
+        byId.select(root).where(
+                cb.and(
+                        cb.equal(root.get(ID_FIELD_NAME), id),
+                        cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME))
+                )
+        );
+
+        Query<Company> query = session.createQuery(byId);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            log.error("Company entity with id {} not found", id);
+            throw new EntityNotFoundException(format(companyNotFoundMessage, id), e);
+        } finally {
+            session.close();
         }
-        return Optional.empty();
+    }
+
+    public boolean existsByEmail(String email) {
+        log.debug("Checking if company with email {} exists", email);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Company> byId = cb.createQuery(Company.class);
+        Root<Company> root = byId.from(Company.class);
+        byId.select(root).where(
+                cb.and(
+                        cb.equal(root.get(EMAIL_FIELD_NAME), email),
+                        cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME))
+                )
+        );
+
+        Query<Company> query = session.createQuery(byId);
+        try {
+            // If the company with provided email
+            // does not exist the exception will be thrown
+            query.getSingleResult();
+            return true;
+        } catch (NoResultException e) {
+            log.info("Company entity with email {} not found", email);
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
     @Override
-    public List<Company> getAll() {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(SELECT);
-            ResultSet rs = ps.executeQuery();
-            List<Company> companies = new ArrayList<>();
-            while (rs.next()) {
-                Company company = new Company(rs.getLong(ID_COLUMN_NAME), rs.getString(NAME_COLUMN_NAME),
-                        rs.getString(EMAIL_COLUMN_NAME), rs.getTimestamp(CREATED_COLUMN_NAME).toLocalDateTime(),
-                        rs.getString(DESCRIPTION_COLUMN_NAME)
-                );
-                companies.add(company);
-            }
-            return companies;
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during SELECT all");
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
-        }
-        return Collections.emptyList();
+    public List<Company> getAll(int pageNumber, Map<String, String> filterProperties) {
+        log.debug("Fetching all companies for page {}", pageNumber);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Company> getAll = cb.createQuery(Company.class);
+        Root<Company> root = getAll.from(Company.class);
+
+        // Filtering
+        List<Predicate> predicates
+                = constructPredicatesFromProps(filterProperties, cb, root);
+        predicates.add(cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME)));
+        getAll.select(root).where(predicates.toArray(new Predicate[0]));
+
+        // Paging
+        Query<Company> query = session.createQuery(getAll);
+        query.setFirstResult(pageSize * pageNumber);
+        query.setMaxResults(pageSize);
+        List<Company> results = query.getResultList();
+        session.close();
+        return results;
     }
 
     @Override
     public void save(Company company) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(INSERT);
-            ps.setString(1, company.getName());
-            ps.setString(2, company.getEmail());
-            ps.setTimestamp(3, Timestamp.valueOf(company.getCreated()));
-            ps.setString(4, company.getDescription());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during INSERT");
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
-        }
+        log.debug("Saving company entity: {}", company);
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.persist(company);
+        transaction.commit();
+        session.close();
     }
 
     @Override
     public void update(Long id, Company updatedFields) {
-        Optional<Company> optionalCompany = get(id);
-        if (optionalCompany.isPresent()) {
-            Company company = optionalCompany.orElseThrow();
-            setIfNotNull(updatedFields.getName(), company::setName);
-            setIfNotNull(updatedFields.getEmail(), company::setEmail);
-            setIfNotNull(updatedFields.getCreated(), company::setCreated);
-            setIfNotNull(updatedFields.getDescription(), company::setDescription);
+        log.debug("Updating company entity with id {} with values from: {}", id, updatedFields);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaUpdate<Company> update = cb.createCriteriaUpdate(Company.class);
+        Root<Company> root = update.from(Company.class);
 
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement ps = connection.prepareStatement(UPDATE);
-                ps.setString(1, company.getName());
-                ps.setString(2, company.getEmail());
-                ps.setTimestamp(3, Timestamp.valueOf(company.getCreated()));
-                ps.setString(4, company.getDescription());
-                ps.setLong(5, company.getId());
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                log.error("SQL Exception caught during UPDATE");
-                if (log.isDebugEnabled()) {
-                    log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-                }
-            }
+        int totalFieldsUpdated = 0;
+        if (setIfNotNull(NAME_FIELD_NAME, updatedFields.getName(), update::set)) {
+            totalFieldsUpdated++;
         }
+        if (setIfNotNull(EMAIL_FIELD_NAME, updatedFields.getEmail(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (setIfNotNull(DESCRIPTION_FIELD_NAME, updatedFields.getDescription(), update::set)) {
+            totalFieldsUpdated++;
+        }
+        if (totalFieldsUpdated > 0) {
+            update.where(
+                    cb.and(
+                            cb.equal(root.get(ID_FIELD_NAME), id),
+                            cb.isFalse(root.get(IS_SOFT_DELETED_FIELD_NAME))
+                    )
+            );
+
+            Transaction transaction = session.beginTransaction();
+            session.createQuery(update).executeUpdate();
+            transaction.commit();
+        }
+        session.close();
     }
 
     @Override
     public void deleteById(Long id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(DELETE);
-            ps.setLong(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during DELETE by id={}", id);
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
+        log.debug("Deleting company entity with id: {}", id);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaUpdate<Company> softDelete = cb.createCriteriaUpdate(Company.class);
+        Root<Company> root = softDelete.from(Company.class);
+        softDelete.set(IS_SOFT_DELETED_FIELD_NAME, true);
+        softDelete.where(cb.equal(root.get(ID_FIELD_NAME), id));
+
+        Transaction transaction = session.beginTransaction();
+        session.createQuery(softDelete).executeUpdate();
+        transaction.commit();
+    }
+
+    private List<Predicate> constructPredicatesFromProps(
+            Map<String, String> filterProperties,
+            CriteriaBuilder cb, Root<Company> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        filterProperties.forEach((key, value) -> {
+            if (key.equals(EMAIL_FILTER_NAME)) {
+                predicates.add(cb.like(root.get(EMAIL_FIELD_NAME), wrapIn(value, "%")));
+            } else if (key.equals(NAME_FILTER_NAME)) {
+                predicates.add(cb.like(root.get(NAME_FIELD_NAME), wrapIn(value, "%")));
             }
-        }
+        });
+        return predicates;
     }
 }

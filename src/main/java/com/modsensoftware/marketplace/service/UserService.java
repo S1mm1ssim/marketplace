@@ -13,7 +13,8 @@ public interface UserService {
 
     User getUserById(UUID id);
 
-    List<User> getAllUsers();
+    List<User> getAllUsers(int pageNumber, String email,
+                           String name, String createdBetween, Long companyId);
 
     void createUser(UserDto userDto);
 

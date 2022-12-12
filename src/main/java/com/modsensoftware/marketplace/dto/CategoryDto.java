@@ -19,5 +19,5 @@ public class CategoryDto {
     private Long parentId;
 
     // If nullParent is true then parentId on entity will be set to null
-    private boolean nullParent;
+    private Boolean nullParent;
 }

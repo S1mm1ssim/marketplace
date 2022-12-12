@@ -1,180 +1,245 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.config.DataSource;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
-import com.modsensoftware.marketplace.enums.Role;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.exception.InvalidFilterException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.graph.RootGraph;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
+import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.domain.Company.ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.COMPANY_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.CREATED_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.EMAIL_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.FULL_NAME_FIELD_NAME;
 import static com.modsensoftware.marketplace.utils.Utils.setIfNotNull;
+import static com.modsensoftware.marketplace.utils.Utils.wrapIn;
 import static java.lang.String.format;
 
 /**
  * @author andrey.demyanchik on 11/1/2022
  */
 @Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class UserDao implements Dao<User, UUID> {
 
-    private final DataSource dataSource;
+    private final SessionFactory sessionFactory;
+    private final CompanyDao companyDao;
 
-    private static final String USER_TABLE_NAME = "\"user\"";
-    private static final String COMPANY_TABLE_NAME = "company";
+    @Value("${default.page.size}")
+    private int pageSize;
+    @Value("${exception.message.userNotFound}")
+    private String userNotFoundMessage;
+    @Value("${exception.message.invalidCreatedBetweenFilter}")
+    private String invalidCreatedBetweenFilterMessage;
 
-    private static final String SELECT = format("SELECT u.id AS user_id, u.username AS user_username, u.email AS user_email, "
-            + "u.name AS user_name, u.role AS user_role, u.created AS user_created, "
-            + "u.updated AS user_updated, u.company_id AS fk_user_company, "
-            + "c.id AS company_id, c.name AS company_name, c.email AS company_email, "
-            + "c.created AS company_created, c.description AS company_description "
-            + "FROM %s AS u "
-            + "INNER JOIN %s AS c on u.company_id = c.id ", USER_TABLE_NAME, COMPANY_TABLE_NAME);
-    private static final String SELECT_BY_ID = SELECT + " WHERE u.id=?";
-    private static final String INSERT = format("INSERT INTO %s(username, email, name, role, "
-            + "created, updated, company_id) VALUES(?, ?, ?, ?, ?, ?, ?)", USER_TABLE_NAME);
-    private static final String UPDATE = format("UPDATE %s SET username=?, email=?, name=?,"
-            + "role=?, created=?, updated=?, company_id=? WHERE id=?", USER_TABLE_NAME);
-    private static final String DELETE = format("DELETE FROM %s WHERE id=?", USER_TABLE_NAME);
+    private static final String USER_ENTITY_GRAPH = "graph.User.company";
+    private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
-    private static final String COMPANY_ID = "company_id";
-    private static final String COMPANY_NAME = "company_name";
-    private static final String COMPANY_EMAIL = "company_email";
-    private static final String COMPANY_CREATED = "company_created";
-    private static final String COMPANY_DESCRIPTION = "company_description";
-    private static final String USER_ID = "user_id";
-    private static final String USER_USERNAME = "user_username";
-    private static final String USER_EMAIL = "user_email";
-    private static final String USER_NAME = "user_name";
-    private static final String USER_ROLE = "user_role";
-    private static final String USER_CREATED = "user_created";
-    private static final String USER_UPDATED = "user_updated";
+    private static final String CREATED_BETWEEN_DELIMITER = ",";
+    private static final int TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER = 2;
 
     @Override
-    public Optional<User> get(UUID id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID);
-            ps.setObject(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return Optional.of(createUserFromResultSetRow(rs));
-            }
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during SELECT by id={}.", id);
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
+    public User get(UUID id) {
+        log.debug("Fetching user entity with uuid {}", id);
+        Session session = sessionFactory.openSession();
+        RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<User> byId = cb.createQuery(User.class);
+        Root<User> root = byId.from(User.class);
+        Join<User, Company> company = root.join(COMPANY_FIELD_NAME);
+
+        byId.select(root).where(
+                cb.and(
+                        cb.equal(root.get(User.ID_FIELD_NAME), id),
+                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
+                )
+        );
+
+        Query<User> query = session.createQuery(byId);
+        query.setHint(GRAPH_TYPE, entityGraph);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            log.error("User entity with uuid {} not found", id);
+            throw new EntityNotFoundException(format(userNotFoundMessage, id), e);
+        } finally {
+            session.close();
         }
-        return Optional.empty();
+    }
+
+    public boolean existsByEmail(String email) {
+        log.debug("Checking if user with email {} exists", email);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<User> byId = cb.createQuery(User.class);
+        Root<User> root = byId.from(User.class);
+        byId.select(root).where(
+                cb.and(
+                        cb.equal(root.get(EMAIL_FIELD_NAME), email),
+                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
+                )
+        );
+
+        Query<User> query = session.createQuery(byId);
+        try {
+            // If the user with provided email
+            // does not exist the exception will be thrown
+            query.getSingleResult();
+            return true;
+        } catch (NoResultException e) {
+            log.info("User entity with email {} not found", email);
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
     @Override
-    public List<User> getAll() {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(SELECT);
-            ResultSet rs = ps.executeQuery();
-            List<User> users = new ArrayList<>();
-            while (rs.next()) {
-                users.add(createUserFromResultSetRow(rs));
-            }
-            return users;
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during SELECT all");
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
-        }
-        return Collections.emptyList();
+    public List<User> getAll(int pageNumber, Map<String, String> filterProperties) {
+        log.debug("Fetching all users for page {}", pageNumber);
+        Session session = sessionFactory.openSession();
+        RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<User> getAll = cb.createQuery(User.class);
+        Root<User> root = getAll.from(User.class);
+        Join<User, Company> company = root.join(COMPANY_FIELD_NAME);
+
+        // Filtering
+        List<Predicate> predicates
+                = constructPredicatesFromProps(filterProperties, cb, root);
+        predicates.add(cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME)));
+        getAll.select(root).where(predicates.toArray(new Predicate[0]));
+
+        // Paging
+        Query<User> query = session.createQuery(getAll);
+        query.setFirstResult(pageSize * pageNumber);
+        query.setMaxResults(pageSize);
+        query.setHint(GRAPH_TYPE, entityGraph);
+        List<User> result = query.getResultList();
+        session.close();
+        return result;
     }
 
     @Override
     public void save(User user) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(INSERT);
-            ps.setString(1, user.getUsername());
-            ps.setString(2, user.getEmail());
-            ps.setString(3, user.getName());
-            ps.setString(4, user.getRole().toString());
-            ps.setTimestamp(5, Timestamp.valueOf(user.getCreated()));
-            ps.setTimestamp(6, Timestamp.valueOf(user.getUpdated()));
-            ps.setLong(7, user.getCompany().getId());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during INSERT");
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
-        }
+        log.debug("Saving user entity: {}", user);
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.persist(user);
+        transaction.commit();
+        session.close();
     }
 
     @Override
     public void update(UUID id, User updatedFields) {
-        Optional<User> optionalUser = get(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.orElseThrow();
-            setIfNotNull(updatedFields.getUsername(), user::setUsername);
-            setIfNotNull(updatedFields.getEmail(), user::setEmail);
-            setIfNotNull(updatedFields.getName(), user::setName);
-            setIfNotNull(updatedFields.getRole(), user::setRole);
-            setIfNotNull(updatedFields.getCreated(), user::setCreated);
-            setIfNotNull(updatedFields.getUpdated(), user::setUpdated);
-            setIfNotNull(updatedFields.getCompany().getId(),
-                    (value) -> user.getCompany().setId(value));
+        log.debug("Updating user entity with id {} with values from: {}", id, updatedFields);
+        try (Session session = sessionFactory.openSession()) {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaUpdate<User> update = cb.createCriteriaUpdate(User.class);
+            Root<User> root = update.from(User.class);
 
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement ps = connection.prepareStatement(UPDATE);
-                ps.setString(1, user.getUsername());
-                ps.setString(2, user.getEmail());
-                ps.setString(3, user.getName());
-                ps.setString(4, user.getRole().toString());
-                ps.setTimestamp(5, Timestamp.valueOf(user.getCreated()));
-                ps.setTimestamp(6, Timestamp.valueOf(user.getUpdated()));
-                ps.setLong(7, user.getCompany().getId());
-                ps.setObject(8, user.getId());
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                log.error("SQL Exception caught during UPDATE");
-                if (log.isDebugEnabled()) {
-                    log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-                }
+            int totalFieldsUpdated = 0;
+            if (setIfNotNull(User.USERNAME_FIELD_NAME, updatedFields.getUsername(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (setIfNotNull(EMAIL_FIELD_NAME, updatedFields.getEmail(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (setIfNotNull(FULL_NAME_FIELD_NAME, updatedFields.getName(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (setIfNotNull(User.UPDATED_FIELD_NAME, updatedFields.getUpdated(), update::set)) {
+                totalFieldsUpdated++;
+            }
+            if (updatedFields.getCompany().getId() != null) {
+                // Here exception will be thrown in case company is not found or is soft deleted
+                Company updCompany = companyDao.get(updatedFields.getCompany().getId());
+                update.set(root.get(COMPANY_FIELD_NAME).get(ID_FIELD_NAME), updCompany.getId());
+                totalFieldsUpdated++;
+            }
+            if (totalFieldsUpdated > 0) {
+                update.where(cb.equal(root.get(User.ID_FIELD_NAME), id));
+
+                Transaction transaction = session.beginTransaction();
+                session.createQuery(update).executeUpdate();
+                transaction.commit();
             }
         }
     }
 
     @Override
     public void deleteById(UUID id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(DELETE);
-            ps.setObject(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("SQL Exception caught during DELETE by id={}", id);
-            if (log.isDebugEnabled()) {
-                log.debug("SQL state - {}. Stacktrace:\n{}", e.getSQLState(), e.getMessage());
-            }
-        }
+        log.debug("Deleting user entity with id: {}", id);
+        Session session = sessionFactory.openSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaDelete<User> delete = cb.createCriteriaDelete(User.class);
+        Root<User> root = delete.from(User.class);
+        delete.where(cb.equal(root.get(User.ID_FIELD_NAME), id));
+
+        Transaction transaction = session.beginTransaction();
+        session.createQuery(delete).executeUpdate();
+        transaction.commit();
     }
 
-    private User createUserFromResultSetRow(ResultSet rs) throws SQLException {
-        Company company = new Company(rs.getLong(COMPANY_ID), rs.getString(COMPANY_NAME),
-                rs.getString(COMPANY_EMAIL), rs.getTimestamp(COMPANY_CREATED).toLocalDateTime(),
-                rs.getString(COMPANY_DESCRIPTION));
-        return new User(UUID.fromString(rs.getString(USER_ID)),
-                rs.getString(USER_USERNAME), rs.getString(USER_EMAIL), rs.getString(USER_NAME),
-                Role.valueOf(rs.getString(USER_ROLE)), rs.getTimestamp(USER_CREATED).toLocalDateTime(),
-                rs.getTimestamp(USER_UPDATED).toLocalDateTime(), company
-        );
+    private List<Predicate> constructPredicatesFromProps(
+            Map<String, String> filterProperties,
+            CriteriaBuilder cb, Root<User> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        filterProperties.forEach((key, value) -> {
+            if (key.equals(EMAIL_FILTER_NAME)) {
+                predicates.add(cb.like(root.get(EMAIL_FIELD_NAME), wrapIn(value, "%")));
+            } else if (key.equals(NAME_FILTER_NAME)) {
+                predicates.add(cb.like(root.get(FULL_NAME_FIELD_NAME), wrapIn(value, "%")));
+            } else if (key.equals(CREATED_BETWEEN_FILTER_NAME)) {
+                Map.Entry<String, String> borders = parseCreatedBetween(value);
+                predicates.add(cb.between(root.get(CREATED_FIELD_NAME),
+                        LocalDateTime.parse(borders.getKey()),
+                        LocalDateTime.parse(borders.getValue())));
+            } else if (key.equals(COMPANY_ID_FILTER_NAME)) {
+                predicates.add(cb.equal(root.get(COMPANY_FIELD_NAME).get(ID_FIELD_NAME), Long.parseLong(value)));
+            }
+        });
+        return predicates;
+    }
+
+    private Map.Entry<String, String> parseCreatedBetween(String createdBetween) {
+        Map<String, String> borders = new HashMap<>();
+        String[] parsed = createdBetween.split(CREATED_BETWEEN_DELIMITER);
+        if (parsed.length != TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER) {
+            log.error("Provided filter: {} is invalid", createdBetween);
+            log.debug("Timestamps provided: {}, expected: {}", parsed.length, TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER);
+            throw new InvalidFilterException(format(invalidCreatedBetweenFilterMessage, createdBetween));
+        }
+        borders.put(parsed[0], parsed[1]);
+        return borders.entrySet().iterator().next();
     }
 }

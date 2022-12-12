@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/categories",
+					"raw": "http://localhost:8080/api/v1/categories?page=0",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -22,6 +22,12 @@
 						"api",
 						"v1",
 						"categories"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						}
 					]
 				}
 			},
@@ -56,7 +62,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"bread\",\r\n    \"description\": \"Bread\",\r\n    \"parentId\": 1\r\n}",
+					"raw": "{\r\n    \"name\": \"testnullparent\",\r\n    \"description\": \"test\",\r\n    \"parentId\": null\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -85,7 +91,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/categories/2",
+					"raw": "http://localhost:8080/api/v1/categories/7",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -95,7 +101,7 @@
 						"api",
 						"v1",
 						"categories",
-						"2"
+						"7"
 					]
 				}
 			},
@@ -108,7 +114,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"description\": \"Diverse\"\r\n}",
+					"raw": "{\r\n    \"parentId\": 10\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -116,7 +122,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/categories/1",
+					"raw": "http://localhost:8080/api/v1/categories/10",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -126,7 +132,7 @@
 						"api",
 						"v1",
 						"categories",
-						"1"
+						"10"
 					]
 				}
 			},

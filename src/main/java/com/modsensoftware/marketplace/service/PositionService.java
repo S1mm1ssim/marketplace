@@ -12,7 +12,7 @@ public interface PositionService {
 
     Position getPositionById(Long id);
 
-    List<Position> getAllPositions();
+    List<Position> getAllPositions(int pageNumber);
 
     void createPosition(PositionDto positionDto);
 

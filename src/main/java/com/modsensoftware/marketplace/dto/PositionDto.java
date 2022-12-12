@@ -1,10 +1,12 @@
 package com.modsensoftware.marketplace.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import javax.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -13,11 +15,13 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PositionDto {
     private UUID itemId;
     private Long companyId;
     private UUID createdBy;
-    private LocalDateTime created;
     // Positive value. Values start at 0.01
-    private Double amount;
+    @DecimalMin(value = "0.01")
+    private BigDecimal amount;
+    private Long version;
 }
