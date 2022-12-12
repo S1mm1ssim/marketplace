@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.dto.CategoryDto;
 import com.modsensoftware.marketplace.service.CategoryService;
@@ -20,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
+
 /**
  * @author andrey.demyanchik on 11/3/2022
  */
@@ -32,8 +34,8 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Category> getAllCategories(@RequestParam(name = "page",
-            defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
+    public List<Category> getAllCategories(
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all categories");
         return categoryService.getAllCategories(pageNumber);
     }

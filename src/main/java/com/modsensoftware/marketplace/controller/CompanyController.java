@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
-import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.*;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -36,7 +34,7 @@ public class CompanyController {
 
     @GetMapping(produces = {"application/json"})
     public List<Company> getAllCompanies(
-            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
             @RequestParam(name = NAME_FILTER_NAME, required = false) String name
     ) {

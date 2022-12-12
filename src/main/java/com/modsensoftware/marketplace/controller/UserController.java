@@ -20,11 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
-import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.*;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -39,7 +35,7 @@ public class UserController {
 
     @GetMapping(produces = {"application/json"})
     public List<User> getAllUsers(
-            @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
             @RequestParam(name = NAME_FILTER_NAME, required = false) String name,
             @RequestParam(name = CREATED_BETWEEN_FILTER_NAME, required = false) String createdBetween,

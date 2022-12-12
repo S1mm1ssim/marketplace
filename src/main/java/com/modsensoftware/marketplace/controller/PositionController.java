@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
+
 /**
  * @author andrey.demyanchik on 11/3/2022
  */
@@ -32,8 +35,8 @@ public class PositionController {
     private final PositionService positionService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Position> getAllPositions(@RequestParam(name = "page",
-            defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
+    public List<Position> getAllPositions(
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all positions");
         return positionService.getAllPositions(pageNumber);
     }
