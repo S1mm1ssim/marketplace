@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.UserTransaction;
 import com.modsensoftware.marketplace.dto.UserTransactionDto;
 import com.modsensoftware.marketplace.service.UserTransactionService;
@@ -19,6 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.USER_ID_PATH_VARIABLE_NAME;
 
 /**
  * @author andrey.demyanchik on 11/27/2022
@@ -40,8 +43,8 @@ public class TransactionController {
 
     @GetMapping("/{userId}/transactions")
     public List<UserTransaction> getAllTransactionsForUser(
-            @PathVariable(name = "userId") UUID userId,
-            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
+            @PathVariable(name = USER_ID_PATH_VARIABLE_NAME) UUID userId
     ) {
         log.debug("Fetching all transactions for page {} for user with id: {}", pageNumber, userId);
         return transactionService.getAllTransactionsForUser(userId.toString(), pageNumber);
