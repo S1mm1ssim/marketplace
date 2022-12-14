@@ -89,7 +89,9 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        PositionDto toBeSaved = new PositionDto(UUID.randomUUID(), 1L, 2L, UUID.randomUUID(), amount, minAmount, 0L);
+        PositionDto toBeSaved = PositionDto.builder().itemId(UUID.randomUUID())
+                .itemVersion(1L).companyId(2L).createdBy(UUID.randomUUID())
+                .amount(amount).minAmount(minAmount).version(0L).build();
 
         // when
         underTest.createPosition(toBeSaved);
@@ -112,7 +114,9 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        PositionDto toBeSaved = new PositionDto(UUID.randomUUID(), null, 2L, UUID.randomUUID(), amount, minAmount, 0L);
+        PositionDto toBeSaved = PositionDto.builder().itemId(UUID.randomUUID())
+                .itemVersion(null).companyId(2L).createdBy(UUID.randomUUID())
+                .amount(amount).minAmount(minAmount).version(0L).build();
         // when
         // then
         Assertions.assertThatThrownBy(() -> underTest.createPosition(toBeSaved))

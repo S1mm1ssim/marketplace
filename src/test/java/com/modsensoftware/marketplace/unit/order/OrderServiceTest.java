@@ -52,8 +52,8 @@ public class OrderServiceTest {
     @Test
     public void shouldNotThrowAnyException() {
         // given
-        Position pos1 = new Position(15L, null, null, null, null, 30d, 1d, 0L);
-        Position pos2 = new Position(16L, null, null, null, null, 30d, 1d, 0L);
+        Position pos1 = Position.builder().id(15L).amount(30d).minAmount(1d).version(0L).build();
+        Position pos2 = Position.builder().id(16L).amount(30d).minAmount(1d).version(0L).build();
         List<OrderDto> orders = new ArrayList<>();
         orders.add(new OrderDto(15L, new BigDecimal(5), 0L));
         orders.add(new OrderDto(16L, new BigDecimal(2), 0L));
@@ -87,7 +87,7 @@ public class OrderServiceTest {
     @Test
     public void shouldThrowInsufficientItemsInStockException() {
         // given
-        Position pos = new Position(16L, null, null, null, null, 3d, 1d, 0L);
+        Position pos = Position.builder().id(16L).amount(3d).minAmount(1d).version(0L).build();
         List<OrderDto> orders = new ArrayList<>();
         orders.add(new OrderDto(16L, new BigDecimal(4), 0L));
         BDDMockito.when(positionDao.get(16L)).thenReturn(pos);
@@ -104,7 +104,7 @@ public class OrderServiceTest {
     @Test
     public void shouldThrowInsufficientOrderAmountException() {
         // given
-        Position pos = new Position(16L, null, null, null, null, 30d, 5d, 0L);
+        Position pos = Position.builder().id(16L).amount(30d).minAmount(5d).version(0L).build();
         List<OrderDto> orders = new ArrayList<>();
         orders.add(new OrderDto(16L, new BigDecimal(4), 0L));
         BDDMockito.when(positionDao.get(16L)).thenReturn(pos);
