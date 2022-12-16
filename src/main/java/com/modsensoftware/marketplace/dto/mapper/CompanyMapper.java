@@ -11,4 +11,6 @@ import org.mapstruct.Mapper;
 public interface CompanyMapper {
 
     Company toCompany(CompanyDto companyDto);
+
+    CompanyDto toCompanyDto(Company company);
 }
