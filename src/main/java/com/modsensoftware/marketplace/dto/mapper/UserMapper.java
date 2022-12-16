@@ -51,7 +51,7 @@ public class UserMapper {
         return User.builder()
                 .username(requestDto.getUsername())
                 .email(requestDto.getEmail())
-                .name(requestDto.getEmail())
+                .name(requestDto.getName())
                 .company(company)
                 .build();
     }
