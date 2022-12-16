@@ -14,29 +14,33 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
         jdbc:
           batch_size: 5
-  redis:
-    host: localhost
-    port: 6379
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8079/realms/test-marketplace
+
+idm:
+  realm-name: "test-marketplace"
+  server-url: "http://localhost:8079"
+  client-id: "test-idm-client"
+  client-secret: "thqX0NUWScsc40CoUvDZaG0hImSZhMSY"
+  admin-username: "test-idm-admin"
+  admin-password: "test-admin"
+  pool-size: 10
 
 logging:
   level:
+    root: info
     com.modsensoftware.marketplace: debug
 
 default:
   page:
     size: 20
   role: MANAGER
-
-
-jwt:
-  secret:
-    access: "qBTmv4oXFFR2GwjexDJ4t6fsIUIUhhXqlktXjXdkcyygs8nPVEwMfo29VDRRepYDVV5IkIxBMzr7OEHXEHd37w=="
-    refresh: "zL1HB3Pch05Avfynovxrf/kpF9O2m4NCWKJUjEp27s9J2jEG3ifiKCGylaZ8fDeoONSTJP/wAzKawB8F9rOMNg=="
-  lifetime:
-    access: 5
-    refresh: 43200
-  claims:
-    roles: "roles"
+  role-prefix: ROLE_
+  jwt-realm-access-claim: realm_access
+  jwt-roles-claim: roles
 
 exception:
   message:
@@ -47,7 +51,7 @@ exception:
     userNotFound: "User entity with uuid=%s is not found."
     invalidCreatedBetweenFilter: "Filter 'created' = %s is invalid"
     companyEmailTaken: "Company with email %s already exists"
-    userEmailTaken: "User with email %s already exists"
+    nonUniqueUser: "User with such email %s or such username %s already exists"
     itemVersionsMismatch: "Provided item version does not match with the one in the database"
     positionVersionsMismatch: "Provided position version does not match with the one in the database"
     sessionFactoryInitFail: "Initialization of SessionFactory failed"
@@ -56,5 +60,4 @@ exception:
     insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
     invalidCredentialsException: "Provided credentials are incorrect"
-    userWithEmailNotFound: "User with email=%s is not found"
-    invalidJwt: "Provided JWT is invalid"
+    userPasswordAbsent: "Could not update user as password is not present."
