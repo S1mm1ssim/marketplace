@@ -42,13 +42,13 @@ public class ItemController {
     public List<Item> getAllItems(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
             @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
-        log.debug("Fetching all items");
+        log.debug("Fetching all items for page {}", pageNumber);
         return itemService.getAllItems(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Item getItemById(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
-        log.debug("Fetching item by id={}", id);
+        log.debug("Fetching item by id: {}", id);
         return itemService.getItemById(id);
     }
 
@@ -67,7 +67,8 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public void updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id, @RequestBody ItemDto updatedFields) {
+    public void updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id,
+                           @RequestBody ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         itemService.updateItem(id, updatedFields);
     }

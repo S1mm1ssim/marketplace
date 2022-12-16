@@ -105,8 +105,6 @@ public class PositionDao implements Dao<Position, Long> {
     public void save(Position position) {
         log.debug("Saving position entity: {}", position);
         Session session = sessionFactory.openSession();
-        Item item = session.get(Item.class, position.getItem().getId());
-        position.setItem(item);
         Transaction transaction = session.beginTransaction();
         session.persist(position);
         transaction.commit();

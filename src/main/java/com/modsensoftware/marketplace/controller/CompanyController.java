@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
+import javax.validation.Valid;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
@@ -50,19 +51,20 @@ public class CompanyController {
             @Email(regexp = EMAIL_REGEX, message = INVALID_EMAIL_MESSAGE) String email,
             @RequestParam(name = NAME_FILTER_NAME, required = false) String name
     ) {
-        log.debug("Fetching all companies");
+        log.debug("Fetching all companies for page {}. "
+                    + "Filter by email: {}, name: {}", pageNumber, email, name);
         return companyService.getAllCompanies(pageNumber, email, name);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
     public Company getCompanyById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
-        log.debug("Fetching company by id={}", id);
+        log.debug("Fetching company by id: {}", id);
         return companyService.getCompanyById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCompany(@RequestBody CompanyDto companyDto) {
+    public void createCompany(@Valid @RequestBody CompanyDto companyDto) {
         log.debug("Creating new company from dto: {}", companyDto);
         companyService.createCompany(companyDto);
     }
@@ -76,7 +78,7 @@ public class CompanyController {
 
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
-                              @RequestBody CompanyDto updatedFields) {
+                              @Valid @RequestBody CompanyDto updatedFields) {
         log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);
     }

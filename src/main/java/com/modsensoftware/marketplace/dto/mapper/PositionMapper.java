@@ -14,6 +14,7 @@ public interface PositionMapper {
 
     @Mappings({
             @Mapping(target = "item.id", source = "positionDto.itemId"),
+            @Mapping(target = "item.version", source = "itemVersion"),
             @Mapping(target = "company.id", source = "positionDto.companyId"),
             @Mapping(target = "createdBy.id", source = "positionDto.createdBy")
     })

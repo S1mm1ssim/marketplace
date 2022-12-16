@@ -180,13 +180,19 @@ public class ItemDaoTest {
                 updatedFields1.getCategory(), item.getVersion() + 1);
 
         // when
+        // In some cases second update is executed before first
+        // and first update is fallen with OptimisticLockException
         List<Item> updatedFields = List.of(updatedFields1, updatedFields2);
         ExecutorService executor = Executors.newFixedThreadPool(2);
         for (Item updatedField : updatedFields) {
             executor.execute(() -> underTest.update(item.getId(), updatedField));
+            // In some cases second update was executed before first
+            // So Thread.sleep was added to prevent that behavior
+            // 5 ms timeout seems reliable as in 30 class runs this test never failed again
+            Thread.sleep(5);
         }
         executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.MINUTES);
+        executor.awaitTermination(2, TimeUnit.SECONDS);
 
         // then
         Item actual = underTest.get(item.getId());

@@ -24,7 +24,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value = {EntityAlreadyExistsException.class,
             InvalidFilterException.class,
-            OptimisticLockException.class})
+            OptimisticLockException.class,
+            InsufficientItemsInStockException.class,
+            InsufficientOrderAmountException.class,
+            NoVersionProvidedException.class
+    })
     protected ResponseEntity<Object> handleBadRequest(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);

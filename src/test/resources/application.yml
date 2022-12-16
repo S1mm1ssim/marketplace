@@ -12,6 +12,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        jdbc:
+          batch_size: 5
 
 logging:
   level:
@@ -35,3 +37,7 @@ exception:
     itemVersionsMismatch: "Provided item version does not match with the one in the database"
     positionVersionsMismatch: "Provided position version does not match with the one in the database"
     sessionFactoryInitFail: "Initialization of SessionFactory failed"
+    noItemVersionProvided: "No version for item with id %s was provided"
+    noPositionVersionProvided: "No version for position with id %s was provided"
+    insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
+    insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"

@@ -13,7 +13,7 @@
     <module name="FileLength"/>
     <module name="LineLength">
         <property name="fileExtensions" value="java"/>
-        <property name="max" value="120"/>
+        <property name="max" value="160"/>
     </module>
 
     <module name="TreeWalker">
@@ -58,6 +58,13 @@
 
         <module name="AbbreviationAsWordInName"/>
         <module name="AbstractClassName"/>
+
+        <!-- Disable class name and field visibility checks for metamodels -->
+        <module name="SuppressionXpathSingleFilter">
+            <property name="files" value="[A-Z]*_.java"/>
+            <property name="checks" value="AbstractClassName|TypeName|VisibilityModifier"/>
+        </module>
+
         <module name="ClassTypeParameterName">
             <property name="format" value="^[A-Z]*$"/>
         </module>
@@ -90,10 +97,15 @@
         <!-- See https://checkstyle.org/config_coding.html -->
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
-        <module name="HiddenField"/>
+        <module name="HiddenField">
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+        </module>
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
-        <module name="MagicNumber"/>
+        <module name="MagicNumber">
+            <property name="ignoreAnnotation" value="true"/>
+        </module>
         <module name="MissingSwitchDefault"/>
         <module name="MultipleVariableDeclarations"/>
         <module name="SimplifyBooleanExpression"/>
@@ -103,7 +115,15 @@
         <!-- See https://checkstyle.org/config_design.html -->
         <module name="FinalClass"/>
         <module name="InterfaceIsType"/>
-        <module name="VisibilityModifier"/>
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
+
+        <!-- Disables modifier visibility check for fields of @Value classes -->
+        <module name="SuppressionXpathSingleFilter">
+            <property name="checks" value="VisibilityModifier"/>
+            <property name="query" value="//*[MODIFIERS//*[@text = 'Value']]/descendant-or-self::node()"/>
+        </module>
 
         <!-- Miscellaneous other checks.                   -->
         <!-- See https://checkstyle.org/config_misc.html -->
