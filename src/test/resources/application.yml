@@ -18,15 +18,16 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8079/realms/test-marketplace
+          issuer-uri: ""
 
 idm:
   realm-name: "test-marketplace"
-  server-url: "http://localhost:8079"
+  server-url: ""
   client-id: "test-idm-client"
-  client-secret: "thqX0NUWScsc40CoUvDZaG0hImSZhMSY"
+  client-secret: "**********"
+  grant-type: "password"
   admin-username: "test-idm-admin"
-  admin-password: "test-admin"
+  admin-password: "test-idm-admin"
   pool-size: 10
 
 logging:

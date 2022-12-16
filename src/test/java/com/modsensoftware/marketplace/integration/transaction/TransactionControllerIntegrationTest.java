@@ -28,9 +28,6 @@ import static java.lang.String.format;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TransactionControllerIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private Keycloak keycloak;
-
     private static String accessToken;
 
     @Value("${exception.message.noPositionVersionProvided}")
@@ -44,7 +41,6 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     protected static void beforeAll() {
         AbstractIntegrationTest.beforeAll();
         ScriptUtils.runInitScript(dbDelegate, "integration/transaction/userTransactionIntegrationTestData.sql");
-        accessToken = getAccessToken(TEST_MANAGER_USERNAME);
     }
 
     @AfterAll
@@ -54,6 +50,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
 
     @BeforeEach
     void setUp() {
+        accessToken = getAccessToken(TEST_MANAGER_USERNAME);
         OrderArgumentsProvider.insufficientItemsInStockMessage = this.insufficientItemsInStockMessage;
         OrderArgumentsProvider.insufficientOrderAmountMessage = this.insufficientOrderAmountMessage;
         OrderArgumentsProvider.noPositionVersionProvidedMessage = this.noPositionVersionProvidedMessage;

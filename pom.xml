@@ -23,6 +23,7 @@
         <restassured.version>5.3.0</restassured.version>
         <io.jsonwebtoken.version>0.11.5</io.jsonwebtoken.version>
         <keycloak.version>20.0.1</keycloak.version>
+        <testcontainers.keycloak.version>2.4.0</testcontainers.keycloak.version>
         <springdoc.version>1.6.13</springdoc.version>
     </properties>
     <dependencies>
@@ -104,6 +105,13 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.dasniko</groupId>
+            <artifactId>testcontainers-keycloak</artifactId>
+            <version>${testcontainers.keycloak.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>io.rest-assured</groupId>

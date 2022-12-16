@@ -7,10 +7,10 @@ import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testcontainers.ext.ScriptUtils;
@@ -28,9 +28,6 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private PositionDao positionDao;
 
-    @Autowired
-    private Keycloak keycloak;
-
     private static String accessToken;
 
     @Value("${exception.message.positionVersionsMismatch}")
@@ -40,12 +37,16 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     protected static void beforeAll() {
         AbstractIntegrationTest.beforeAll();
         ScriptUtils.runInitScript(dbDelegate, "integration/position/positionIntegrationTestData.sql");
-        accessToken = getAccessToken(TEST_STORAGE_MANAGER_USERNAME);
     }
 
     @AfterAll
     static void afterAll() {
         ScriptUtils.runInitScript(dbDelegate, "integration/position/positionIntegrationTestTearDown.sql");
+    }
+
+    @BeforeEach
+    void setUp() {
+        accessToken = getAccessToken(TEST_STORAGE_MANAGER_USERNAME);
     }
 
     @Test

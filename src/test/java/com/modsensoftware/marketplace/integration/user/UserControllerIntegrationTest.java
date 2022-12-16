@@ -8,7 +8,6 @@ import com.modsensoftware.marketplace.service.UserService;
 import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,8 +38,6 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     private static String accessToken;
 
     private static boolean wasSetupExecuted = false;
-    private static int testsExecuted = 0;
-    private static final int TESTS_TO_BE_EXECUTED = 9;
     private static final List<String> USER_IDS = new ArrayList<>();
 
     @Value("${exception.message.userNotFound}")
@@ -51,7 +48,6 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @BeforeAll
     protected static void beforeAll() {
         AbstractIntegrationTest.beforeAll();
-        accessToken = getAccessToken(TEST_MANAGER_USERNAME);
         ScriptUtils.runInitScript(dbDelegate, "integration/user/userIntegrationTestData.sql");
     }
 
@@ -62,6 +58,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        accessToken = getAccessToken(TEST_MANAGER_USERNAME);
         if (!wasSetupExecuted) {
             wasSetupExecuted = true;
             USER_IDS.add(userService.createUser(createUserRequestDto("user1", "user1@user.com", 1000L)));
@@ -73,14 +70,6 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     private UserRequestDto createUserRequestDto(String username, String email, Long companyId) {
         return new UserRequestDto(username, email, "name", "password", companyId);
-    }
-
-    @AfterEach
-    void tearDown() {
-        testsExecuted++;
-        if (testsExecuted == TESTS_TO_BE_EXECUTED) {
-            USER_IDS.forEach(userId -> userService.deleteUser(UUID.fromString(userId)));
-        }
     }
 
     @Test
