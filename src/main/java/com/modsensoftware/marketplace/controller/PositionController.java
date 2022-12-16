@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.PositionDto;
 import com.modsensoftware.marketplace.service.PositionService;
@@ -22,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
+
 /**
  * @author andrey.demyanchik on 11/3/2022
  */
@@ -34,8 +36,8 @@ public class PositionController {
     private final PositionService positionService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Position> getAllPositions(@RequestParam(name = "page",
-            defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber) {
+    public List<Position> getAllPositions(
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
@@ -46,7 +48,7 @@ public class PositionController {
         return positionService.getPositionById(id);
     }
 
-    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
+    @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createPosition(@Valid @RequestBody PositionDto positionDto) {
@@ -54,7 +56,7 @@ public class PositionController {
         positionService.createPosition(positionDto);
     }
 
-    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
+    @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deletePosition(@PathVariable(name = "id") Long id) {
@@ -62,7 +64,7 @@ public class PositionController {
         positionService.deletePosition(id);
     }
 
-    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
+    @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
     public void updatePosition(@PathVariable Long id,
                                @Valid @RequestBody PositionDto updatedFields) {

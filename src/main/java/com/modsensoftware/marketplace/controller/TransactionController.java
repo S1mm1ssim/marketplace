@@ -32,7 +32,7 @@ public class TransactionController {
 
     private final UserTransactionService transactionService;
 
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transactions")
     public void createUserTransaction(@Valid @RequestBody UserTransactionDto transactionDto) {
@@ -40,7 +40,7 @@ public class TransactionController {
         transactionService.createUserTransaction(transactionDto);
     }
 
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     @GetMapping("/{userId}/transactions")
     public List<UserTransaction> getAllTransactionsForUser(
             @PathVariable(name = "userId") UUID userId,
