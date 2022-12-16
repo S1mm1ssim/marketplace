@@ -15,6 +15,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
@@ -25,6 +27,9 @@ import java.util.Map;
  */
 @ExtendWith(MockitoExtension.class)
 public class CompanyServiceTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Mock
     private CompanyDao companyDao;
