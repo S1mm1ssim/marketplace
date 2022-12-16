@@ -14,7 +14,6 @@ import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.enums.Role;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -26,6 +25,8 @@ import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -46,6 +47,9 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class UserTransactionDaoTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -123,8 +127,8 @@ public class UserTransactionDaoTest {
     public void canGetAllTransactionsForUserWithPagination() {
         // given
         Company company = generatePersistentCompany("customerCompany@company.com");
-        User user1 = generatePersistentUser("customer1@email.com", company);
-        User user2 = generatePersistentUser("customer2@email.com", company);
+        User user1 = generatePersistentUser("customer1@email.com", "username3", company);
+        User user2 = generatePersistentUser("customer2@email.com", "username4", company);
 
         Position savedPosition = generateDefaultPosition();
         List<UserTransaction> userTransactions = generateTransactionsForUsers(savedPosition, user1, user2);
@@ -155,17 +159,16 @@ public class UserTransactionDaoTest {
         return company;
     }
 
-    private User generatePersistentUser(String email, Company company) {
-        User user = new User(null, "username", email, "full name", "password",
-                Role.MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+    private User generatePersistentUser(String email, String username, Company company) {
+        User user = new User(UUID.randomUUID(), username, email, "full name",
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
         userDao.save(user);
         return user;
     }
 
     private Position generateDefaultPosition() {
         Company company = generatePersistentCompany("company@company.com");
-        User user = generatePersistentUser("email@email.com", company);
-        user.setRole(Role.STORAGE_MANAGER);
+        User user = generatePersistentUser("email@email.com", "username1", company);
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         Item item = new Item(null, "name", "description",
