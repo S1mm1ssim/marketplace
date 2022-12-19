@@ -1,4 +1,8 @@
+
 spring:
+  cloud:
+    config:
+      enabled: false
   datasource:
     url: ""
     username: ""
@@ -62,3 +66,6 @@ exception:
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
     invalidCredentialsException: "Provided credentials are incorrect"
     userPasswordAbsent: "Could not update user as password is not present."
+eureka:
+  client:
+    enabled: false
