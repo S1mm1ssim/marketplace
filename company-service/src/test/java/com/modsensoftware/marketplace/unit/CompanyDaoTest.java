@@ -1,6 +1,5 @@
-package com.modsensoftware.marketplace.unit.company;
+package com.modsensoftware.marketplace.unit;
 
-import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
 import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;

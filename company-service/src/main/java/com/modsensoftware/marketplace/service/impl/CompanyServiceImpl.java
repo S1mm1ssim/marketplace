@@ -57,6 +57,7 @@ public class CompanyServiceImpl implements CompanyService {
         if (!companyDao.existsByEmail(companyDto.getEmail())) {
             Company company = companyMapper.toCompany(companyDto);
             company.setCreated(LocalDateTime.now());
+            company.setIsDeleted(false);
             log.debug("Mapping result: {}", company);
             companyDao.save(company);
         } else {

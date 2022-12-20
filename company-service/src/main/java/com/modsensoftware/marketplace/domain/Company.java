@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "company")
+@Table(name = "company", schema = "company_service")
 public class Company {
 
     public static final String ID_FIELD_NAME = "id";

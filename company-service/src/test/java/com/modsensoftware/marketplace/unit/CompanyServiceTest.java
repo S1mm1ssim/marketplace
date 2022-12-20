@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.unit.company;
+package com.modsensoftware.marketplace.unit;
 
 import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.domain.Company;
