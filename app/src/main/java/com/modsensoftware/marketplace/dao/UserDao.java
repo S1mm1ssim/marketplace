@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.InvalidFilterException;
@@ -9,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.graph.RootGraph;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -19,7 +17,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
@@ -33,9 +30,7 @@ import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILT
 import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
-import static com.modsensoftware.marketplace.domain.Company.ID_FIELD_NAME;
-import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
-import static com.modsensoftware.marketplace.domain.User.COMPANY_FIELD_NAME;
+import static com.modsensoftware.marketplace.domain.User.COMPANY_ID_FIELD_NAME;
 import static com.modsensoftware.marketplace.domain.User.CREATED_FIELD_NAME;
 import static com.modsensoftware.marketplace.domain.User.EMAIL_FIELD_NAME;
 import static com.modsensoftware.marketplace.domain.User.FULL_NAME_FIELD_NAME;
@@ -54,7 +49,6 @@ import static java.lang.String.format;
 public class UserDao implements Dao<User, UUID> {
 
     private final SessionFactory sessionFactory;
-    private final CompanyDao companyDao;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -63,9 +57,6 @@ public class UserDao implements Dao<User, UUID> {
     @Value("${exception.message.invalidCreatedBetweenFilter}")
     private String invalidCreatedBetweenFilterMessage;
 
-    private static final String USER_ENTITY_GRAPH = "graph.User.company";
-    private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
-
     private static final String CREATED_BETWEEN_DELIMITER = ",";
     private static final int TIMESTAMPS_AMOUNT_EXPECTED_IN_FILTER = 2;
 
@@ -73,21 +64,15 @@ public class UserDao implements Dao<User, UUID> {
     public User get(UUID id) {
         log.debug("Fetching user entity with uuid {}", id);
         Session session = sessionFactory.openSession();
-        RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> byId = cb.createQuery(User.class);
         Root<User> root = byId.from(User.class);
-        Join<User, Company> company = root.join(COMPANY_FIELD_NAME);
 
         byId.select(root).where(
-                cb.and(
-                        cb.equal(root.get(User.ID_FIELD_NAME), id),
-                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
-                )
+                cb.and(cb.equal(root.get(User.ID_FIELD_NAME), id))
         );
 
         Query<User> query = session.createQuery(byId);
-        query.setHint(GRAPH_TYPE, entityGraph);
         try {
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -102,23 +87,18 @@ public class UserDao implements Dao<User, UUID> {
     public List<User> getAll(int pageNumber, Map<String, String> filterProperties) {
         log.debug("Fetching all users for page {}", pageNumber);
         Session session = sessionFactory.openSession();
-        RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<User> getAll = cb.createQuery(User.class);
         Root<User> root = getAll.from(User.class);
-        Join<User, Company> company = root.join(COMPANY_FIELD_NAME);
 
         // Filtering
-        List<Predicate> predicates
-                = constructPredicatesFromProps(filterProperties, cb, root);
-        predicates.add(cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME)));
+        List<Predicate> predicates = constructPredicatesFromProps(filterProperties, cb, root);
         getAll.select(root).where(predicates.toArray(new Predicate[0]));
 
         // Paging
         Query<User> query = session.createQuery(getAll);
         query.setFirstResult(pageSize * pageNumber);
         query.setMaxResults(pageSize);
-        query.setHint(GRAPH_TYPE, entityGraph);
         List<User> result = query.getResultList();
         session.close();
         return result;
@@ -152,10 +132,7 @@ public class UserDao implements Dao<User, UUID> {
             if (setIfNotNull(FULL_NAME_FIELD_NAME, updatedFields.getName(), update::set)) {
                 totalFieldsUpdated++;
             }
-            if (updatedFields.getCompany().getId() != null) {
-                // Here exception will be thrown in case company is not found or is soft deleted
-                Company updCompany = companyDao.get(updatedFields.getCompany().getId());
-                update.set(root.get(COMPANY_FIELD_NAME).get(ID_FIELD_NAME), updCompany.getId());
+            if (setIfNotNull(COMPANY_ID_FIELD_NAME, updatedFields.getCompanyId(), update::set)) {
                 totalFieldsUpdated++;
             }
             if (totalFieldsUpdated > 0) {
@@ -199,7 +176,7 @@ public class UserDao implements Dao<User, UUID> {
                         LocalDateTime.parse(borders.getKey()),
                         LocalDateTime.parse(borders.getValue())));
             } else if (key.equals(COMPANY_ID_FILTER_NAME)) {
-                predicates.add(cb.equal(root.get(COMPANY_FIELD_NAME).get(ID_FIELD_NAME), Long.parseLong(value)));
+                predicates.add(cb.equal(root.get(COMPANY_ID_FIELD_NAME), Long.parseLong(value)));
             }
         });
         return predicates;

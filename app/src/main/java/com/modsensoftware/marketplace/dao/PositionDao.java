@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
@@ -25,8 +24,6 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
 
-import static com.modsensoftware.marketplace.domain.Company.IS_SOFT_DELETED_FIELD_NAME;
-import static com.modsensoftware.marketplace.domain.Position.COMPANY_FIELD_NAME;
 import static com.modsensoftware.marketplace.domain.Position.ID_FIELD_NAME;
 import static java.lang.String.format;
 
@@ -40,7 +37,6 @@ public class PositionDao implements Dao<Position, Long> {
 
     private final SessionFactory sessionFactory;
     private final ItemDao itemDao;
-    private final CompanyDao companyDao;
     private final UserDao userDao;
 
     @Value("${default.page.size}")
@@ -48,7 +44,7 @@ public class PositionDao implements Dao<Position, Long> {
     @Value("${exception.message.positionNotFound}")
     private String positionNotFoundMessage;
 
-    private static final String POSITION_GRAPH = "graph.Position.item.company.user";
+    private static final String POSITION_GRAPH = "graph.Position.item.user";
     private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
 
     @Override
@@ -60,12 +56,7 @@ public class PositionDao implements Dao<Position, Long> {
         CriteriaQuery<Position> byId = cb.createQuery(Position.class);
         Root<Position> root = byId.from(Position.class);
 
-        byId.select(root).where(
-                cb.and(
-                        cb.equal(root.get(ID_FIELD_NAME), id),
-                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
-                )
-        );
+        byId.select(root).where(cb.and(cb.equal(root.get(ID_FIELD_NAME), id)));
 
         Query<Position> query = session.createQuery(byId);
         query.setHint(GRAPH_TYPE, entityGraph);
@@ -87,10 +78,6 @@ public class PositionDao implements Dao<Position, Long> {
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Position> getAll = cb.createQuery(Position.class);
         Root<Position> root = getAll.from(Position.class);
-
-        getAll.select(root).where(
-                cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
-        );
 
         Query<Position> query = session.createQuery(getAll);
         query.setFirstResult(pageSize * pageNumber);
@@ -114,27 +101,21 @@ public class PositionDao implements Dao<Position, Long> {
     @Override
     public void update(Long id, Position updatedFields) {
         log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        try {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
             Position position = session.find(Position.class, id, LockModeType.OPTIMISTIC);
             if (updatedFields.getItem().getId() != null) {
                 Item updItem = itemDao.get(updatedFields.getItem().getId());
                 position.setItem(updItem);
             }
-            if (updatedFields.getCompany().getId() != null) {
-                Company updCompany = companyDao.get(updatedFields.getCompany().getId());
-                position.setCompany(updCompany);
-            }
             if (updatedFields.getCreatedBy().getId() != null) {
                 User updUser = userDao.get(updatedFields.getCreatedBy().getId());
                 position.setCreatedBy(updUser);
             }
+            Utils.setIfNotNull(updatedFields.getCompanyId(), position::setCompanyId);
             Utils.setIfNotNull(updatedFields.getAmount(), position::setAmount);
             session.merge(position);
-        } finally {
             transaction.commit();
-            session.close();
         }
     }
 
