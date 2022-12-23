@@ -1,21 +1,15 @@
 package com.modsensoftware.marketplace.unit.category;
 
-import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
 import com.modsensoftware.marketplace.dao.CategoryDao;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.unit.AbstractDaoTest;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,22 +20,10 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 11/21/2022
  */
-@Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class CategoryDaoTest {
-
-    @MockBean
-    private JwtDecoder jwtDecoder;
-
-    @Autowired
-    private SessionFactory sessionFactory;
+public class CategoryDaoTest extends AbstractDaoTest {
 
     @Autowired
     private CategoryDao underTest;
-
-    @Container
-    public static CustomPostgreSQLContainer postgreSQLContainer
-            = CustomPostgreSQLContainer.getInstance();
 
     @Value("${default.page.size}")
     private int pageSize;

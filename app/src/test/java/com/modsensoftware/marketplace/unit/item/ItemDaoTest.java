@@ -1,24 +1,18 @@
 package com.modsensoftware.marketplace.unit.item;
 
-import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
 import com.modsensoftware.marketplace.dao.CategoryDao;
 import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.unit.AbstractDaoTest;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,25 +30,13 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 /**
  * @author andrey.demyanchik on 11/22/2022
  */
-@Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class ItemDaoTest {
-
-    @MockBean
-    private JwtDecoder jwtDecoder;
-
-    @Autowired
-    private SessionFactory sessionFactory;
+public class ItemDaoTest extends AbstractDaoTest {
 
     @Autowired
     private ItemDao underTest;
 
     @Autowired
     private CategoryDao categoryDao;
-
-    @Container
-    public static CustomPostgreSQLContainer postgreSQLContainer
-            = CustomPostgreSQLContainer.getInstance();
 
     @Value("${default.page.size}")
     private int pageSize;
