@@ -1,6 +1,6 @@
 package com.modsensoftware.marketplace.dto.response;
 
-import com.modsensoftware.marketplace.dto.CompanyDto;
+import com.modsensoftware.marketplace.dto.Company;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +21,5 @@ public class UserResponseDto {
     private String name;
     private LocalDateTime created;
     private LocalDateTime updated;
-    private CompanyDto company;
+    private Company company;
 }

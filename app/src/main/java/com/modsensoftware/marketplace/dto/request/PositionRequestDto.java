@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.dto;
+package com.modsensoftware.marketplace.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PositionDto {
+public class PositionRequestDto {
     private UUID itemId;
     private Long itemVersion;
     private Long companyId;

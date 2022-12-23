@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.dto.mapper;
 
-import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
+import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.request.UserRequestDto;
 import com.modsensoftware.marketplace.dto.response.UserResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,6 @@ import java.util.Collections;
 @Component
 public class UserMapper {
 
-    private final CompanyMapper companyMapper;
-
     public UserRepresentation toKeycloakUserRepresentation(UserRequestDto userDto) {
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setEnabled(true);
@@ -33,7 +31,7 @@ public class UserMapper {
         return userRepresentation;
     }
 
-    public UserResponseDto toResponseDto(User user) {
+    public UserResponseDto toResponseDto(User user, Company company) {
         return new UserResponseDto(
                 user.getId(),
                 user.getUsername(),
@@ -41,18 +39,16 @@ public class UserMapper {
                 user.getName(),
                 user.getCreated(),
                 user.getUpdated(),
-                companyMapper.toCompanyDto(user.getCompany())
+                company
         );
     }
 
     public User toUser(UserRequestDto requestDto) {
-        Company company = new Company();
-        company.setId(requestDto.getCompanyId());
         return User.builder()
                 .username(requestDto.getUsername())
                 .email(requestDto.getEmail())
                 .name(requestDto.getName())
-                .company(company)
+                .companyId(requestDto.getCompanyId())
                 .build();
     }
 }
