@@ -1,15 +1,12 @@
 package com.modsensoftware.marketplace.unit.user;
 
-import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
-import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.dao.UserDao;
-import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.InvalidFilterException;
+import com.modsensoftware.marketplace.unit.AbstractDaoTest;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,11 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,25 +32,10 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 /**
  * @author andrey.demyanchik on 11/23/2022
  */
-@Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class UserDaoTest {
-
-    @MockBean
-    private JwtDecoder jwtDecoder;
-
-    @Autowired
-    private SessionFactory sessionFactory;
+public class UserDaoTest extends AbstractDaoTest {
 
     @Autowired
     private UserDao underTest;
-
-    @Autowired
-    private CompanyDao companyDao;
-
-    @Container
-    public static CustomPostgreSQLContainer postgreSQLContainer
-            = CustomPostgreSQLContainer.getInstance();
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -96,21 +73,15 @@ public class UserDaoTest {
 
 
     @Test
-    public void canGetAllNonSoftDeletedUsersWithPagination() {
+    public void canGetUsersWithPagination() {
         // given
-        Company company = generateDefaultTestPersistentCompany();
-        Company softDeletedCompany = new Company(null, "company", "softDeleted@company.com",
-                now().truncatedTo(SECONDS), "description", true);
-        companyDao.save(softDeletedCompany);
+        Long companyId = 1L;
         Random random = new Random();
         List<User> users = new ArrayList<>();
         for (int i = 0; i < pageSize + 1; i++) {
-            User user = generateUserWithRandomEmail(random, company);
-            User softDeletedUser = generateUserWithRandomEmail(random, softDeletedCompany);
+            User user = generateUserWithRandomEmailAndCompanyId(random, companyId);
             users.add(user);
-            users.add(softDeletedUser);
             underTest.save(user);
-            underTest.save(softDeletedUser);
         }
 
         // when
@@ -119,28 +90,21 @@ public class UserDaoTest {
 
         // then
         Assertions.assertThat(firstPage.size()).isEqualTo(pageSize);
-        Assertions.assertThat(firstPage).noneMatch(user -> user.getCompany().getIsDeleted().equals(true));
-        Assertions.assertThat(secondPage.size()).isEqualTo(users.size() / 2 - pageSize);
-        Assertions.assertThat(secondPage).noneMatch(user -> user.getCompany().getIsDeleted().equals(true));
+        Assertions.assertThat(secondPage.size()).isEqualTo(users.size() - pageSize);
 
         // clean up
         deleteAllUsers(users);
-        deleteCompany(company);
-        deleteCompany(softDeletedCompany);
     }
 
     @Test
     public void canGetAllUsersFilteredByCompanyId() {
         // given
-        Company company = generateDefaultTestPersistentCompany();
-        Company anotherCompany = new Company(null, "company", "anotherCompany@anotherCompany.com",
-                now().truncatedTo(SECONDS), "description", false);
-        companyDao.save(anotherCompany);
+        Long companyId = 1L;
         Random random = new Random();
         List<User> users = new ArrayList<>();
         for (int i = 0; i < pageSize / 2; i++) {
-            User user = generateUserWithRandomEmail(random, company);
-            User anotherUser = generateUserWithRandomEmail(random, anotherCompany);
+            User user = generateUserWithRandomEmailAndCompanyId(random, companyId);
+            User anotherUser = generateUserWithRandomEmailAndCompanyId(random, companyId + 1);
             users.add(user);
             users.add(anotherUser);
             underTest.save(user);
@@ -149,7 +113,7 @@ public class UserDaoTest {
 
         // when
         Map<String, String> companyIdFilter = new HashMap<>();
-        String filterValue = String.valueOf(company.getId());
+        String filterValue = String.valueOf(companyId);
         companyIdFilter.put("companyId", filterValue);
         List<User> firstPage = underTest.getAll(0, companyIdFilter);
 
@@ -158,15 +122,13 @@ public class UserDaoTest {
 
         // clean up
         deleteAllUsers(users);
-        deleteCompany(company);
-        deleteCompany(anotherCompany);
     }
 
     @Test
     public void canGetAllUsersFilteredByTimestampCreated() {
         // given
-        Company company = generateDefaultTestPersistentCompany();
-        List<User> users = generatePersistentUsersForTimestampFilterTest(company);
+        Long companyId = 1L;
+        List<User> users = generatePersistentUsersForTimestampFilterTest(companyId);
         int expectedAmountOfUsersLeftAfterFiltering = 2;
 
         // when
@@ -180,7 +142,6 @@ public class UserDaoTest {
 
         // clean up
         deleteAllUsers(users);
-        deleteCompany(company);
     }
 
     @ValueSource(strings = {
@@ -206,17 +167,15 @@ public class UserDaoTest {
     @Test
     public void canUpdateUser() {
         // given
-        Company company = generateDefaultTestPersistentCompany();
-        Company anotherCompany = new Company(null, "another company", "anotherCompany@anotherCompany.com",
-                now().truncatedTo(SECONDS), "description", false);
-        companyDao.save(anotherCompany);
+        Long companyId = 1L;
+        Long anotherCompanyId = 2L;
         User user = new User(UUID.randomUUID(), "username", "email@email.com", "full name",
-                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), companyId);
         underTest.save(user);
         User updatedFields = new User(null, "upd username", "updEmail@email.com",
-                "upd full name", null, now().truncatedTo(SECONDS), anotherCompany);
+                "upd full name", null, now().truncatedTo(SECONDS), anotherCompanyId);
         User expected = new User(user.getId(), updatedFields.getUsername(), updatedFields.getEmail(),
-                updatedFields.getName(), user.getCreated(), updatedFields.getUpdated(), updatedFields.getCompany());
+                updatedFields.getName(), user.getCreated(), updatedFields.getUpdated(), updatedFields.getCompanyId());
 
         // when
         underTest.update(user.getId(), updatedFields);
@@ -227,7 +186,6 @@ public class UserDaoTest {
 
         // clean up
         deleteUser(actual);
-        deleteCompany(company);
     }
 
     @Test
@@ -236,7 +194,6 @@ public class UserDaoTest {
         User user = generateDefaultTestUser();
         underTest.save(user);
         User updatedFields = new User();
-        updatedFields.setCompany(new Company());
 
         // when
         underTest.update(user.getId(), updatedFields);
@@ -263,29 +220,17 @@ public class UserDaoTest {
         User result = session.get(User.class, user.getId());
         Assertions.assertThat(result).isNull();
         session.close();
-
-        // clean up
-        deleteCompany(user.getCompany());
-    }
-
-    private Company generateDefaultTestPersistentCompany() {
-        Company company = new Company(null, "company", "company@company.com",
-                now().truncatedTo(SECONDS), "description", false);
-        companyDao.save(company);
-        return company;
     }
 
     private User generateDefaultTestUser() {
-        Company company = generateDefaultTestPersistentCompany();
         return new User(UUID.randomUUID(), "username", "email@email.com", "full name",
-                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), 1L);
     }
 
     private void deleteUser(User user) {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.delete(user);
-        session.delete(user.getCompany());
         transaction.commit();
         session.close();
     }
@@ -298,20 +243,12 @@ public class UserDaoTest {
         session.close();
     }
 
-    private void deleteCompany(Company company) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.delete(company);
-        transaction.commit();
-        session.close();
-    }
-
-    private List<User> generatePersistentUsersForTimestampFilterTest(Company userCompany) {
+    private List<User> generatePersistentUsersForTimestampFilterTest(Long companyId) {
         Random random = new Random();
-        User user1 = generateUserWithRandomEmailAndTimestamp(random, userCompany, "2022-10-01T12:00:00");
-        User user2 = generateUserWithRandomEmailAndTimestamp(random, userCompany, "2022-11-01T12:00:00");
-        User user3 = generateUserWithRandomEmailAndTimestamp(random, userCompany, "2022-11-07T12:00:00");
-        User user4 = generateUserWithRandomEmailAndTimestamp(random, userCompany, "2022-11-18T12:00:00");
+        User user1 = generateUserWithRandomEmailAndTimestamp(random, companyId, "2022-10-01T12:00:00");
+        User user2 = generateUserWithRandomEmailAndTimestamp(random, companyId, "2022-11-01T12:00:00");
+        User user3 = generateUserWithRandomEmailAndTimestamp(random, companyId, "2022-11-07T12:00:00");
+        User user4 = generateUserWithRandomEmailAndTimestamp(random, companyId, "2022-11-18T12:00:00");
         List<User> users = List.of(user1, user2, user3, user4);
         Session saveSession = sessionFactory.openSession();
         Transaction saveTransaction = saveSession.beginTransaction();
@@ -321,15 +258,15 @@ public class UserDaoTest {
         return users;
     }
 
-    private User generateUserWithRandomEmail(Random random, Company company) {
+    private User generateUserWithRandomEmailAndCompanyId(Random random, Long companyId) {
         return new User(UUID.randomUUID(), format("username%s", random.nextInt()),
                 format("email%s@email.com", random.nextInt()), "full name",
-                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), companyId);
     }
 
-    private User generateUserWithRandomEmailAndTimestamp(Random random, Company company, String timestamp) {
+    private User generateUserWithRandomEmailAndTimestamp(Random random, Long companyId, String timestamp) {
         return new User(UUID.randomUUID(), format("username%s", random.nextInt()),
                 format("email%s@email.com", random.nextInt()), "full name",
-                parse(timestamp), parse(timestamp), company);
+                parse(timestamp), parse(timestamp), companyId);
     }
 }

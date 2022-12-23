@@ -1,22 +1,19 @@
 package com.modsensoftware.marketplace.unit.usertransaction;
 
-import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
 import com.modsensoftware.marketplace.dao.CategoryDao;
-import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.dao.UserTransactionDao;
 import com.modsensoftware.marketplace.domain.Category;
-import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.domain.UserTransaction;
+import com.modsensoftware.marketplace.unit.AbstractDaoTest;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
@@ -24,11 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.persistence.PersistenceException;
 import java.time.LocalDateTime;
@@ -44,17 +36,8 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 /**
  * @author andrey.demyanchik on 11/27/2022
  */
-@Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class UserTransactionDaoTest {
+public class UserTransactionDaoTest extends AbstractDaoTest {
 
-    @MockBean
-    private JwtDecoder jwtDecoder;
-
-    @Autowired
-    private SessionFactory sessionFactory;
-    @Autowired
-    private CompanyDao companyDao;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -66,10 +49,6 @@ public class UserTransactionDaoTest {
 
     @Autowired
     private UserTransactionDao underTest;
-
-    @Container
-    public static CustomPostgreSQLContainer postgreSQLContainer
-            = CustomPostgreSQLContainer.getInstance();
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -126,9 +105,8 @@ public class UserTransactionDaoTest {
     @Test
     public void canGetAllTransactionsForUserWithPagination() {
         // given
-        Company company = generatePersistentCompany("customerCompany@company.com");
-        User user1 = generatePersistentUser("customer1@email.com", "username3", company);
-        User user2 = generatePersistentUser("customer2@email.com", "username4", company);
+        User user1 = generatePersistentUser("customer1@email.com", "username3", 1L);
+        User user2 = generatePersistentUser("customer2@email.com", "username4", 2L);
 
         Position savedPosition = generateDefaultPosition();
         List<UserTransaction> userTransactions = generateTransactionsForUsers(savedPosition, user1, user2);
@@ -148,33 +126,26 @@ public class UserTransactionDaoTest {
 
         // clean up
         userTransactions.forEach(this::deleteUserTransaction);
-        deleteEntities(user1, user2, company);
+        deleteEntities(user1, user2);
         deletePositionAndItsEntities(savedPosition);
     }
 
-    private Company generatePersistentCompany(String companyEmail) {
-        Company company = new Company(null, "company", companyEmail,
-                now().truncatedTo(SECONDS), "description", false);
-        companyDao.save(company);
-        return company;
-    }
-
-    private User generatePersistentUser(String email, String username, Company company) {
+    private User generatePersistentUser(String email, String username, Long companyId) {
         User user = new User(UUID.randomUUID(), username, email, "full name",
-                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), companyId);
         userDao.save(user);
         return user;
     }
 
     private Position generateDefaultPosition() {
-        Company company = generatePersistentCompany("company@company.com");
-        User user = generatePersistentUser("email@email.com", "username1", company);
+        Long companyId = 1L;
+        User user = generatePersistentUser("email@email.com", "username1", companyId);
         Category category = new Category(null, "category", "description", null);
         categoryDao.save(category);
         Item item = new Item(null, "name", "description",
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, 1L);
         itemDao.save(item);
-        Position position = new Position(null, item, company, user, now().truncatedTo(SECONDS), 120d, 0.1d, 0L);
+        Position position = new Position(null, item, companyId, user, now().truncatedTo(SECONDS), 120d, 0.1d, 0L);
         positionDao.save(position);
         return position;
     }
@@ -199,7 +170,6 @@ public class UserTransactionDaoTest {
         session.delete(position.getItem());
         session.delete(position.getItem().getCategory());
         session.delete(position.getCreatedBy());
-        session.delete(position.getCompany());
         transaction.commit();
         session.close();
     }
