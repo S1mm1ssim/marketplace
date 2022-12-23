@@ -43,13 +43,3 @@ WHERE id = '722cd920-e127-4cc2-93b9-e9b4a8f18873';
 DELETE
 FROM "user"
 WHERE id = 'c048ef0e-fe46-4c65-9c01-d88af74ba0ab';
-
-DELETE
-FROM company
-WHERE id = 999;
-DELETE
-FROM company
-WHERE id = 1000;
-DELETE
-FROM company
-WHERE id = 1001;

@@ -1,6 +1,3 @@
-INSERT INTO company(id, name, email, created, description, is_deleted)
-VALUES (999, 'company', 'company@company.com', now(), 'description', false);
-
 INSERT INTO "user"(id, username, email, name, created, updated, company_id)
 VALUES ('b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d', 'customer1', 'sqlcustomer1@user.com', 'full name', now(), now(), 999),
        ('722cd920-e127-4cc2-93b9-e9b4a8f18873', 'customer2', 'sqlcustomer2@email.com', 'full name', now(), now(), 999);

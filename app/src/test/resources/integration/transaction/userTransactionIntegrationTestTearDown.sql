@@ -31,7 +31,3 @@ WHERE id = 999;
 DELETE
 FROM "user"
 WHERE id IN ('b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d', '722cd920-e127-4cc2-93b9-e9b4a8f18873');
-
-DELETE
-FROM company
-WHERE id = 999;
