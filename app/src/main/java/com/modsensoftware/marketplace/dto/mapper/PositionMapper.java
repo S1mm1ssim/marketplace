@@ -9,8 +9,6 @@ import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 /**
  * @author andrey.demyanchik on 11/3/2022
  */

@@ -12,14 +12,18 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FeignErrorHandler implements ErrorDecoder {
+
+    private static final int BAD_REQUEST_STATUS = 400;
+    private static final int NOT_FOUND_STATUS = 404;
+
     private final ErrorDecoder errorDecoder = new Default();
 
     @Override
     public Exception decode(String methodKey, Response response) {
         switch (response.status()) {
-            case 400:
+            case BAD_REQUEST_STATUS:
                 return new EntityAlreadyExistsException("Bad Request");
-            case 404:
+            case NOT_FOUND_STATUS:
                 log.error("Company entity not found");
                 return new EntityNotFoundException("Not Found: Company entity not found");
             default:

@@ -34,7 +34,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.modsensoftware.marketplace.constants.Constants.*;
+import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
 import static java.lang.String.format;
 
 /**
