@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.ext.ScriptUtils;
 
 import java.util.UUID;
@@ -23,8 +26,12 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 11/28/2022
  */
+@ActiveProfiles("integration-test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TransactionControllerIntegrationTest extends AbstractIntegrationTest {
+
+    @LocalServerPort
+    private int port;
 
     private static String accessToken;
 
@@ -48,6 +55,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
 
     @BeforeEach
     void setUp() {
+        RestAssured.port = this.port;
         accessToken = getAccessToken(TEST_MANAGER_USERNAME);
         OrderArgumentsProvider.insufficientItemsInStockMessage = this.insufficientItemsInStockMessage;
         OrderArgumentsProvider.insufficientOrderAmountMessage = this.insufficientOrderAmountMessage;

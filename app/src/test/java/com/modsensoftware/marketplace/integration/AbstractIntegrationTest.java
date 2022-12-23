@@ -22,14 +22,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * @author andrey.demyanchik on 11/22/2022
  */
 @Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
-        properties = {
-                "server.port=8081",
-                "management.server.port=9081"
-        })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest {
 
-    private static final int DEFAULT_PORT = 8081;
     private static final String BASE_PATH = "/api/v1";
 
     private static final String GET_ACCESS_TOKEN_PATH = "/protocol/openid-connect/token";
@@ -63,13 +58,6 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeAll
     protected static void beforeAll() {
-        String port = System.getProperty("server.port");
-        if (port == null) {
-            RestAssured.port = DEFAULT_PORT;
-        } else {
-            RestAssured.port = Integer.parseInt(port);
-        }
-
         String basePath = System.getProperty("server.base");
         if (basePath == null) {
             basePath = BASE_PATH;

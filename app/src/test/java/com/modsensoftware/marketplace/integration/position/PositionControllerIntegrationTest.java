@@ -1,8 +1,13 @@
 package com.modsensoftware.marketplace.integration.position;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
+import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
+import com.modsensoftware.marketplace.integration.CompanyStubs;
+import com.modsensoftware.marketplace.integration.LoadBalancerTestConfig;
 import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
@@ -13,8 +18,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.ext.ScriptUtils;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +32,17 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 11/23/2022
  */
+@ActiveProfiles({"wiremock-test", "integration-test"})
+@ContextConfiguration(classes = {LoadBalancerTestConfig.class})
 public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
 
+    @LocalServerPort
+    private int port;
+
+    @Autowired
+    private WireMockServer wireMockServer1;
+    @Autowired
+    private WireMockServer wireMockServer2;
     @Autowired
     private PositionDao positionDao;
 
@@ -46,11 +64,14 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        RestAssured.port = this.port;
         accessToken = getAccessToken(TEST_STORAGE_MANAGER_USERNAME);
     }
 
     @Test
-    public void shouldReturn201StatusOnSaveOperation() {
+    public void shouldReturn201StatusOnSaveOperation() throws IOException {
+        CompanyStubs.setupGetCompanyWithId(wireMockServer1, 999L);
+        CompanyStubs.setupGetCompanyWithId(wireMockServer2, 999L);
         // given
         String itemUuid = "b6b7764c-ed62-47a4-a68d-3cad4da1e187";
         String companyId = "999";
@@ -96,36 +117,66 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldReturnAllPositionsWithNonSoftDeletedCompany() {
-        Position[] positions = RestAssured.given()
+    public void shouldReturnAllPositionsWithNonSoftDeletedCompany() throws IOException {
+        CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer1);
+        CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer2);
+        PositionResponseDto[] positions = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .get("/positions")
                 .then().statusCode(200)
-                .extract().body().as(Position[].class);
-        Assertions.assertThat(positions).noneMatch(position -> position.getCompany().getIsDeleted().equals(true));
+                .extract().body().as(PositionResponseDto[].class);
         Assertions.assertThat(positions.length).isGreaterThanOrEqualTo(2);
     }
 
     @Test
-    public void shouldReturnPositionById() {
-        String positionId = "999";
-        Position actual = RestAssured.given()
-                .contentType("application/json")
-                .header("Authorization", "Bearer " + accessToken)
-                .when()
-                .get(format("/positions/%s", positionId))
-                .then().statusCode(200)
-                .extract().body().as(Position.class);
+    public void shouldLoadBalanceGetAllPositions() throws IOException {
+        CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer1);
+        CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer2);
+        for (int i = 0; i < 10; i++) {
+            RestAssured.given()
+                    .contentType("application/json")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .when()
+                    .get("/positions")
+                    .then().statusCode(200);
+        }
+        wireMockServer1.verify(WireMock.moreThan(0),
+                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/")));
+        wireMockServer2.verify(WireMock.moreThan(0),
+                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/")));
+    }
 
-        Position expected = positionDao.get(Long.valueOf(positionId));
-        Assertions.assertThat(actual).isEqualTo(expected);
+    @Test
+    public void shouldLoadBalanceGetPositionById() throws IOException {
+        long companyId = 1000L;
+        CompanyStubs.setupGetCompanyWithId(wireMockServer1, companyId);
+        CompanyStubs.setupGetCompanyWithId(wireMockServer2, companyId);
+        String positionId = "999";
+        for (int i = 0; i < 10; i++) {
+            RestAssured.given()
+                    .contentType("application/json")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .when()
+                    .get(format("/positions/%s", positionId))
+                    .then().statusCode(200);
+        }
+        wireMockServer1.verify(WireMock.moreThan(0),
+                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/" + companyId)));
+        wireMockServer2.verify(WireMock.moreThan(0),
+                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/" + companyId)));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"1001", "99999"})
+    @ValueSource(strings = {"99999", "1001"})
     public void shouldReturn404StatusIfPositionNotFoundOrItsCompanyIsSoftDeleted(String positionId) {
+        // createdBy.company
+        CompanyStubs.setupGetNonExistentCompany(wireMockServer1, 1001L);
+        CompanyStubs.setupGetNonExistentCompany(wireMockServer2, 1001L);
+        // company_id
+        CompanyStubs.setupGetNonExistentCompany(wireMockServer1, 1002L);
+        CompanyStubs.setupGetNonExistentCompany(wireMockServer2, 1002L);
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
