@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "item")
 @NamedEntityGraph(
         name = "graph.Item.category.parent",
