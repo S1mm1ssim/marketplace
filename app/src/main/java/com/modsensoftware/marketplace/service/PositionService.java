@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service;
 
-import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.PositionDto;
+import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 
 import java.util.List;
 
@@ -10,13 +10,13 @@ import java.util.List;
  */
 public interface PositionService {
 
-    Position getPositionById(Long id);
+    PositionResponseDto getPositionById(Long id);
 
-    List<Position> getAllPositions(int pageNumber);
+    List<PositionResponseDto> getAllPositions(int pageNumber);
 
-    void createPosition(PositionDto positionDto);
+    void createPosition(PositionRequestDto positionRequestDto);
 
     void deletePosition(Long id);
 
-    void updatePosition(Long id, PositionDto updatedFields);
+    void updatePosition(Long id, PositionRequestDto updatedFields);
 }

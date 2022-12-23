@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.PositionDto;
+import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,14 +36,14 @@ public class PositionController {
     private final PositionService positionService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Position> getAllPositions(
+    public List<PositionResponseDto> getAllPositions(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Position getPositionById(@PathVariable(name = "id") Long id) {
+    public PositionResponseDto getPositionById(@PathVariable(name = "id") Long id) {
         log.debug("Fetching position by id: {}", id);
         return positionService.getPositionById(id);
     }
@@ -51,9 +51,9 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createPosition(@Valid @RequestBody PositionDto positionDto) {
-        log.debug("Creating new position from dto: {}", positionDto);
-        positionService.createPosition(positionDto);
+    public void createPosition(@Valid @RequestBody PositionRequestDto positionRequestDto) {
+        log.debug("Creating new position from dto: {}", positionRequestDto);
+        positionService.createPosition(positionRequestDto);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
@@ -67,7 +67,7 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
     public void updatePosition(@PathVariable Long id,
-                               @Valid @RequestBody PositionDto updatedFields) {
+                               @Valid @RequestBody PositionRequestDto updatedFields) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         positionService.updatePosition(id, updatedFields);
     }
