@@ -38,6 +38,7 @@ create table "user"
     created    timestamp                       not null,
     updated    timestamp                       not null,
     company_id bigint                          not null,
+    password   varchar(72)                     not null,
     constraint user_pkey
         primary key (id),
     constraint user_email_key

@@ -14,6 +14,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
         jdbc:
           batch_size: 5
+  redis:
+    host: localhost
+    port: 6379
 
 logging:
   level:
@@ -23,6 +26,17 @@ default:
   page:
     size: 20
   role: MANAGER
+
+
+jwt:
+  secret:
+    access: "qBTmv4oXFFR2GwjexDJ4t6fsIUIUhhXqlktXjXdkcyygs8nPVEwMfo29VDRRepYDVV5IkIxBMzr7OEHXEHd37w=="
+    refresh: "zL1HB3Pch05Avfynovxrf/kpF9O2m4NCWKJUjEp27s9J2jEG3ifiKCGylaZ8fDeoONSTJP/wAzKawB8F9rOMNg=="
+  lifetime:
+    access: 5
+    refresh: 43200
+  claims:
+    roles: "roles"
 
 exception:
   message:
@@ -41,3 +55,6 @@ exception:
     noPositionVersionProvided: "No version for position with id %s was provided"
     insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
+    invalidCredentialsException: "Provided credentials are incorrect"
+    userWithEmailNotFound: "User with email=%s is not found"
+    invalidJwt: "Provided JWT is invalid"

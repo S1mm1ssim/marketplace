@@ -6,6 +6,7 @@ import com.modsensoftware.marketplace.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,6 +53,7 @@ public class ItemController {
         return itemService.getItemById(id);
     }
 
+    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createItem(@RequestBody ItemDto itemDto) {
@@ -59,6 +61,7 @@ public class ItemController {
         itemService.createItem(itemDto);
     }
 
+    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
@@ -66,6 +69,7 @@ public class ItemController {
         itemService.deleteItem(id);
     }
 
+    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
     @PutMapping("/{id}")
     public void updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id,
                            @RequestBody ItemDto updatedFields) {

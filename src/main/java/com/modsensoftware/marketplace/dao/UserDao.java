@@ -58,6 +58,8 @@ public class UserDao implements Dao<User, UUID> {
     private int pageSize;
     @Value("${exception.message.userNotFound}")
     private String userNotFoundMessage;
+    @Value("${exception.message.userWithEmailNotFound}")
+    private String userWithEmailNotFoundMessage;
     @Value("${exception.message.invalidCreatedBetweenFilter}")
     private String invalidCreatedBetweenFilterMessage;
 
@@ -91,6 +93,34 @@ public class UserDao implements Dao<User, UUID> {
         } catch (NoResultException e) {
             log.error("User entity with uuid {} not found", id);
             throw new EntityNotFoundException(format(userNotFoundMessage, id), e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public User getByEmail(String email) {
+        log.debug("Fetching user entity with email {}", email);
+        Session session = sessionFactory.openSession();
+        RootGraph<?> entityGraph = session.getEntityGraph(USER_ENTITY_GRAPH);
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<User> byId = cb.createQuery(User.class);
+        Root<User> root = byId.from(User.class);
+        Join<User, Company> company = root.join(COMPANY_FIELD_NAME);
+
+        byId.select(root).where(
+                cb.and(
+                        cb.equal(root.get(EMAIL_FIELD_NAME), email),
+                        cb.isFalse(root.get(COMPANY_FIELD_NAME).get(IS_SOFT_DELETED_FIELD_NAME))
+                )
+        );
+
+        Query<User> query = session.createQuery(byId);
+        query.setHint(GRAPH_TYPE, entityGraph);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            log.error("User entity with email {} not found", email);
+            throw new EntityNotFoundException(format(userWithEmailNotFoundMessage, email), e);
         } finally {
             session.close();
         }

@@ -1,11 +1,11 @@
 INSERT INTO company(id, name, email, created, description, is_deleted)
 VALUES (999, 'company', 'company@company.com', now(), 'description', false);
 
-INSERT INTO "user"(id, username, email, name, role, created, updated, company_id)
-VALUES ('b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d', 'customer1', 'sqlcustomer1@user.com', 'full name', 'MANAGER', now(),
-        now(), 999),
-       ('722cd920-e127-4cc2-93b9-e9b4a8f18873', 'customer2', 'sqlcustomer2@email.com', 'full name', 'MANAGER', now(),
-        now(), 999);
+INSERT INTO "user"(id, username, email, password, name, role, created, updated, company_id)
+VALUES ('b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d', 'customer1', 'sqlcustomer1@user.com', 'password', 'full name',
+        'STORAGE_MANAGER', now(), now(), 999),
+       ('722cd920-e127-4cc2-93b9-e9b4a8f18873', 'customer2', 'sqlcustomer2@email.com', 'password', 'full name',
+        'MANAGER', now(), now(), 999);
 
 INSERT INTO category(id, name, parent_category, description)
 VALUES (999, 'root', null, 'description');

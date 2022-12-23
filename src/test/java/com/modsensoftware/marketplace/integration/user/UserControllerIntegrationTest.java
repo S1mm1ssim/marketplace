@@ -1,7 +1,9 @@
 package com.modsensoftware.marketplace.integration.user;
 
+import com.modsensoftware.marketplace.config.jwt.JwtProvider;
 import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.domain.User;
+import com.modsensoftware.marketplace.enums.Role;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import io.restassured.RestAssured;
@@ -31,6 +33,9 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private JwtProvider jwtProvider;
+
     @Value("${exception.message.userNotFound}")
     private String userNotFoundMessage;
 
@@ -51,6 +56,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         Map<String, String> user = new HashMap<>();
         user.put("username", "testUser");
         user.put("email", "saveTest@test.com");
+        user.put("password", "user_password");
         user.put("name", "testUser");
         user.put("companyId", companyId);
         RestAssured.given()
@@ -64,12 +70,14 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void shouldReturnAllUsersWhoseCompanyIsNotDeleted() {
         // given
+        String token = generateAccessToken(getTestUser());
         final String userWithSoftDeletedCompany = "softDeleted@user.com";
 
         // when
         // then
         User[] users = RestAssured.given()
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/users").then()
                 .statusCode(200)
@@ -82,12 +90,14 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void shouldReturnAllUsersFiltered() {
         // given
+        String token = generateAccessToken(getTestUser());
         int expectedUsersAmount = 2;
         String emailFilter = "sqluser";
         // when
         // then
         User[] users = RestAssured.given()
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
                 .param("email", emailFilter)
                 .when()
                 .get("/users").then()
@@ -99,13 +109,16 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void canGetUserById() {
         // given
+        String token = generateAccessToken(getTestUser());
         final String userUuid = "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d";
         User expected = userDao.get(UUID.fromString(userUuid));
+        expected.setPassword(null);
 
         // when
         // then
         User response = RestAssured.given()
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .get(String.format("/users/%s", userUuid)).then()
                 .statusCode(200)
@@ -121,10 +134,12 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("Should return 404 status on getById operation if user not found or their company is soft deleted")
     public void shouldReturn404StatusOnGetByIdNotFound(String userUuid) {
         // given
+        String token = generateAccessToken(getTestUser());
         // when
         // then
         String response = RestAssured.given()
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .get(String.format("/users/%s", userUuid)).then()
                 .statusCode(404)
@@ -136,10 +151,12 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void canDeleteUser() {
         // given
+        String token = generateAccessToken(getTestUser());
         final String userUuid = "722cd920-e127-4cc2-93b9-e9b4a8f18873";
         // when
         // then
         RestAssured.given()
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .delete(String.format("/users/%s", userUuid)).then()
                 .statusCode(204);
@@ -150,6 +167,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void canUpdateUser() {
         // given
+        String token = generateAccessToken(getTestUser());
         final String userUuid = "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d";
         String updatedName = "updated name";
         String updatedFields = String.format("{\n"
@@ -160,11 +178,22 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         // then
         RestAssured.given()
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
                 .body(updatedFields)
                 .when()
                 .put(String.format("/users/%s", userUuid)).then()
                 .statusCode(200);
         User user = userDao.get(UUID.fromString(userUuid));
         Assertions.assertThat(user.getName()).isEqualTo(updatedName);
+    }
+
+    private String generateAccessToken(User user) {
+        return jwtProvider.generateAccessToken(user);
+    }
+
+    private User getTestUser() {
+        return new User(UUID.fromString("b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d"),
+                "user1", "sqluser1@mail.com", "password", "full name", Role.MANAGER,
+                null, null, null);
     }
 }

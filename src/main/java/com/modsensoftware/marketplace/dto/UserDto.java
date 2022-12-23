@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
 
@@ -20,5 +21,7 @@ public class UserDto {
     @Email(regexp = EMAIL_REGEX, message = INVALID_EMAIL_MESSAGE)
     private String email;
     private String name;
+    @Length(min = 8, message = "Password must be at least 8 characters long")
+    private String password;
     private Long companyId;
 }

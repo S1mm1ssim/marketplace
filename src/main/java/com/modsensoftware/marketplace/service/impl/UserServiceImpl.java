@@ -1,16 +1,21 @@
 package com.modsensoftware.marketplace.service.impl;
 
 import com.modsensoftware.marketplace.dao.UserDao;
+import com.modsensoftware.marketplace.domain.RefreshToken;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.UserDto;
 import com.modsensoftware.marketplace.dto.mapper.UserMapper;
 import com.modsensoftware.marketplace.enums.Role;
+import com.modsensoftware.marketplace.exception.AuthorizationException;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
+import com.modsensoftware.marketplace.repository.RefreshTokenRepository;
 import com.modsensoftware.marketplace.service.UserService;
 import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,7 +39,9 @@ import static java.lang.String.format;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final UserMapper userMapper;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Value("${exception.message.userEmailTaken}")
     private String userEmailTakenMessage;
@@ -46,6 +53,15 @@ public class UserServiceImpl implements UserService {
     public User getUserById(UUID id) {
         log.debug("Fetching user by id: {}", id);
         return userDao.get(id);
+    }
+
+    public User getUserByEmail(String email) {
+        log.debug("Fetching user by email: {}", email);
+        try {
+            return userDao.getByEmail(email);
+        } catch (EntityNotFoundException e) {
+            throw new AuthorizationException(e.getMessage());
+        }
     }
 
     @Override
@@ -75,6 +91,7 @@ public class UserServiceImpl implements UserService {
             user.setRole(Role.valueOf(defaultRole));
             user.setCreated(LocalDateTime.now());
             user.setUpdated(LocalDateTime.now());
+            user.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
             log.debug("Mapping result: {}", user);
             userDao.save(user);
         } else {
@@ -87,7 +104,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(UUID id) {
         log.debug("Deleting user by id: {}", id);
+        User user = userDao.get(id);
         userDao.deleteById(id);
+        log.debug("Deleting associated refresh token");
+        List<RefreshToken> userTokens = refreshTokenRepository.findByUserEmail(user.getEmail());
+        userTokens.forEach(token -> refreshTokenRepository.deleteById(token.getId()));
     }
 
     @Override

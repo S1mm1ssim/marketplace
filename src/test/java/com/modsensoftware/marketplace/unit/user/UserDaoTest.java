@@ -60,6 +60,8 @@ public class UserDaoTest {
     private int pageSize;
     @Value("${exception.message.userNotFound}")
     private String userNotFoundMessage;
+    @Value("${exception.message.userWithEmailNotFound}")
+    private String userWithEmailNotFoundMessage;
     @Value("${exception.message.invalidCreatedBetweenFilter}")
     private String invalidCreatedBetweenFilterMessage;
 
@@ -88,6 +90,33 @@ public class UserDaoTest {
         Assertions.assertThatThrownBy(() -> underTest.get(UUID.fromString(nonExistentUuid)))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage(format(userNotFoundMessage, nonExistentUuid));
+    }
+
+    @Test
+    public void canSaveAndGetUserByEmail() {
+        // given
+        User user = generateDefaultTestUser();
+
+        // when
+        underTest.save(user);
+
+        // then
+        User result = underTest.getByEmail(user.getEmail());
+        Assertions.assertThat(result).isEqualTo(user);
+
+        // clean up
+        deleteUser(user);
+    }
+
+    @Test
+    public void getByNonExistentEmailShouldThrowEntityNotFoundException() {
+        // given
+        String nonExistentEmail = "hsadgsakjdbhabhsadbjskbhdashasdhj@fhdjfhjdksfnkjd.dashdaskjdsadkansl";
+        // when
+        // then
+        Assertions.assertThatThrownBy(() -> underTest.getByEmail(nonExistentEmail))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage(format(userWithEmailNotFoundMessage, nonExistentEmail));
     }
 
     @Test
@@ -263,13 +292,13 @@ public class UserDaoTest {
         Company anotherCompany = new Company(null, "another company", "anotherCompany@anotherCompany.com",
                 now().truncatedTo(SECONDS), "description", false);
         companyDao.save(anotherCompany);
-        User user = new User(null, "username", "email@email.com", "full name",
+        User user = new User(null, "username", "email@email.com", "full name", "password",
                 MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
         underTest.save(user);
         User updatedFields = new User(null, "upd username", "updEmail@email.com",
-                "upd full name", null, null, now().truncatedTo(SECONDS), anotherCompany);
+                "upd full name", "password", null, null, now().truncatedTo(SECONDS), anotherCompany);
         User expected = new User(user.getId(), updatedFields.getUsername(), updatedFields.getEmail(),
-                updatedFields.getName(), user.getRole(), user.getCreated(),
+                updatedFields.getName(), "password", user.getRole(), user.getCreated(),
                 updatedFields.getUpdated(), updatedFields.getCompany());
 
         // when
@@ -331,7 +360,7 @@ public class UserDaoTest {
 
     private User generateDefaultTestUser() {
         Company company = generateDefaultTestPersistentCompany();
-        return new User(null, "username", "email@email.com", "full name",
+        return new User(null, "username", "email@email.com", "full name", "password",
                 MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 
@@ -376,22 +405,22 @@ public class UserDaoTest {
     }
 
     private User generateUserWithRandomEmail(Random random, Company company) {
-        return new User(null, "username", format("email%s@email.com", random.nextInt()), "full name",
+        return new User(null, "username", format("email%s@email.com", random.nextInt()), "full name", "pass",
                 MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 
     private User generateUserWithRandomEmailAndName(Random random, Company company, String name) {
-        return new User(null, "username", format("email%s@email.com", random.nextInt()), name,
+        return new User(null, "username", format("email%s@email.com", random.nextInt()), name, "password",
                 MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 
     private User generateUserWithRandomEmailAndTimestamp(Random random, Company company, String timestamp) {
-        return new User(null, "username", format("email%s@email.com", random.nextInt()), "full name",
+        return new User(null, "username", format("email%s@email.com", random.nextInt()), "full name", "password",
                 MANAGER, parse(timestamp), parse(timestamp), company);
     }
 
     private User generateUserWithRandomizedEmail(Random random, Company company, String email) {
-        return new User(null, "username", format(email, random.nextInt()), "full name",
+        return new User(null, "username", format(email, random.nextInt()), "full name", "password",
                 MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 }
