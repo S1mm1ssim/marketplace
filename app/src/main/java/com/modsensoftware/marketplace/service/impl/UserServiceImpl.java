@@ -2,6 +2,7 @@ package com.modsensoftware.marketplace.service.impl;
 
 import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.domain.User;
+import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.UserMapper;
 import com.modsensoftware.marketplace.dto.request.UserRequestDto;
 import com.modsensoftware.marketplace.dto.response.UserResponseDto;
@@ -30,12 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.*;
 import static java.lang.String.format;
 
 /**
@@ -49,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final Keycloak keycloak;
     private final UserDao userDao;
     private final UserMapper userMapper;
+    private final CompanyClient companyClient;
 
     @Value("${idm.realm-name}")
     private String realmName;
@@ -60,14 +60,13 @@ public class UserServiceImpl implements UserService {
     private String userPasswordAbsentMessage;
     @Value("${default.role}")
     private String defaultRole;
-    @Value("${default.page.size}")
-    private int pageSize;
 
     @Override
     public UserResponseDto getUserById(UUID id) {
         log.debug("Fetching user by id: {}", id);
-        return userMapper.toResponseDto(userDao.get(id));
-
+        User user = userDao.get(id);
+        Company company = companyClient.getCompanyById(user.getCompanyId());
+        return userMapper.toResponseDto(user, company);
     }
 
     @Override
@@ -87,12 +86,25 @@ public class UserServiceImpl implements UserService {
             filterProperties.put(COMPANY_ID_FILTER_NAME, companyId.toString());
         }
         List<User> users = userDao.getAll(pageNumber, filterProperties);
-        return users.stream().map(userMapper::toResponseDto).collect(Collectors.toList());
+        List<Company> companies = companyClient.getCompanies();
+        Map<Long, Company> companyIdSelfMap = companies.stream()
+                .collect(Collectors.toMap(Company::getId, Function.identity()));
+        return users.stream()
+                // Filtering users whose company is not present (i.e. company is soft deleted)
+                .filter(user -> companyIdSelfMap.containsKey(user.getCompanyId()))
+                // Mapping users to response DTOs
+                .map(user -> userMapper.toResponseDto(user, companyIdSelfMap.get(user.getCompanyId())))
+                .collect(Collectors.toList());
     }
 
     @Override
     public String createUser(UserRequestDto userDto) {
         log.debug("Registering new user from dto: {}", userDto);
+        if (userDto.getCompanyId() != null) {
+            // A request is sent to check if a company with such id exists
+            // Feign decoder will check status and throw runtime exception if company not found
+            companyClient.getCompanyById(userDto.getCompanyId());
+        }
         UserRepresentation userRepresentation = userMapper.toKeycloakUserRepresentation(userDto);
         RealmResource realmResource = keycloak.realm(realmName);
         UsersResource usersResource = realmResource.users();
@@ -150,7 +162,11 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUser(updatedFields);
         user.setId(id);
         user.setUpdated(LocalDateTime.now());
-        user.setUpdated(LocalDateTime.now());
+        if (user.getCompanyId() != null) {
+            // A request is sent to check if a company with such id exists
+            // Feign decoder will check status and throw runtime exception if company not found
+            companyClient.getCompanyById(user.getCompanyId());
+        }
         userDao.update(id, user);
     }
 
