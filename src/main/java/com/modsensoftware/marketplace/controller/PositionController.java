@@ -19,9 +19,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -37,13 +41,14 @@ public class PositionController {
 
     @GetMapping(produces = {"application/json"})
     public List<Position> getAllPositions(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Position getPositionById(@PathVariable(name = "id") Long id) {
+    public Position getPositionById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Fetching position by id: {}", id);
         return positionService.getPositionById(id);
     }
@@ -59,14 +64,14 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deletePosition(@PathVariable(name = "id") Long id) {
+    public void deletePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Deleting position by id: {}", id);
         positionService.deletePosition(id);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
-    public void updatePosition(@PathVariable Long id,
+    public void updatePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
                                @Valid @RequestBody PositionDto updatedFields) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         positionService.updatePosition(id, updatedFields);

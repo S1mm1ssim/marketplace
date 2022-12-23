@@ -58,9 +58,9 @@ public class PositionServiceTest {
         // given
         long id = 1L;
         long version = 1L;
-        BigDecimal amount = new BigDecimal(10);
-        PositionDto updatedFields = new PositionDto(null, null, null, null, amount, null, version);
-        Position position = new Position(id, null, null, null, null, null, null, version);
+        BigDecimal amount = new BigDecimal("10");
+        PositionDto updatedFields = PositionDto.builder().amount(amount).version(version).build();
+        Position position = Position.builder().version(version).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
@@ -76,9 +76,9 @@ public class PositionServiceTest {
         Long id = 1L;
         long version = 1L;
         long differentVersion = 2L;
-        BigDecimal amount = new BigDecimal(10);
-        PositionDto updatedFields = new PositionDto(null, null, null, null, amount, null, version);
-        Position position = new Position(id, null, null, null, null, null, null, differentVersion);
+        BigDecimal amount = new BigDecimal("10");
+        PositionDto updatedFields = PositionDto.builder().amount(amount).version(version).build();
+        Position position = Position.builder().version(differentVersion).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
         // when
@@ -94,8 +94,9 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        PositionDto toBeSaved = new PositionDto(UUID.randomUUID(), 1L, 2L,
-                UUID.randomUUID(), amount, minAmount, 0L);
+        PositionDto toBeSaved = PositionDto.builder().itemId(UUID.randomUUID())
+                .itemVersion(1L).companyId(2L).createdBy(UUID.randomUUID())
+                .amount(amount).minAmount(minAmount).version(0L).build();
 
         // when
         underTest.createPosition(toBeSaved);
@@ -118,8 +119,9 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        PositionDto toBeSaved = new PositionDto(UUID.randomUUID(), null, 2L,
-                UUID.randomUUID(), amount, minAmount, 0L);
+        PositionDto toBeSaved = PositionDto.builder().itemId(UUID.randomUUID())
+                .itemVersion(null).companyId(2L).createdBy(UUID.randomUUID())
+                .amount(amount).minAmount(minAmount).version(0L).build();
         // when
         // then
         Assertions.assertThatThrownBy(() -> underTest.createPosition(toBeSaved))

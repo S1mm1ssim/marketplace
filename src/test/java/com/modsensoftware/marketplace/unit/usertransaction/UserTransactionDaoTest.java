@@ -174,16 +174,15 @@ public class UserTransactionDaoTest {
         Item item = new Item(null, "name", "description",
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), category, 1L);
         itemDao.save(item);
-        Position position = new Position(null, item, company, user, now().truncatedTo(SECONDS), 120d, 0.1d, 0L);
+        Position position = Position.builder().id(null).item(item).company(company)
+                .createdBy(user).created(now().truncatedTo(SECONDS))
+                .amount(120d).minAmount(0.1d).version(0L).build();
         positionDao.save(position);
         return position;
     }
 
     private Position generateOrderPosition(Long positionId, Long positionVersion) {
-        Position orderPosition = new Position();
-        orderPosition.setId(positionId);
-        orderPosition.setVersion(positionVersion);
-        return orderPosition;
+        return Position.builder().id(positionId).version(positionVersion).build();
     }
 
     private UserTransaction generateUserTransaction(UUID userId, Position orderPosition) {
@@ -223,8 +222,7 @@ public class UserTransactionDaoTest {
     }
 
     private List<UserTransaction> generateTransactionsForUsers(Position savedPosition, User user1, User user2) {
-        Position orderPosition = generateOrderPosition(savedPosition.getId(),
-                savedPosition.getVersion());
+        Position orderPosition = generateOrderPosition(savedPosition.getId(), savedPosition.getVersion());
         List<UserTransaction> userTransactions = new ArrayList<>();
         // Generating pageSize + 1 userTransactions for each user
         for (int i = 0; i < pageSize + 1; i++) {
