@@ -1,7 +1,6 @@
 package com.modsensoftware.marketplace.config;
 
 import com.modsensoftware.marketplace.domain.Category;
-import com.modsensoftware.marketplace.domain.Company;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.Position;
@@ -47,7 +46,6 @@ public class SessionFactoryConfig {
         MetadataSources metadataSources = new MetadataSources(serviceRegistry);
         metadataSources.addAnnotatedClass(Category.class);
         metadataSources.addAnnotatedClass(User.class);
-        metadataSources.addAnnotatedClass(Company.class);
         metadataSources.addAnnotatedClass(Item.class);
         metadataSources.addAnnotatedClass(Position.class);
         metadataSources.addAnnotatedClass(UserTransaction.class);

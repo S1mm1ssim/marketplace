@@ -1,21 +1,24 @@
 package com.modsensoftware.marketplace.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 
 /**
- * @author andrey.demyanchik on 11/3/2022
+ * @author andrey.demyanchik on 10/31/2022
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompanyDto {
+public class Company {
+
+    private Long id;
     private String name;
-    @Pattern(regexp = "(\\w+)@(\\w+\\.)(\\w+)(\\.\\w+)*",
-            message = "Email must be valid.")
     private String email;
+    private LocalDateTime created;
     private String description;
 }

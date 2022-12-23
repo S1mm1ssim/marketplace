@@ -41,14 +41,9 @@ import java.util.UUID;
                 @NamedSubgraph(
                         name = "subgraph.position",
                         attributeNodes = {
-                                @NamedAttributeNode("company"),
-                                @NamedAttributeNode(value = "createdBy", subgraph = "subgraph.user"),
+                                @NamedAttributeNode(value = "createdBy"),
                                 @NamedAttributeNode(value = "item", subgraph = "subgraph.category")
                         }
-                ),
-                @NamedSubgraph(
-                        name = "subgraph.user",
-                        attributeNodes = @NamedAttributeNode(value = "company")
                 ),
                 @NamedSubgraph(
                         name = "subgraph.category",

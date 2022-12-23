@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,11 +26,11 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @NamedEntityGraph(
-        name = "graph.Position.item.company.user",
+        name = "graph.Position.item.user",
         attributeNodes = {
-                @NamedAttributeNode(value = "createdBy", subgraph = "subgraph.user.company"),
-                @NamedAttributeNode(value = "company"),
+                @NamedAttributeNode(value = "createdBy"),
                 @NamedAttributeNode(value = "item", subgraph = "subgraph.item.category")
         },
         subgraphs = {
@@ -37,12 +38,6 @@ import java.time.LocalDateTime;
                         name = "subgraph.item.category",
                         attributeNodes = {
                                 @NamedAttributeNode("category")
-                        }
-                ),
-                @NamedSubgraph(
-                        name = "subgraph.user.company",
-                        attributeNodes = {
-                                @NamedAttributeNode("company")
                         }
                 )
         }
@@ -52,7 +47,6 @@ import java.time.LocalDateTime;
 public class Position {
 
     public static final String ID_FIELD_NAME = "id";
-    public static final String COMPANY_FIELD_NAME = "company";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,9 +56,8 @@ public class Position {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @Column(name = "company_id", nullable = false)
+    private Long companyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")

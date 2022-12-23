@@ -8,12 +8,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,13 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Builder
-@Table(name = "\"user\"")
-@NamedEntityGraph(
-        name = "graph.User.company",
-        attributeNodes = {
-                @NamedAttributeNode("company")
-        }
-)
+@Table(name = "\"user\"", schema = "public")
 public class User {
 
     public static final String ID_FIELD_NAME = "id";
@@ -41,7 +30,7 @@ public class User {
     public static final String FULL_NAME_FIELD_NAME = "name";
     public static final String CREATED_FIELD_NAME = "created";
     public static final String UPDATED_FIELD_NAME = "updated";
-    public static final String COMPANY_FIELD_NAME = "company";
+    public static final String COMPANY_ID_FIELD_NAME = "companyId";
 
     @Id
     @Type(type = "pg-uuid")
@@ -62,7 +51,6 @@ public class User {
     @Column(name = "updated", nullable = false)
     private LocalDateTime updated;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @Column(name = "company_id", nullable = false)
+    private Long companyId;
 }
