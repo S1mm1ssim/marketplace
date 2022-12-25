@@ -1,8 +1,6 @@
 package com.modsensoftware.marketplace.dto;
 
 import com.modsensoftware.marketplace.domain.Company;
-import com.modsensoftware.marketplace.dto.CompanyRequestDto;
-import com.modsensoftware.marketplace.dto.CompanyResponseDto;
 import org.mapstruct.Mapper;
 
 /**

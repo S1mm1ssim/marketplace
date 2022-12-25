@@ -2,11 +2,10 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.domain.Company;
+import com.modsensoftware.marketplace.dto.CompanyMapper;
 import com.modsensoftware.marketplace.dto.CompanyRequestDto;
 import com.modsensoftware.marketplace.dto.CompanyResponseDto;
-import com.modsensoftware.marketplace.dto.CompanyMapper;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
-import com.modsensoftware.marketplace.service.CompanyService;
 import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
