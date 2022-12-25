@@ -25,4 +25,4 @@ spring:
     loadbalancer:
       cache:
         caffeine:
-          spec: maximumSize=10,initialCapacity=50,expireAfterAccess=300
+          spec: maximumSize=10,initialCapacity=50,expireAfterAccess=300s
