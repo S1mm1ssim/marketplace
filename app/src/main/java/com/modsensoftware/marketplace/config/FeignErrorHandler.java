@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.config.feign;
+package com.modsensoftware.marketplace.config;
 
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
