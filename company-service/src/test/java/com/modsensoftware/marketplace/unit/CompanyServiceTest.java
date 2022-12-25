@@ -2,10 +2,10 @@ package com.modsensoftware.marketplace.unit;
 
 import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.domain.Company;
-import com.modsensoftware.marketplace.dto.CompanyDto;
-import com.modsensoftware.marketplace.dto.mapper.CompanyMapper;
+import com.modsensoftware.marketplace.dto.CompanyRequestDto;
+import com.modsensoftware.marketplace.dto.CompanyMapper;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
-import com.modsensoftware.marketplace.service.impl.CompanyServiceImpl;
+import com.modsensoftware.marketplace.service.CompanyServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,8 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
@@ -27,9 +25,6 @@ import java.util.Map;
  */
 @ExtendWith(MockitoExtension.class)
 public class CompanyServiceTest {
-
-    @MockBean
-    private JwtDecoder jwtDecoder;
 
     @Mock
     private CompanyDao companyDao;
@@ -65,7 +60,7 @@ public class CompanyServiceTest {
     @Test
     public void canCreateCompany() {
         // given
-        CompanyDto dto = new CompanyDto("Name", "Email", "Description");
+        CompanyRequestDto dto = new CompanyRequestDto("Name", "Email", "Description");
         BDDMockito.given(companyDao.existsByEmail(BDDMockito.any())).willReturn(false);
 
         // when
@@ -84,7 +79,7 @@ public class CompanyServiceTest {
     public void saveShouldThrowEntityAlreadyExistsException() {
         // given
         String email = "Email";
-        CompanyDto dto = new CompanyDto("Name", email, "Description");
+        CompanyRequestDto dto = new CompanyRequestDto("Name", email, "Description");
         BDDMockito.given(companyDao.existsByEmail(email)).willReturn(true);
         // when
         // then
