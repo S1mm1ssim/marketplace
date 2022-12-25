@@ -12,12 +12,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users?page=0",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/users?page=0",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
@@ -35,7 +33,7 @@
 						},
 						{
 							"key": "email",
-							"value": "3",
+							"value": "em",
 							"disabled": true
 						},
 						{
@@ -59,17 +57,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/fc252447-049e-48b7-b442-3ac5176640c2",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/users/8f25c310-9c3f-426d-9ea5-b30a088408ef",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
 						"users",
-						"fc252447-049e-48b7-b442-3ac5176640c2"
+						"8f25c310-9c3f-426d-9ea5-b30a088408ef"
 					]
 				}
 			},
@@ -78,11 +74,14 @@
 		{
 			"name": "Create user",
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"User\",\r\n    \"email\": \"user3@gmail.com\",\r\n    \"name\": \"Usernam2e\",\r\n    \"companyId\": 2\r\n}",
+					"raw": "{\r\n    \"username\": \"user\",\r\n    \"email\": \"user@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"name\": \"user\",\r\n    \"companyId\": 2\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -90,12 +89,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/users",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
@@ -111,7 +108,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/c127b0de-53bc-467b-914a-fc4aab217bff",
+					"raw": "http://localhost:8080/api/v1/users/861ffe6d-ab29-43a3-96f9-ce68f8a7296c",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -121,7 +118,7 @@
 						"api",
 						"v1",
 						"users",
-						"c127b0de-53bc-467b-914a-fc4aab217bff"
+						"861ffe6d-ab29-43a3-96f9-ce68f8a7296c"
 					]
 				}
 			},
@@ -134,7 +131,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"companyId\": 999\r\n}",
+					"raw": "{\r\n    \"companyId\": 4,\r\n    \"firstName\": \"Andrey22\",\r\n    \"password\": \"password1\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -142,21 +139,157 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/fc252447-049e-48b7-b442-3ac5176640c2",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/users/1b7c5d7a-3b6c-46f6-a379-20adffd9fce4",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
 						"users",
-						"fc252447-049e-48b7-b442-3ac5176640c2"
+						"1b7c5d7a-3b6c-46f6-a379-20adffd9fce4"
 					]
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Create transaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"d179238e-6cb1-4ad6-9958-8b3043ceca0c\",\r\n    \"orderLine\":\r\n    [\r\n        {\r\n            \"positionId\": 29,\r\n            \"amount\": 2,\r\n            \"positionVersion\": 1\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{application_host}}/api/v1/users/transactions",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all transactions for user",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{application_host}}/api/v1/users/d179238e-6cb1-4ad6-9958-8b3043ceca0c/transactions?page=0",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"d179238e-6cb1-4ad6-9958-8b3043ceca0c",
+						"transactions"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "tokenName",
+				"value": "Keycloak",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "simmissim",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "password",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "password_credentials",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{client_secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{client_name}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "application_host",
+			"value": "http://localhost:8080",
+			"type": "string"
 		}
 	]
 }

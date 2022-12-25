@@ -12,12 +12,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/positions",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/positions",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
@@ -33,12 +31,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/positions/1",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/positions/1",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
@@ -55,17 +51,15 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/positions/1",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/positions/25",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
 						"positions",
-						"1"
+						"25"
 					]
 				}
 			},
@@ -86,12 +80,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/positions/1",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/positions/1",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
@@ -109,7 +101,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"itemId\": \"e9e1bfbd-32e0-47b2-ba84-6e5d2f896130\",\r\n    \"companyId\": 4,\r\n    \"createdBy\": \"fc252447-049e-48b7-b442-3ac5176640c2\",\r\n    \"amount\": 15\r\n}",
+					"raw": "{\r\n    \"itemId\": \"5c33b41a-e76d-448d-8434-1fcaa497e966\",\r\n    \"itemVersion\": 1,\r\n    \"companyId\": 2,\r\n    \"createdBy\": \"886e840c-3ca8-4f8a-ab03-71e6348860aa\",\r\n    \"amount\": 150,\r\n    \"minAmount\": 1\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -117,12 +109,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/positions",
-					"protocol": "http",
+					"raw": "{{application_host}}/api/v1/positions",
 					"host": [
-						"localhost"
+						"{{application_host}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"v1",
@@ -131,6 +121,88 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "tokenName",
+				"value": "Keycloak",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "simmissim",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "password",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "password_credentials",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{client_secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{client_name}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "application_host",
+			"value": "http://localhost:8080",
+			"type": "string"
 		}
 	]
 }

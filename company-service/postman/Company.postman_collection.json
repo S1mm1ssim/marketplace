@@ -1,30 +1,42 @@
 {
 	"info": {
-		"_postman_id": "45111f9b-959f-4802-84fb-4c40a9acddc1",
-		"name": "Items",
+		"_postman_id": "8f55038c-b2d7-4c7e-8ece-f753e309f7ee",
+		"name": "Company",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "16950885"
 	},
 	"item": [
 		{
-			"name": "Get all items",
+			"name": "Get all companies",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{application_host}}/api/v1/items?page=0",
+					"raw": "{{application_host}}/api/v1/companies/2",
 					"host": [
 						"{{application_host}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"items"
+						"companies",
+						"2"
 					],
 					"query": [
 						{
 							"key": "page",
-							"value": "0"
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "name",
+							"value": "e",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": "@",
+							"disabled": true
 						}
 					]
 				}
@@ -32,33 +44,33 @@
 			"response": []
 		},
 		{
-			"name": "Get item by id",
+			"name": "Get company by id",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{application_host}}/api/v1/items/e9e1bfbd-32e0-47b2-ba84-6e5d2f896130",
+					"raw": "{{application_host}}/api/v1/companies/2",
 					"host": [
 						"{{application_host}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"items",
-						"e9e1bfbd-32e0-47b2-ba84-6e5d2f896130"
+						"companies",
+						"2"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Create item",
+			"name": "Post company",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"Latest\",\r\n    \"description\": \"Latest\",\r\n    \"categoryId\": \"4\"\r\n}",
+					"raw": "{\r\n    \"name\": \"test\",\r\n    \"email\": \"test@test.com\",\r\n    \"description\": \"Test\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -66,47 +78,48 @@
 					}
 				},
 				"url": {
-					"raw": "{{application_host}}/api/v1/items",
+					"raw": "{{application_host}}/api/v1/companies/",
 					"host": [
 						"{{application_host}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"items"
+						"companies",
+						""
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete item",
+			"name": "Delete company",
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{application_host}}/api/v1/items/3dd35fe7-2581-41d1-884a-90e62e5e06a7",
+					"raw": "{{application_host}}/api/v1/companies/4",
 					"host": [
 						"{{application_host}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"items",
-						"3dd35fe7-2581-41d1-884a-90e62e5e06a7"
+						"companies",
+						"4"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Update item",
+			"name": "Update company",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"categoryId\": 999,\r\n    \"version\": 1\r\n}",
+					"raw": "{\r\n    \"name\": \"Updated\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -114,15 +127,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{application_host}}/api/v1/items/5c33b41a-e76d-448d-8434-1fcaa497e966",
+					"raw": "{{application_host}}/api/v1/companies/4",
 					"host": [
 						"{{application_host}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"items",
-						"5c33b41a-e76d-448d-8434-1fcaa497e966"
+						"companies",
+						"4"
 					]
 				}
 			},
@@ -207,7 +220,7 @@
 	"variable": [
 		{
 			"key": "application_host",
-			"value": "http://localhost:8080",
+			"value": "http://localhost:8090",
 			"type": "string"
 		}
 	]
