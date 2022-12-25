@@ -53,20 +53,17 @@ default:
 
 exception:
   message:
+    sessionFactoryInitFail: "Initialization of SessionFactory failed"
     categoryNotFound: "Category entity with id=%s is not present."
-    companyNotFound: "Company entity with id=%s is not present."
     itemNotFound: "Item entity with uuid=%s is not present."
     positionNotFound: "Position entity with id=%s is not found."
     userNotFound: "User entity with uuid=%s is not found."
     invalidCreatedBetweenFilter: "Filter 'created' = %s is invalid"
-    companyEmailTaken: "Company with email %s already exists"
     nonUniqueUser: "User with such email %s or such username %s already exists"
     itemVersionsMismatch: "Provided item version does not match with the one in the database"
     positionVersionsMismatch: "Provided position version does not match with the one in the database"
-    sessionFactoryInitFail: "Initialization of SessionFactory failed"
     noItemVersionProvided: "No version for item with id %s was provided"
     noPositionVersionProvided: "No version for position with id %s was provided"
     insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
-    invalidCredentialsException: "Provided credentials are incorrect"
     userPasswordAbsent: "Could not update user as password is not present."
