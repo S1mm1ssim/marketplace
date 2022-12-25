@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.domain.Company;
-import com.modsensoftware.marketplace.dto.CompanyDto;
+import com.modsensoftware.marketplace.dto.CompanyRequestDto;
+import com.modsensoftware.marketplace.dto.CompanyResponseDto;
 import com.modsensoftware.marketplace.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
-import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
-import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.*;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -38,18 +35,18 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Company> getAllCompanies(
+    public List<CompanyResponseDto> getAllCompanies(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(name = EMAIL_FILTER_NAME, required = false) String email,
             @RequestParam(name = NAME_FILTER_NAME, required = false) String name
     ) {
         log.debug("Fetching all companies for page {}. "
-                    + "Filter by email: {}, name: {}", pageNumber, email, name);
+                + "Filter by email: {}, name: {}", pageNumber, email, name);
         return companyService.getAllCompanies(pageNumber, email, name);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Company getCompanyById(@PathVariable(name = "id") Long id) {
+    public CompanyResponseDto getCompanyById(@PathVariable(name = "id") Long id) {
         log.debug("Fetching company by id: {}", id);
         return companyService.getCompanyById(id);
     }
@@ -57,9 +54,9 @@ public class CompanyController {
     @PreAuthorize("hasAnyRole('DIRECTOR')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCompany(@Valid @RequestBody CompanyDto companyDto) {
-        log.debug("Creating new company from dto: {}", companyDto);
-        companyService.createCompany(companyDto);
+    public void createCompany(@Valid @RequestBody CompanyRequestDto companyRequestDto) {
+        log.debug("Creating new company from dto: {}", companyRequestDto);
+        companyService.createCompany(companyRequestDto);
     }
 
     @PreAuthorize("hasAnyRole('DIRECTOR')")
@@ -73,7 +70,7 @@ public class CompanyController {
     @PreAuthorize("hasAnyRole('DIRECTOR')")
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = "id") Long id,
-                              @Valid @RequestBody CompanyDto updatedFields) {
+                              @Valid @RequestBody CompanyRequestDto updatedFields) {
         log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);
     }
