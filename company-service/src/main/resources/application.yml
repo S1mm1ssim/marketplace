@@ -5,7 +5,7 @@ spring:
   application:
     name: company-service
   datasource:
-    url: "jdbc:postgresql://localhost:32768/marketplace"
+    url: "jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:32768}/marketplace"
     username: "postgres"
     password: "postgres"
     driver-class-name: org.postgresql.Driver
@@ -21,4 +21,9 @@ spring:
         jdbc:
           batch_size: 5
   config:
-    import: optional:configserver:http://localhost:8888
+    import: "optional:configserver:${CONFIG_URI:http://localhost:8888}"
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: "${EUREKA_URI:http://localhost:8761/eureka}"
