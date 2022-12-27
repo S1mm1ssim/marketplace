@@ -1,0 +1,52 @@
+{
+  "id": 999,
+  "item": {
+    "id": "5c33b41a-e76d-448d-8434-1fcaa497e966",
+    "name": "Rye bread",
+    "description": "Black rye bread",
+    "created": "2022-11-03T22:56:00",
+    "category": {
+      "id": 3,
+      "name": "stuff",
+      "description": "Bread",
+      "parent": {
+        "id": 1,
+        "name": "food",
+        "description": "Diverse",
+        "parent": {
+          "id": 8,
+          "name": "testnew",
+          "description": "test",
+          "parent": null
+        }
+      }
+    },
+    "version": 1
+  },
+  "company": {
+    "id": 2,
+    "name": "test",
+    "email": "test@test.com",
+    "created": "2022-12-19T16:21:15.982533",
+    "description": "Test"
+  },
+  "createdBy": {
+    "id": "880ba95f-6058-40aa-8893-b95cc7f57206",
+    "username": "user",
+    "email": "user@gmail.com",
+    "name": "user",
+    "created": "2022-12-27T13:30:23.692939",
+    "updated": "2022-12-27T13:30:23.692939",
+    "company": {
+      "id": 2,
+      "name": "test",
+      "email": "test@test.com",
+      "created": "2022-12-19T16:21:15.982533",
+      "description": "Test"
+    }
+  },
+  "created": "2022-12-27T13:33:21.851828",
+  "amount": 150.0,
+  "minAmount": 5.0,
+  "version": 0
+}

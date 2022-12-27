@@ -21,7 +21,7 @@ public class OrderArgumentsProvider implements ArgumentsProvider {
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         return Stream.of(
                 Arguments.of(999L, 6.0, null, format(noPositionVersionProvidedMessage, 999L)),
-                Arguments.of(999L, 100000.0, 0L, format(insufficientItemsInStockMessage, 999L, 100000.0, 144.0)),
+                Arguments.of(999L, 100000.0, 0L, format(insufficientItemsInStockMessage, 999L, 100000.0, 150.0)),
                 Arguments.of(999L, 1.0, 0L, format(insufficientOrderAmountMessage, 1.0, 999L, 5.0))
         );
     }
