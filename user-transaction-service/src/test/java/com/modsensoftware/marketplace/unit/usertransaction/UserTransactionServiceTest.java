@@ -1,14 +1,14 @@
 package com.modsensoftware.marketplace.unit.usertransaction;
 
-import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.dao.UserTransactionDao;
-import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.OrderDto;
-import com.modsensoftware.marketplace.dto.UserTransactionDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
+import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
 import com.modsensoftware.marketplace.dto.mapper.UserTransactionMapper;
 import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.UserTransactionService;
+import com.modsensoftware.marketplace.service.impl.UserClient;
 import com.modsensoftware.marketplace.service.impl.UserTransactionServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -34,11 +32,8 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 public class UserTransactionServiceTest {
 
-    @MockBean
-    private JwtDecoder jwtDecoder;
-
     @Mock
-    private UserDao userDao;
+    private UserClient userClient;
     @Mock
     private UserTransactionDao transactionDao;
     @Mock
@@ -51,7 +46,7 @@ public class UserTransactionServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new UserTransactionServiceImpl(userDao, transactionDao, orderService);
+        underTest = new UserTransactionServiceImpl(userClient, transactionDao, orderService);
     }
 
     @Test
@@ -72,9 +67,9 @@ public class UserTransactionServiceTest {
     public void canSaveUserTransaction() {
         // given
         UUID userId = UUID.randomUUID();
-        OrderDto orderDto = new OrderDto(1L, new BigDecimal("5"), 0L);
-        UserTransactionDto transactionDto = new UserTransactionDto(userId, List.of(orderDto));
-        BDDMockito.when(userDao.get(userId)).thenReturn(new User());
+        OrderRequestDto orderDto = new OrderRequestDto(1L, new BigDecimal("5"), 0L);
+        UserTransactionRequestDto transactionDto = new UserTransactionRequestDto(userId, List.of(orderDto));
+        BDDMockito.when(userClient.getUserById(userId)).thenReturn(new UserResponseDto());
         UserTransaction expectedTransaction = transactionMapper.toUserTransaction(transactionDto);
 
         // when

@@ -1,13 +1,17 @@
 package com.modsensoftware.marketplace.unit.order;
 
-import com.modsensoftware.marketplace.dao.PositionDao;
-import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.OrderDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
+import com.modsensoftware.marketplace.dto.response.CompanyResponseDto;
+import com.modsensoftware.marketplace.dto.response.ItemResponseDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.impl.OrderServiceImpl;
+import com.modsensoftware.marketplace.service.impl.PositionClient;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -30,7 +35,8 @@ import static java.lang.String.format;
 public class OrderServiceTest {
 
     @Mock
-    private PositionDao positionDao;
+    private PositionClient positionClient;
+    private final PositionMapper positionMapper = new PositionMapper();
 
     private OrderService underTest;
 
@@ -43,7 +49,7 @@ public class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new OrderServiceImpl(positionDao);
+        underTest = new OrderServiceImpl(positionClient, positionMapper);
         ReflectionTestUtils.setField(underTest, "noPositionVersionProvidedMessage", NO_POSITION_VERSION_PROVIDED_MESSAGE);
         ReflectionTestUtils.setField(underTest, "insufficientItemsInStockMessage", INSUFFICIENT_ITEMS_IN_STOCK_MESSAGE);
         ReflectionTestUtils.setField(underTest, "insufficientOrderAmountMessage", INSUFFICIENT_ORDER_AMOUNT_MESSAGE);
@@ -52,45 +58,56 @@ public class OrderServiceTest {
     @Test
     public void shouldNotThrowAnyExceptionDuringOrdersValidation() {
         // given
-        Position pos1 = new Position(15L, null, null, null, null, 30d, 1d, 0L);
-        Position pos2 = new Position(16L, null, null, null, null, 30d, 1d, 0L);
-        List<OrderDto> orders = new ArrayList<>();
-        orders.add(new OrderDto(15L, new BigDecimal(5), 0L));
-        orders.add(new OrderDto(16L, new BigDecimal(2), 0L));
-        BDDMockito.when(positionDao.get(15L)).thenReturn(pos1);
-        BDDMockito.when(positionDao.get(16L)).thenReturn(pos2);
+        PositionResponseDto pos1 = PositionResponseDto.builder()
+                .id(15L)
+                .item(ItemResponseDto.builder().id(UUID.randomUUID()).version(0L).build())
+                .company(CompanyResponseDto.builder().id(2L).build())
+                .createdBy(UserResponseDto.builder().id(UUID.randomUUID()).build())
+                .amount(30d).minAmount(1d).version(0L).build();
+        PositionResponseDto pos2 = PositionResponseDto.builder()
+                .id(16L)
+                .item(ItemResponseDto.builder().id(UUID.randomUUID()).version(0L).build())
+                .company(CompanyResponseDto.builder().id(2L).build())
+                .createdBy(UserResponseDto.builder().id(UUID.randomUUID()).build())
+                .amount(30d).minAmount(1d).version(0L).build();
+        List<OrderRequestDto> orders = new ArrayList<>();
+        orders.add(new OrderRequestDto(15L, new BigDecimal(5), 0L));
+        orders.add(new OrderRequestDto(16L, new BigDecimal(2), 0L));
+        BDDMockito.when(positionClient.getPositionById(15L)).thenReturn(pos1);
+        BDDMockito.when(positionClient.getPositionById(16L)).thenReturn(pos2);
 
         // when
         // then
         Assertions.assertThatNoException().isThrownBy(() -> underTest.validateOrders(orders));
-        BDDMockito.verify(positionDao).update(pos1.getId(), pos1);
-        BDDMockito.verify(positionDao).update(pos2.getId(), pos2);
+        BDDMockito.verify(positionClient).updatePosition(pos1.getId(), positionMapper.toPositionRequestDto(pos1));
+        BDDMockito.verify(positionClient).updatePosition(pos2.getId(), positionMapper.toPositionRequestDto(pos2));
     }
 
     @Test
     public void shouldThrowEntityNotFoundExceptionIfNoPositionVersionProvided() {
         // given
         Long positionId = 16L;
-        List<OrderDto> orders = new ArrayList<>();
+        List<OrderRequestDto> orders = new ArrayList<>();
         // Null version provided
-        orders.add(new OrderDto(positionId, new BigDecimal(4), null));
+        orders.add(new OrderRequestDto(positionId, new BigDecimal(4), null));
 
         // when
         // then
         Assertions.assertThatThrownBy(() -> underTest.validateOrders(orders))
                 .isInstanceOf(NoVersionProvidedException.class)
                 .hasMessage(format(NO_POSITION_VERSION_PROVIDED_MESSAGE, positionId));
-        BDDMockito.verify(positionDao, BDDMockito.never()).get(BDDMockito.any());
-        BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
+        BDDMockito.verify(positionClient, BDDMockito.never()).getPositionById(BDDMockito.any());
+        BDDMockito.verify(positionClient, BDDMockito.never()).updatePosition(BDDMockito.any(), BDDMockito.any());
     }
 
     @Test
     public void shouldThrowInsufficientItemsInStockException() {
         // given
-        Position pos = new Position(16L, null, null, null, null, 3d, 1d, 0L);
-        List<OrderDto> orders = new ArrayList<>();
-        orders.add(new OrderDto(16L, new BigDecimal(4), 0L));
-        BDDMockito.when(positionDao.get(16L)).thenReturn(pos);
+        PositionResponseDto pos = PositionResponseDto.builder()
+                .id(16L).amount(3d).minAmount(1d).version(0L).build();
+        List<OrderRequestDto> orders = new ArrayList<>();
+        orders.add(new OrderRequestDto(16L, new BigDecimal(4), 0L));
+        BDDMockito.when(positionClient.getPositionById(16L)).thenReturn(pos);
 
         // when
         // then
@@ -98,16 +115,17 @@ public class OrderServiceTest {
                 .isInstanceOf(InsufficientItemsInStockException.class)
                 .hasMessage(format(INSUFFICIENT_ITEMS_IN_STOCK_MESSAGE, pos.getId(),
                         orders.get(0).getAmount(), pos.getAmount()));
-        BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
+        BDDMockito.verify(positionClient, BDDMockito.never()).updatePosition(BDDMockito.any(), BDDMockito.any());
     }
 
     @Test
     public void shouldThrowInsufficientOrderAmountException() {
         // given
-        Position pos = new Position(16L, null, null, null, null, 30d, 5d, 0L);
-        List<OrderDto> orders = new ArrayList<>();
-        orders.add(new OrderDto(16L, new BigDecimal(4), 0L));
-        BDDMockito.when(positionDao.get(16L)).thenReturn(pos);
+        PositionResponseDto pos = PositionResponseDto.builder()
+                .id(16L).amount(30d).minAmount(5d).version(0L).build();
+        List<OrderRequestDto> orders = new ArrayList<>();
+        orders.add(new OrderRequestDto(16L, new BigDecimal(4), 0L));
+        BDDMockito.when(positionClient.getPositionById(16L)).thenReturn(pos);
 
         // when
         // then
@@ -115,6 +133,6 @@ public class OrderServiceTest {
                 .isInstanceOf(InsufficientOrderAmountException.class)
                 .hasMessage(format(INSUFFICIENT_ORDER_AMOUNT_MESSAGE, orders.get(0).getAmount(),
                         pos.getId(), pos.getMinAmount()));
-        BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
+        BDDMockito.verify(positionClient, BDDMockito.never()).updatePosition(BDDMockito.any(), BDDMockito.any());
     }
 }
