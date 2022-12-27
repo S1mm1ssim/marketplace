@@ -5,7 +5,7 @@ spring:
   application:
     name: company-service
   datasource:
-    url: "jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:32768}/marketplace"
+    url: "jdbc:postgresql://${POSTGRES_ADDRESS:localhost:32768}/marketplace"
     username: "postgres"
     password: "postgres"
     driver-class-name: org.postgresql.Driver
