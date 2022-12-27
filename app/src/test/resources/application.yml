@@ -60,9 +60,6 @@ exception:
     itemVersionsMismatch: "Provided item version does not match with the one in the database"
     positionVersionsMismatch: "Provided position version does not match with the one in the database"
     noItemVersionProvided: "No version for item with id %s was provided"
-    noPositionVersionProvided: "No version for position with id %s was provided"
-    insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
-    insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
     userPasswordAbsent: "Could not update user as password is not present."
 eureka:
   client:
