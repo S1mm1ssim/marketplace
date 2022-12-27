@@ -12,15 +12,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{application_host}}/api/v1/companies/2",
+					"raw": "{{application_host}}/api/v1/companies",
 					"host": [
 						"{{application_host}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"companies",
-						"2"
+						"companies"
 					],
 					"query": [
 						{
@@ -215,13 +214,6 @@
 					""
 				]
 			}
-		}
-	],
-	"variable": [
-		{
-			"key": "application_host",
-			"value": "http://localhost:8090",
-			"type": "string"
 		}
 	]
 }
