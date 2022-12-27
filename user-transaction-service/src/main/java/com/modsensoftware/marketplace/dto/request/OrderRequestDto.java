@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.dto;
+package com.modsensoftware.marketplace.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDto {
+public class OrderRequestDto {
 
     private Long positionId;
 

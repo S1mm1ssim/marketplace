@@ -1,6 +1,6 @@
 package com.modsensoftware.marketplace.service;
 
-import com.modsensoftware.marketplace.dto.OrderDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
 
 import java.util.Collection;
 
@@ -9,5 +9,5 @@ import java.util.Collection;
  */
 public interface OrderService {
 
-    void validateOrders(Collection<OrderDto> orders);
+    void validateOrders(Collection<OrderRequestDto> orders);
 }

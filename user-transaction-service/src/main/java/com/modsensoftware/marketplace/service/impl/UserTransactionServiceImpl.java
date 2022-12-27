@@ -1,9 +1,8 @@
 package com.modsensoftware.marketplace.service.impl;
 
-import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.dao.UserTransactionDao;
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.UserTransactionDto;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
 import com.modsensoftware.marketplace.dto.mapper.UserTransactionMapper;
 import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.UserTransactionService;
@@ -25,16 +24,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserTransactionServiceImpl implements UserTransactionService {
 
-    private final UserDao userDao;
+    private final UserClient userClient;
     private final UserTransactionDao transactionDao;
     private final UserTransactionMapper transactionMapper = Mappers.getMapper(UserTransactionMapper.class);
     private final OrderService orderService;
 
     @Override
-    public void createUserTransaction(UserTransactionDto transactionDto) {
+    public void createUserTransaction(UserTransactionRequestDto transactionDto) {
         // If user doesn't exist EntityNotFoundException will be thrown
-        // and caught by ExceptionHandler
-        userDao.get(transactionDto.getUserId());
+        // and caught by feign ErrorHandler
+        userClient.getUserById(transactionDto.getUserId());
         log.debug("Creating new transaction from dto: {}", transactionDto);
 
         // If validation fails, exception will be thrown and caught by ExceptionHandler

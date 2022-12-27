@@ -39,11 +39,6 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
     private int pageSize;
 
     @Override
-    public UserTransaction get(Long id) {
-        return null;
-    }
-
-    @Override
     public List<UserTransaction> getAll(int pageNumber, Map<String, String> filterProperties) {
         UUID userId = UUID.fromString(filterProperties.get(USER_ID_FIELD_NAME));
         log.debug("Fetching all transactions for page {} for user with id {}", pageNumber,
@@ -81,15 +76,5 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
         session.persist(userTransaction);
         transaction.commit();
         session.close();
-    }
-
-    @Override
-    public void update(Long id, UserTransaction updatedFields) {
-
-    }
-
-    @Override
-    public void deleteById(Long id) {
-
     }
 }

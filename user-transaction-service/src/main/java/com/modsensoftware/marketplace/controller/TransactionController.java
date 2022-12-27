@@ -1,8 +1,7 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.UserTransactionDto;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
 import com.modsensoftware.marketplace.service.UserTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,10 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.USER_ID_PATH_VARIABLE_NAME;
+
 /**
  * @author andrey.demyanchik on 11/27/2022
  */
@@ -35,7 +38,7 @@ public class TransactionController {
     @PreAuthorize("hasAnyRole('MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transactions")
-    public void createUserTransaction(@Valid @RequestBody UserTransactionDto transactionDto) {
+    public void createUserTransaction(@Valid @RequestBody UserTransactionRequestDto transactionDto) {
         log.debug("Creating new transaction from dto: {}", transactionDto);
         transactionService.createUserTransaction(transactionDto);
     }
@@ -43,8 +46,8 @@ public class TransactionController {
     @PreAuthorize("hasAnyRole('MANAGER')")
     @GetMapping("/{userId}/transactions")
     public List<UserTransaction> getAllTransactionsForUser(
-            @PathVariable(name = "userId") UUID userId,
-            @RequestParam(name = "page", defaultValue = Constants.DEFAULT_PAGE_NUMBER) int pageNumber
+            @PathVariable(name = USER_ID_PATH_VARIABLE_NAME) UUID userId,
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber
     ) {
         log.debug("Fetching all transactions for page {} for user with id: {}", pageNumber, userId);
         return transactionService.getAllTransactionsForUser(userId.toString(), pageNumber);

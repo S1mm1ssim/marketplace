@@ -1,8 +1,8 @@
 package com.modsensoftware.marketplace.service.impl;
 
-import com.modsensoftware.marketplace.dao.PositionDao;
-import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.OrderDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
@@ -24,7 +24,8 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final PositionDao positionDao;
+    private final PositionClient positionClient;
+    private final PositionMapper positionMapper;
 
     @Value("${exception.message.noPositionVersionProvided}")
     private String noPositionVersionProvidedMessage;
@@ -34,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private String insufficientOrderAmountMessage;
 
     @Override
-    public void validateOrders(Collection<OrderDto> orders) {
+    public void validateOrders(Collection<OrderRequestDto> orders) {
         log.debug("Validating orders: {}", orders);
         orders.forEach(orderDto -> {
             log.debug("Validating order: {}", orderDto);
@@ -43,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new NoVersionProvidedException(format(noPositionVersionProvidedMessage,
                         orderDto.getPositionId()));
             }
-            Position position = positionDao.get(orderDto.getPositionId());
+            PositionResponseDto position = positionClient.getPositionById(orderDto.getPositionId());
             if (position.getAmount() < orderDto.getAmount().doubleValue()) {
                 log.error("Wanted amount is bigger than position with id {} has in stock", position.getId());
                 log.debug("Wanted amount={}. Currently in stock={}",
@@ -62,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
                 );
             }
             position.setAmount(position.getAmount() - orderDto.getAmount().doubleValue());
-            positionDao.update(position.getId(), position);
+            positionClient.updatePosition(position.getId(), positionMapper.toPositionRequestDto(position));
         });
     }
 }

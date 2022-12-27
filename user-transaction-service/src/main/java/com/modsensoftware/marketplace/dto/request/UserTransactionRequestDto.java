@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.dto;
+package com.modsensoftware.marketplace.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +13,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserTransactionDto {
+public class UserTransactionRequestDto {
 
     private UUID userId;
-    private List<OrderDto> orderLine;
+    private List<OrderRequestDto> orderLine;
 }

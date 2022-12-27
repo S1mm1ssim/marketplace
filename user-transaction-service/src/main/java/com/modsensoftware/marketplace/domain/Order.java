@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "\"order\"")
+@Table(name = "\"order\"", schema = "user_transaction_service")
 public class Order {
 
     @Id
@@ -32,9 +32,8 @@ public class Order {
     @Column(name = "amount", nullable = false)
     private Double amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "position_id")
-    private Position position;
+    @Column(name = "position_id", nullable = false)
+    private Long positionId;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

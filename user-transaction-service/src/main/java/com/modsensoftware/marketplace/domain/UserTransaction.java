@@ -14,7 +14,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
@@ -28,28 +27,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_transaction")
+@Table(name = "user_transaction", schema = "user_transaction_service")
 @NamedEntityGraph(
         name = "graph.UserTransaction.orders.position",
-        attributeNodes = @NamedAttributeNode(value = "orderLine", subgraph = "subgraph.order"),
-        subgraphs = {
-                @NamedSubgraph(
-                        name = "subgraph.order",
-                        attributeNodes = @NamedAttributeNode(value = "position", subgraph = "subgraph.position")
-
-                ),
-                @NamedSubgraph(
-                        name = "subgraph.position",
-                        attributeNodes = {
-                                @NamedAttributeNode(value = "createdBy"),
-                                @NamedAttributeNode(value = "item", subgraph = "subgraph.category")
-                        }
-                ),
-                @NamedSubgraph(
-                        name = "subgraph.category",
-                        attributeNodes = @NamedAttributeNode(value = "category")
-                )
-        }
+        attributeNodes = @NamedAttributeNode(value = "orderLine")
 )
 public class UserTransaction {
 
