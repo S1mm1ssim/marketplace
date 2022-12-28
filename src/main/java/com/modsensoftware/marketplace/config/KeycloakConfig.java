@@ -1,10 +1,14 @@
 package com.modsensoftware.marketplace.config;
 
+import lombok.RequiredArgsConstructor;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,22 +16,19 @@ import org.springframework.context.annotation.Configuration;
  * @author andrey.demyanchik on 12/8/2022
  */
 @Configuration
+@ConfigurationProperties(prefix = "idm")
+@ConfigurationPropertiesScan
+@ConstructorBinding
+@RequiredArgsConstructor
 public class KeycloakConfig {
 
-    @Value("${idm.realm-name}")
-    private String realmName;
-    @Value("${idm.server-url}")
-    private String serverUrl;
-    @Value("${idm.client-id}")
-    private String clientId;
-    @Value("${idm.client-secret}")
-    private String clientSecret;
-    @Value("${idm.admin-username}")
-    private String adminUsername;
-    @Value("${idm.admin-password}")
-    private String adminPassword;
-    @Value("${idm.pool-size}")
-    private int connectionPoolSize;
+    private final String realmName;
+    private final String serverUrl;
+    private final String clientId;
+    private final String clientSecret;
+    private final String adminUsername;
+    private final String adminPassword;
+    private final int poolSize;
 
     @Bean
     public Keycloak keycloak() {
@@ -40,7 +41,7 @@ public class KeycloakConfig {
                 .clientId(clientId)
                 .clientSecret(clientSecret)
                 .resteasyClient(new ResteasyClientBuilderImpl()
-                        .connectionPoolSize(connectionPoolSize)
+                        .connectionPoolSize(poolSize)
                         .build()
                 )
                 .build();
