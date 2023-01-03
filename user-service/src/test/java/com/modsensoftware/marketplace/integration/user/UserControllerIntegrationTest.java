@@ -37,7 +37,7 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 11/22/2022
  */
-@ActiveProfiles({"wiremock-test", "integration-test"})
+@ActiveProfiles("wiremock-test")
 @ContextConfiguration(classes = {LoadBalancerTestConfig.class})
 public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
@@ -68,13 +68,13 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     @AfterAll
     static void afterAll() {
-        ScriptUtils.runInitScript(dbDelegate, "integration/user/userIntegrationTestTearDown.sql");
+        ScriptUtils.runInitScript(AbstractIntegrationTest.dbDelegate, "integration/user/userIntegrationTestTearDown.sql");
     }
 
     @BeforeEach
     void setUp() throws IOException {
         RestAssured.port = this.port;
-        accessToken = getAccessToken(TEST_MANAGER_USERNAME);
+        accessToken = getAccessToken(AbstractIntegrationTest.TEST_MANAGER_USERNAME);
         if (!wasSetupExecuted) {
             wasSetupExecuted = true;
             CompanyStubs.setupGetCompanyWithId(wireMockServer1, 999L);

@@ -1,8 +1,5 @@
 package com.modsensoftware.marketplace.config;
 
-import com.modsensoftware.marketplace.domain.Category;
-import com.modsensoftware.marketplace.domain.Item;
-import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
@@ -28,6 +25,8 @@ public class SessionFactoryConfig {
     private String username;
     @Value("${spring.datasource.password}")
     private String password;
+    @Value("${spring.jpa.properties.hibernate.default_schema}")
+    private String schemaName;
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
     @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
@@ -42,10 +41,7 @@ public class SessionFactoryConfig {
                 .applySettings(hibernateProperties())
                 .build();
         MetadataSources metadataSources = new MetadataSources(serviceRegistry);
-        metadataSources.addAnnotatedClass(Category.class);
         metadataSources.addAnnotatedClass(User.class);
-        metadataSources.addAnnotatedClass(Item.class);
-        metadataSources.addAnnotatedClass(Position.class);
         Metadata metadata = metadataSources.buildMetadata();
         try {
             return metadata.getSessionFactoryBuilder().build();
@@ -61,6 +57,7 @@ public class SessionFactoryConfig {
         settings.put("connection.url", url);
         settings.put("connection.username", username);
         settings.put("connection.password", password);
+        settings.put("hibernate.default_schema", schemaName);
         settings.put("hibernate.jdbc.batch_size", batchSize);
         settings.put("dialect", "org.hibernate.dialect.PostgreSQL10Dialect");
         settings.put("hibernate.show_sql", "true");

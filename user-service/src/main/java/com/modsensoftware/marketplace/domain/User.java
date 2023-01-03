@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Builder
-@Table(name = "\"user\"", schema = "public")
+@Table(name = "\"user\"", schema = "user_service")
 public class User {
 
     public static final String ID_FIELD_NAME = "id";
