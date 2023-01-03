@@ -23,6 +23,14 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {
+           UnauthorizedOperationException.class
+    })
+    protected ResponseEntity<Object> handleForbidden(RuntimeException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(),
+                new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(value = {
             EntityAlreadyExistsException.class,
             InvalidFilterException.class,
             OptimisticLockException.class,
