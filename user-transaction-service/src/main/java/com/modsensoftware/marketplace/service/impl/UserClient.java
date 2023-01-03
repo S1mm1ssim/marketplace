@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * @author andrey.demyanchik on 12/26/2022
  */
-@FeignClient(name = "APP", contextId = "APP-user-client", path = "/api/v1/users",
+@FeignClient(name = "USER-SERVICE", path = "/api/v1/users",
         configuration = {FeignErrorHandler.class})
 public interface UserClient {
 

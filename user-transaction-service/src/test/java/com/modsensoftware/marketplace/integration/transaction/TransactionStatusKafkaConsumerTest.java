@@ -22,7 +22,6 @@ import static com.modsensoftware.marketplace.domain.UserTransactionStatus.SUCCES
 /**
  * @author andrey.demyanchik on 12/29/2022
  */
-@ActiveProfiles("integration-test")
 @EmbeddedKafka(topics = {"userTransactionStatusResultsTest", "userTransactionProcessingTest"})
 public class TransactionStatusKafkaConsumerTest extends AbstractIntegrationTest {
 

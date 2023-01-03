@@ -14,6 +14,8 @@ public class LoadBalancerTestConfig {
 
     private static final int WIREMOCK_PORT_1 = 9561;
     private static final int WIREMOCK_PORT_2 = 9562;
+    private static final int WIREMOCK_PORT_3 = 9563;
+    private static final int WIREMOCK_PORT_4 = 9564;
 
     @Bean(name = "wireMockServer1", initMethod = "start", destroyMethod = "stop")
     public WireMockServer wireMockServer1() {
@@ -23,5 +25,15 @@ public class LoadBalancerTestConfig {
     @Bean(name = "wireMockServer2", initMethod = "start", destroyMethod = "stop")
     public WireMockServer wireMockServer2() {
         return new WireMockServer(WIREMOCK_PORT_2);
+    }
+
+    @Bean(name = "wireMockServer3", initMethod = "start", destroyMethod = "stop")
+    public WireMockServer wireMockServer3() {
+        return new WireMockServer(WIREMOCK_PORT_3);
+    }
+
+    @Bean(name = "wireMockServer4", initMethod = "start", destroyMethod = "stop")
+    public WireMockServer wireMockServer4() {
+        return new WireMockServer(WIREMOCK_PORT_4);
     }
 }
