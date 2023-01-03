@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.persistence.OptimisticLockException;
-
 /**
  * @author andrey.demyanchik on 11/16/2022
  */
@@ -23,10 +21,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {
-            OptimisticLockException.class,
             InsufficientItemsInStockException.class,
-            InsufficientOrderAmountException.class,
-            NoVersionProvidedException.class,
+            InsufficientOrderAmountException.class
     })
     protected ResponseEntity<Object> handleBadRequest(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(),
