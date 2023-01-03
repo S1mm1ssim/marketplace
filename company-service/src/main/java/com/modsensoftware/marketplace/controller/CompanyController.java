@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.dto.CompanyRequestDto;
-import com.modsensoftware.marketplace.dto.CompanyResponseDto;
+import com.modsensoftware.marketplace.dto.CompanyRequest;
+import com.modsensoftware.marketplace.dto.CompanyResponse;
 import com.modsensoftware.marketplace.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping(produces = {"application/json"})
-    public List<CompanyResponseDto> getAllCompanies(
+    public List<CompanyResponse> getAllCompanies(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
             @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber,
             @RequestParam(name = EMAIL_FILTER_NAME, required = false)
@@ -58,7 +58,7 @@ public class CompanyController {
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public CompanyResponseDto getCompanyById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
+    public CompanyResponse getCompanyById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
         log.debug("Fetching company by id: {}", id);
         return companyService.getCompanyById(id);
     }
@@ -66,9 +66,9 @@ public class CompanyController {
     @PreAuthorize("hasAnyRole('DIRECTOR')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCompany(@Valid @RequestBody CompanyRequestDto companyRequestDto) {
-        log.debug("Creating new company from dto: {}", companyRequestDto);
-        companyService.createCompany(companyRequestDto);
+    public void createCompany(@Valid @RequestBody CompanyRequest companyRequest) {
+        log.debug("Creating new company from dto: {}", companyRequest);
+        companyService.createCompany(companyRequest);
     }
 
     @PreAuthorize("hasAnyRole('DIRECTOR')")
@@ -82,7 +82,7 @@ public class CompanyController {
     @PreAuthorize("hasAnyRole('DIRECTOR')")
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = "ID_PATH_VARIABLE_NAME") Long id,
-                              @Valid @RequestBody CompanyRequestDto updatedFields) {
+                              @Valid @RequestBody CompanyRequest updatedFields) {
         log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);
     }

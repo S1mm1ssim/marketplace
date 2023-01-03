@@ -7,7 +7,7 @@ import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.PositionRequest;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.service.impl.CompanyClient;
 import com.modsensoftware.marketplace.service.impl.PositionServiceImpl;
@@ -89,7 +89,7 @@ public class PositionServiceTest {
         Long userCompanyId = 2L;
         UUID userId = UUID.randomUUID();
         BigDecimal amount = new BigDecimal(10);
-        PositionRequestDto updatedFields = new PositionRequestDto(null, null, posCompanyId, userId, amount, null, version);
+        PositionRequest updatedFields = new PositionRequest(null, null, posCompanyId, userId, amount, null, version);
         Position position = Position.builder().id(id).version(version).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
         BDDMockito.given(userDao.get(userId)).willReturn(User.builder().id(userId).companyId(userCompanyId).build());
@@ -110,7 +110,7 @@ public class PositionServiceTest {
         long version = 1L;
         long differentVersion = 2L;
         BigDecimal amount = new BigDecimal(10);
-        PositionRequestDto updatedFields = PositionRequestDto.builder().amount(amount).version(version).build();
+        PositionRequest updatedFields = PositionRequest.builder().amount(amount).version(version).build();
         Position position = Position.builder().id(id).version(differentVersion).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
@@ -138,7 +138,7 @@ public class PositionServiceTest {
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
         Long companyId = 2L;
-        PositionRequestDto toBeSaved = new PositionRequestDto(UUID.randomUUID(), 1L, companyId,
+        PositionRequest toBeSaved = new PositionRequest(UUID.randomUUID(), 1L, companyId,
                 UUID.randomUUID(), amount, minAmount, 0L);
         BDDMockito.given(companyClient.getCompanyById(companyId)).willReturn(new Company());
         BDDMockito.given(positionMapper.toPosition(toBeSaved)).willReturn(Position.builder()
@@ -175,7 +175,7 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        PositionRequestDto toBeSaved = new PositionRequestDto(UUID.randomUUID(), null, 2L,
+        PositionRequest toBeSaved = new PositionRequest(UUID.randomUUID(), null, 2L,
                 UUID.randomUUID(), amount, minAmount, 0L);
         // when
         // then

@@ -20,7 +20,7 @@ import static com.modsensoftware.marketplace.constants.Constants.MIN_AMOUNT_VALU
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PositionRequestDto {
+public class PositionRequest {
     private UUID itemId;
     private Long itemVersion;
     private Long companyId;

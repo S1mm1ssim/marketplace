@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import com.modsensoftware.marketplace.integration.CompanyStubs;
 import com.modsensoftware.marketplace.integration.LoadBalancerTestConfig;
@@ -120,13 +120,13 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     public void shouldReturnAllPositionsWithNonSoftDeletedCompany() throws IOException {
         CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer1);
         CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer2);
-        PositionResponseDto[] positions = RestAssured.given()
+        PositionResponse[] positions = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .get("/positions")
                 .then().statusCode(200)
-                .extract().body().as(PositionResponseDto[].class);
+                .extract().body().as(PositionResponse[].class);
         Assertions.assertThat(positions.length).isGreaterThanOrEqualTo(2);
     }
 

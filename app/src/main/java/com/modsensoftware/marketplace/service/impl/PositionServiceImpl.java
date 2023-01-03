@@ -6,8 +6,8 @@ import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.PositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class PositionServiceImpl implements PositionService {
     private String noItemVersionProvidedMessage;
 
     @Override
-    public PositionResponseDto getPositionById(Long id) {
+    public PositionResponse getPositionById(Long id) {
         log.debug("Fetching company by id: {}", id);
         Position position = positionDao.get(id);
         Company positionCompany = companyClient.getCompanyById(position.getCompanyId());
@@ -53,7 +53,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public List<PositionResponseDto> getAllPositions(int pageNumber) {
+    public List<PositionResponse> getAllPositions(int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         List<Position> positions = positionDao.getAll(pageNumber, Collections.emptyMap());
         List<Company> companies = companyClient.getCompanies();
@@ -72,19 +72,19 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public void createPosition(PositionRequestDto positionRequestDto) {
-        log.debug("Creating new position from dto: {}", positionRequestDto);
-        if (positionRequestDto.getItemVersion() == null) {
-            log.error("Provided positionRequestDto didn't contain item's version");
+    public void createPosition(PositionRequest positionRequest) {
+        log.debug("Creating new position from dto: {}", positionRequest);
+        if (positionRequest.getItemVersion() == null) {
+            log.error("Provided positionRequest didn't contain item's version");
             throw new NoVersionProvidedException(format(noItemVersionProvidedMessage,
-                    positionRequestDto.getItemId()));
+                    positionRequest.getItemId()));
         }
-        if (positionRequestDto.getCompanyId() != null) {
+        if (positionRequest.getCompanyId() != null) {
             // A request is sent to check if a company with such id exists
             // Feign decoder will check status and throw runtime exception if company not found
-            companyClient.getCompanyById(positionRequestDto.getCompanyId());
+            companyClient.getCompanyById(positionRequest.getCompanyId());
         }
-        Position position = positionMapper.toPosition(positionRequestDto);
+        Position position = positionMapper.toPosition(positionRequest);
         position.setCreated(LocalDateTime.now());
         log.debug("Mapping result: {}", position);
         positionDao.save(position);
@@ -97,7 +97,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public void updatePosition(Long id, PositionRequestDto updatedFields) {
+    public void updatePosition(Long id, PositionRequest updatedFields) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         Position position = positionDao.get(id);
         if (position.getVersion().equals(updatedFields.getVersion())) {
