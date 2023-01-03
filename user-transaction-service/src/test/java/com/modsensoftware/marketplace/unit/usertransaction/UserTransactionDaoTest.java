@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.unit.usertransaction;
 import com.modsensoftware.marketplace.dao.UserTransactionDao;
 import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.UserTransaction;
+import com.modsensoftware.marketplace.domain.UserTransactionStatus;
 import com.modsensoftware.marketplace.dto.response.CompanyResponseDto;
 import com.modsensoftware.marketplace.dto.response.UserResponseDto;
 import com.modsensoftware.marketplace.unit.AbstractDaoTest;
@@ -86,8 +87,8 @@ public class UserTransactionDaoTest extends AbstractDaoTest {
     }
 
     private UserTransaction generateUserTransaction(UUID userId, Long positionId) {
-        return new UserTransaction(null, userId, now().truncatedTo(SECONDS), List.of(
-                new Order(null, 5d, positionId, null))
+        return new UserTransaction(null, userId, now().truncatedTo(SECONDS), UserTransactionStatus.IN_PROGRESS,
+                List.of(new Order(null, 5d, positionId, null))
         );
     }
 
