@@ -151,10 +151,7 @@ public class UserTransactionDaoTest extends AbstractDaoTest {
     }
 
     private Position generateOrderPosition(Long positionId, Long positionVersion) {
-        Position orderPosition = new Position();
-        orderPosition.setId(positionId);
-        orderPosition.setVersion(positionVersion);
-        return orderPosition;
+        return Position.builder().id(positionId).version(positionVersion).build();
     }
 
     private UserTransaction generateUserTransaction(UUID userId, Position orderPosition) {
@@ -193,8 +190,7 @@ public class UserTransactionDaoTest extends AbstractDaoTest {
     }
 
     private List<UserTransaction> generateTransactionsForUsers(Position savedPosition, User user1, User user2) {
-        Position orderPosition = generateOrderPosition(savedPosition.getId(),
-                savedPosition.getVersion());
+        Position orderPosition = generateOrderPosition(savedPosition.getId(), savedPosition.getVersion());
         List<UserTransaction> userTransactions = new ArrayList<>();
         // Generating pageSize + 1 userTransactions for each user
         for (int i = 0; i < pageSize + 1; i++) {

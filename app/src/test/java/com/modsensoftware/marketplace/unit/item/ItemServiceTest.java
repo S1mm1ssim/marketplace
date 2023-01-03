@@ -45,8 +45,8 @@ public class ItemServiceTest {
         // given
         UUID id = UUID.randomUUID();
         long version = 1L;
-        ItemDto updatedFields = new ItemDto(null, "description", null, version);
-        Item item = new Item(id, null, null, null, null, version);
+        ItemDto updatedFields = ItemDto.builder().description("description").version(version).build();
+        Item item = Item.builder().id(id).version(version).build();
         BDDMockito.given(itemDao.get(id)).willReturn(item);
 
         // when
@@ -62,8 +62,8 @@ public class ItemServiceTest {
         UUID id = UUID.randomUUID();
         long version = 1L;
         long differentVersion = 2L;
-        ItemDto updatedFields = new ItemDto(null, "description", null, version);
-        Item item = new Item(id, null, null, null, null, differentVersion);
+        ItemDto updatedFields = ItemDto.builder().description("description").version(version).build();
+        Item item = Item.builder().id(id).version(differentVersion).build();
         BDDMockito.given(itemDao.get(id)).willReturn(item);
 
         // when

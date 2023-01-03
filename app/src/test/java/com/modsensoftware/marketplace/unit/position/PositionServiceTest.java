@@ -110,7 +110,7 @@ public class PositionServiceTest {
         long version = 1L;
         long differentVersion = 2L;
         BigDecimal amount = new BigDecimal(10);
-        PositionRequestDto updatedFields = new PositionRequestDto(null, null, null, null, amount, null, version);
+        PositionRequestDto updatedFields = PositionRequestDto.builder().amount(amount).version(version).build();
         Position position = Position.builder().id(id).version(differentVersion).build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
 
