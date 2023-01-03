@@ -53,12 +53,12 @@ public class ItemDao implements Dao<Item, UUID> {
         log.debug("Fetching item entity with id {}", id);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Item> byId = cb.createQuery(Item.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Item> byId = criteriaBuilder.createQuery(Item.class);
         Root<Item> root = byId.from(Item.class);
         Join<Item, Category> category = root.join(CATEGORY_FIELD_NAME);
 
-        byId.select(root).where(cb.equal(root.get(ID_FIELD_NAME), id));
+        byId.select(root).where(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id));
 
         Query<Item> query = session.createQuery(byId);
         query.setHint(GRAPH_TYPE, entityGraph);
@@ -77,8 +77,8 @@ public class ItemDao implements Dao<Item, UUID> {
         log.debug("Fetching all items for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Item> getAll = cb.createQuery(Item.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Item> getAll = criteriaBuilder.createQuery(Item.class);
         Root<Item> root = getAll.from(Item.class);
         Join<Item, Category> category = root.join(CATEGORY_FIELD_NAME);
 
@@ -127,10 +127,10 @@ public class ItemDao implements Dao<Item, UUID> {
     public void deleteById(UUID id) {
         log.debug("Deleting item entity with id: {}", id);
         Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaDelete<Item> delete = cb.createCriteriaDelete(Item.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaDelete<Item> delete = criteriaBuilder.createCriteriaDelete(Item.class);
         Root<Item> root = delete.from(Item.class);
-        delete.where(cb.equal(root.get(ID_FIELD_NAME), id));
+        delete.where(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(delete).executeUpdate();

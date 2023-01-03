@@ -91,11 +91,9 @@ public class UserDao implements Dao<User, UUID> {
         CriteriaQuery<User> getAll = cb.createQuery(User.class);
         Root<User> root = getAll.from(User.class);
 
-        // Filtering
         List<Predicate> predicates = constructPredicatesFromProps(filterProperties, cb, root);
         getAll.select(root).where(predicates.toArray(new Predicate[0]));
 
-        // Paging
         Query<User> query = session.createQuery(getAll);
         query.setFirstResult(pageSize * pageNumber);
         query.setMaxResults(pageSize);
