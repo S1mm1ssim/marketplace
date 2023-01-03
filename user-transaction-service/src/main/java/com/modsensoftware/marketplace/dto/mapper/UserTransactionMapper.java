@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.dto.mapper;
 
 import com.modsensoftware.marketplace.domain.UserTransaction;
+import com.modsensoftware.marketplace.dto.PlacedUserTransaction;
 import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
 import org.mapstruct.Mapper;
 
@@ -11,4 +12,5 @@ import org.mapstruct.Mapper;
 public interface UserTransactionMapper {
 
     UserTransaction toUserTransaction(UserTransactionRequestDto transactionDto);
+    PlacedUserTransaction toPlacedUserTransaction(UserTransaction userTransaction);
 }
