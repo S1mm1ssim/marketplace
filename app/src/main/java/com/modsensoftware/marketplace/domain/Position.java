@@ -17,7 +17,6 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.Table;
-import javax.persistence.Version;
 import java.time.LocalDateTime;
 
 /**
@@ -73,8 +72,4 @@ public class Position {
     // Positive value. Values start at 0.01
     @Column(name = "min_amount", nullable = false)
     private Double minAmount;
-
-    @Version
-    @Column(name = "version", nullable = false)
-    private Long version;
 }
