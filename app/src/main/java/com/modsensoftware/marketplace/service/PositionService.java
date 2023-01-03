@@ -1,7 +1,9 @@
 package com.modsensoftware.marketplace.service;
 
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
 import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -14,9 +16,9 @@ public interface PositionService {
 
     List<PositionResponseDto> getAllPositions(int pageNumber);
 
-    void createPosition(PositionRequestDto positionRequestDto);
+    Long createPosition(CreatePositionRequestDto createPositionRequestDto, Authentication authentication);
 
-    void deletePosition(Long id);
+    void deletePosition(Long id, Authentication authentication);
 
-    void updatePosition(Long id, PositionRequestDto updatedFields);
+    void updatePosition(Long id, UpdatePositionRequestDto updatedFields, Authentication authentication);
 }
