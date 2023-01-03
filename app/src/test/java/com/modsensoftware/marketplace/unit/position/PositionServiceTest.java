@@ -1,14 +1,16 @@
 package com.modsensoftware.marketplace.unit.position;
 
 import com.modsensoftware.marketplace.dao.PositionDao;
-import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
+import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
 import com.modsensoftware.marketplace.service.impl.CompanyClient;
 import com.modsensoftware.marketplace.service.impl.PositionServiceImpl;
 import org.assertj.core.api.Assertions;
@@ -20,9 +22,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.persistence.OptimisticLockException;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -37,23 +39,20 @@ public class PositionServiceTest {
     @Mock
     private PositionDao positionDao;
     @Mock
-    private UserDao userDao;
-    @Mock
     private CompanyClient companyClient;
     @Mock
     private PositionMapper positionMapper;
+    @Mock
+    private Authentication authentication;
 
     private PositionServiceImpl underTest;
 
-    private static final String POSITION_VERSIONS_MISMATCH_MESSAGE
-            = "Provided position version does not match with the one in the database";
     private static final String NO_ITEM_VERSION_PROVIDED_MESSAGE
             = "No version for item with id %s was provided";
 
     @BeforeEach
     void setUp() {
-        underTest = new PositionServiceImpl(positionDao, userDao, positionMapper, companyClient);
-        ReflectionTestUtils.setField(underTest, "positionVersionsMismatch", POSITION_VERSIONS_MISMATCH_MESSAGE);
+        underTest = new PositionServiceImpl(positionDao, positionMapper, companyClient);
         ReflectionTestUtils.setField(underTest, "noItemVersionProvidedMessage", NO_ITEM_VERSION_PROVIDED_MESSAGE);
     }
 
@@ -83,79 +82,90 @@ public class PositionServiceTest {
     @Test
     public void canUpdatePosition() {
         // given
-        long id = 1L;
-        long version = 1L;
-        Long posCompanyId = 1L;
-        Long userCompanyId = 2L;
         UUID userId = UUID.randomUUID();
+        BDDMockito.given(authentication.getName()).willReturn(userId.toString());
+        long id = 1L;
         BigDecimal amount = new BigDecimal(10);
-        PositionRequestDto updatedFields = new PositionRequestDto(null, null, posCompanyId, userId, amount, null, version);
-        Position position = Position.builder().id(id).version(version).build();
+        UpdatePositionRequestDto updatedFields = new UpdatePositionRequestDto(amount, null);
+        Position position = Position.builder()
+                .createdBy(User.builder().id(userId).build())
+                .build();
         BDDMockito.given(positionDao.get(id)).willReturn(position);
-        BDDMockito.given(userDao.get(userId)).willReturn(User.builder().id(userId).companyId(userCompanyId).build());
-        BDDMockito.given(companyClient.getCompanyById(posCompanyId)).willReturn(new Company());
-        BDDMockito.given(companyClient.getCompanyById(userCompanyId)).willReturn(new Company());
 
         // when
-        underTest.updatePosition(id, updatedFields);
+        underTest.updatePosition(id, updatedFields, authentication);
 
         // then
         BDDMockito.verify(positionDao).update(id, positionMapper.toPosition(updatedFields));
     }
 
     @Test
-    public void shouldThrowVersionMismatchExceptionWhenPositionVersionsMismatch() {
-        // given
-        Long id = 1L;
-        long version = 1L;
-        long differentVersion = 2L;
-        BigDecimal amount = new BigDecimal(10);
-        PositionRequestDto updatedFields = new PositionRequestDto(null, null, null, null, amount, null, version);
-        Position position = Position.builder().id(id).version(differentVersion).build();
-        BDDMockito.given(positionDao.get(id)).willReturn(position);
-
-        // when
-        // then
-        Assertions.assertThatThrownBy(() -> underTest.updatePosition(id, updatedFields))
-                .isInstanceOf(OptimisticLockException.class)
-                .hasMessage(POSITION_VERSIONS_MISMATCH_MESSAGE);
-        BDDMockito.verify(positionDao, BDDMockito.never()).update(BDDMockito.any(), BDDMockito.any());
-    }
-
-    @Test
     public void canDeletePosition() {
         // given
+        UUID userId = UUID.randomUUID();
+        BDDMockito.given(authentication.getName()).willReturn(userId.toString());
         Long positionId = 1L;
+        BDDMockito.given(positionDao.get(positionId)).willReturn(Position.builder()
+                .id(positionId)
+                .createdBy(User.builder().id(userId).build())
+                .build());
         // when
-        underTest.deletePosition(positionId);
+        underTest.deletePosition(positionId, authentication);
         // then
         BDDMockito.verify(positionDao).deleteById(positionId);
     }
 
     @Test
+    public void shouldThrowEntityNotFoundExceptionIfPositionForDeleteNotFound() {
+        // given
+        Long positionId = 100000L;
+        BDDMockito.given(positionDao.get(positionId)).willThrow(EntityNotFoundException.class);
+        // when
+        // then
+        Assertions.assertThatThrownBy(() -> underTest.deletePosition(positionId, authentication))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    public void shouldThrowUnauthorizedOperationExceptionOnDeleteByAnotherUser() {
+        // given
+        BDDMockito.given(authentication.getName()).willReturn(UUID.randomUUID().toString());
+        Long positionId = 1L;
+        BDDMockito.given(positionDao.get(positionId)).willReturn(Position.builder()
+                .id(positionId)
+                .createdBy(User.builder().id(UUID.randomUUID()).build())
+                .build());
+        // when
+        // then
+        Assertions.assertThatThrownBy(() -> underTest.deletePosition(positionId, authentication))
+                .isInstanceOf(UnauthorizedOperationException.class);
+    }
+
+    @Test
     public void canSavePosition() {
         // given
+        UUID userId = UUID.randomUUID();
+        BDDMockito.given(authentication.getName()).willReturn(userId.toString());
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
         Long companyId = 2L;
-        PositionRequestDto toBeSaved = new PositionRequestDto(UUID.randomUUID(), 1L, companyId,
-                UUID.randomUUID(), amount, minAmount, 0L);
+        CreatePositionRequestDto toBeSaved = new CreatePositionRequestDto(UUID.randomUUID(), 1L,
+                companyId, amount, minAmount);
         BDDMockito.given(companyClient.getCompanyById(companyId)).willReturn(new Company());
-        BDDMockito.given(positionMapper.toPosition(toBeSaved)).willReturn(Position.builder()
+        BDDMockito.given(positionMapper.toPosition(toBeSaved, userId)).willReturn(Position.builder()
                 .item(Item.builder()
                         .id(toBeSaved.getItemId())
                         .version(toBeSaved.getItemVersion())
                         .build()
                 ).companyId(companyId)
-                .createdBy(User.builder().id(toBeSaved.getCreatedBy())
+                .createdBy(User.builder().id(userId)
                         .build()
                 ).amount(amount.doubleValue())
                 .minAmount(minAmount.doubleValue())
-                .version(0L)
                 .build());
 
         // when
-        underTest.createPosition(toBeSaved);
+        underTest.createPosition(toBeSaved, authentication);
 
         // then
         ArgumentCaptor<Position> argumentCaptor = ArgumentCaptor.forClass(Position.class);
@@ -164,7 +174,7 @@ public class PositionServiceTest {
                 .hasFieldOrPropertyWithValue("item.version", toBeSaved.getItemVersion())
                 .hasFieldOrPropertyWithValue("item.id", toBeSaved.getItemId())
                 .hasFieldOrPropertyWithValue("companyId", toBeSaved.getCompanyId())
-                .hasFieldOrPropertyWithValue("createdBy.id", toBeSaved.getCreatedBy())
+                .hasFieldOrPropertyWithValue("createdBy.id", userId)
                 .hasFieldOrPropertyWithValue("amount", amount.doubleValue())
                 .hasFieldOrPropertyWithValue("minAmount", minAmount.doubleValue());
     }
@@ -175,11 +185,11 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        PositionRequestDto toBeSaved = new PositionRequestDto(UUID.randomUUID(), null, 2L,
-                UUID.randomUUID(), amount, minAmount, 0L);
+        CreatePositionRequestDto toBeSaved = new CreatePositionRequestDto(UUID.randomUUID(), null,
+                2L, amount, minAmount);
         // when
         // then
-        Assertions.assertThatThrownBy(() -> underTest.createPosition(toBeSaved))
+        Assertions.assertThatThrownBy(() -> underTest.createPosition(toBeSaved, authentication))
                 .isInstanceOf(NoVersionProvidedException.class)
                 .hasMessage(format(NO_ITEM_VERSION_PROVIDED_MESSAGE, toBeSaved.getItemId()));
         BDDMockito.verify(positionDao, BDDMockito.never()).save(BDDMockito.any());
