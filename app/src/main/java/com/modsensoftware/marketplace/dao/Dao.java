@@ -11,7 +11,7 @@ public interface Dao<T, ID> {
 
     List<T> getAll(int pageNumber, Map<String, String> filterProperties);
 
-    void save(T t);
+    ID save(T t);
 
     void update(ID id, T updatedFields);
 
