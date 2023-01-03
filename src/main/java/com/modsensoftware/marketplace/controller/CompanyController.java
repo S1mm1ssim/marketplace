@@ -63,7 +63,7 @@ public class CompanyController {
         return companyService.getCompanyById(id);
     }
 
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAnyRole('DIRECTOR')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createCompany(@Valid @RequestBody CompanyDto companyDto) {
@@ -71,7 +71,7 @@ public class CompanyController {
         companyService.createCompany(companyDto);
     }
 
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAnyRole('DIRECTOR')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id) {
@@ -79,7 +79,7 @@ public class CompanyController {
         companyService.deleteCompany(id);
     }
 
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAnyRole('DIRECTOR')")
     @PutMapping("/{id}")
     public void updateCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
                               @Valid @RequestBody CompanyDto updatedFields) {

@@ -18,9 +18,13 @@
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <maven.checkstyle.plugin.version>3.2.0</maven.checkstyle.plugin.version>
         <hibernate.version>5.6.11.Final</hibernate.version>
+        <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <restassured.version>5.3.0</restassured.version>
         <io.jsonwebtoken.version>0.11.5</io.jsonwebtoken.version>
+        <keycloak.version>20.0.1</keycloak.version>
+        <testcontainers.keycloak.version>2.4.0</testcontainers.keycloak.version>
+        <springdoc.version>1.6.13</springdoc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -29,39 +33,26 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>3.9.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${io.jsonwebtoken.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${io.jsonwebtoken.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>${io.jsonwebtoken.version}</version>
-            <scope>runtime</scope>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>${keycloak.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.13</version>
+            <version>${springdoc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -96,7 +87,7 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>6.2.5.Final</version>
+            <version>${hibernate.validator.version}</version>
         </dependency>
 
         <dependency>
@@ -114,6 +105,13 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.dasniko</groupId>
+            <artifactId>testcontainers-keycloak</artifactId>
+            <version>${testcontainers.keycloak.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>io.rest-assured</groupId>

@@ -1,9 +1,6 @@
 package com.modsensoftware.marketplace.integration.transaction;
 
-import com.modsensoftware.marketplace.config.jwt.JwtProvider;
-import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.enums.Role;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
@@ -16,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testcontainers.ext.ScriptUtils;
@@ -30,8 +28,7 @@ import static java.lang.String.format;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TransactionControllerIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private JwtProvider jwtProvider;
+    private static String accessToken;
 
     @Value("${exception.message.noPositionVersionProvided}")
     private String noPositionVersionProvidedMessage;
@@ -53,6 +50,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
 
     @BeforeEach
     void setUp() {
+        accessToken = getAccessToken(TEST_MANAGER_USERNAME);
         OrderArgumentsProvider.insufficientItemsInStockMessage = this.insufficientItemsInStockMessage;
         OrderArgumentsProvider.insufficientOrderAmountMessage = this.insufficientOrderAmountMessage;
         OrderArgumentsProvider.noPositionVersionProvidedMessage = this.noPositionVersionProvidedMessage;
@@ -62,7 +60,6 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     @Test
     public void shouldReturn201StatusOnCreateValidUserTransaction() {
         // given
-        String token = generateAccessToken(getTestManager());
         String payload = "{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
                 + "    \"orderLine\":\n"
@@ -78,7 +75,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         // when
         RestAssured.given()
                 .contentType("application/json")
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .body(payload)
                 .post("/users/transactions")
@@ -93,7 +90,6 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                                                                          Long positionVersion,
                                                                          String exceptionMessage) {
         // given
-        String token = generateAccessToken(getTestManager());
         String invalidPayload = format("{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
                 + "    \"orderLine\":\n"
@@ -109,7 +105,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         // when
         String response = RestAssured.given()
                 .contentType("application/json")
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .body(invalidPayload)
                 .post("/users/transactions")
@@ -123,12 +119,11 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
 
     @Test
     public void shouldReturnAllTransactionsForUser() {
-        String token = generateAccessToken(getTestManager());
         int expectedTransactionsAmount = 2;
         String userId = "722cd920-e127-4cc2-93b9-e9b4a8f18873";
         UserTransaction[] userTransactions = RestAssured.given()
                 .contentType("application/json")
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .get(format("/users/%s/transactions", userId))
                 .then().statusCode(200)
@@ -137,15 +132,5 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         Assertions.assertThat(userTransactions.length).isEqualTo(expectedTransactionsAmount);
         Assertions.assertThat(userTransactions)
                 .allMatch(userTransaction -> userTransaction.getUserId().equals(UUID.fromString(userId)));
-    }
-
-    private String generateAccessToken(User user) {
-        return jwtProvider.generateAccessToken(user);
-    }
-
-    private User getTestManager() {
-        return new User(UUID.fromString("b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d"),
-                "user1", "sqluser1@mail.com", "password", "full name", Role.MANAGER,
-                null, null, null);
     }
 }

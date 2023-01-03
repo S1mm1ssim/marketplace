@@ -13,6 +13,8 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.OptimisticLockException;
@@ -23,6 +25,9 @@ import java.util.UUID;
  */
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Mock
     private ItemDao itemDao;

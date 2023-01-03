@@ -6,9 +6,7 @@ import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.domain.UserTransaction;
 import com.modsensoftware.marketplace.dto.OrderDto;
 import com.modsensoftware.marketplace.dto.UserTransactionDto;
-import com.modsensoftware.marketplace.dto.mapper.OrderMapper;
 import com.modsensoftware.marketplace.dto.mapper.UserTransactionMapper;
-import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.UserTransactionService;
 import com.modsensoftware.marketplace.service.impl.UserTransactionServiceImpl;
@@ -21,6 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -33,6 +33,9 @@ import java.util.UUID;
  */
 @ExtendWith(MockitoExtension.class)
 public class UserTransactionServiceTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Mock
     private UserDao userDao;

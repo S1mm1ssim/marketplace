@@ -18,6 +18,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -30,7 +32,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import static com.modsensoftware.marketplace.enums.Role.MANAGER;
 import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
 import static java.time.LocalDateTime.parse;
@@ -42,6 +43,9 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class UserDaoTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -60,8 +64,6 @@ public class UserDaoTest {
     private int pageSize;
     @Value("${exception.message.userNotFound}")
     private String userNotFoundMessage;
-    @Value("${exception.message.userWithEmailNotFound}")
-    private String userWithEmailNotFoundMessage;
     @Value("${exception.message.invalidCreatedBetweenFilter}")
     private String invalidCreatedBetweenFilterMessage;
 
@@ -92,32 +94,6 @@ public class UserDaoTest {
                 .hasMessage(format(userNotFoundMessage, nonExistentUuid));
     }
 
-    @Test
-    public void canSaveAndGetUserByEmail() {
-        // given
-        User user = generateDefaultTestUser();
-
-        // when
-        underTest.save(user);
-
-        // then
-        User result = underTest.getByEmail(user.getEmail());
-        Assertions.assertThat(result).isEqualTo(user);
-
-        // clean up
-        deleteUser(user);
-    }
-
-    @Test
-    public void getByNonExistentEmailShouldThrowEntityNotFoundException() {
-        // given
-        String nonExistentEmail = "hsadgsakjdbhabhsadbjskbhdashasdhj@fhdjfhjdksfnkjd.dashdaskjdsadkansl";
-        // when
-        // then
-        Assertions.assertThatThrownBy(() -> underTest.getByEmail(nonExistentEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage(format(userWithEmailNotFoundMessage, nonExistentEmail));
-    }
 
     @Test
     public void canGetAllNonSoftDeletedUsersWithPagination() {
@@ -151,64 +127,6 @@ public class UserDaoTest {
         deleteAllUsers(users);
         deleteCompany(company);
         deleteCompany(softDeletedCompany);
-    }
-
-    @Test
-    public void canGetAllUsersFilteredByName() {
-        // given
-        Company company = generateDefaultTestPersistentCompany();
-        Random random = new Random();
-        List<User> users = new ArrayList<>();
-        for (int i = 0; i < pageSize / 2; i++) {
-            User user = generateUserWithRandomEmailAndName(random, company, "full name");
-            User anotherUser = generateUserWithRandomEmailAndName(random, company, "name");
-            users.add(user);
-            users.add(anotherUser);
-            underTest.save(user);
-            underTest.save(anotherUser);
-        }
-
-        // when
-        Map<String, String> nameFilter = new HashMap<>();
-        String filterValue = "full";
-        nameFilter.put("name", filterValue);
-        List<User> firstPage = underTest.getAll(0, nameFilter);
-
-        // then
-        Assertions.assertThat(firstPage.size()).isEqualTo(pageSize / 2);
-
-        // clean up
-        deleteAllUsers(users);
-        deleteCompany(company);
-    }
-
-    @Test
-    public void canGetAllUsersFilteredByEmail() {
-        // given
-        Company company = generateDefaultTestPersistentCompany();
-        Random random = new Random();
-        List<User> users = new ArrayList<>();
-        for (int i = 0; i < pageSize / 2; i++) {
-            User user = generateUserWithRandomizedEmail(random, company, "email%s@email.com");
-            User anotherUser = generateUserWithRandomizedEmail(random, company, "user%s@user.com");
-            users.add(user);
-            users.add(anotherUser);
-            underTest.save(user);
-            underTest.save(anotherUser);
-        }
-
-        // when
-        Map<String, String> emailFilter = new HashMap<>();
-        String filterValue = "email";
-        emailFilter.put("email", filterValue);
-        List<User> firstPage = underTest.getAll(0, emailFilter);
-
-        // then
-        Assertions.assertThat(firstPage.size()).isEqualTo(pageSize / 2);
-
-        // clean up
-        deleteAllUsers(users);
-        deleteCompany(company);
     }
 
     @Test
@@ -292,14 +210,13 @@ public class UserDaoTest {
         Company anotherCompany = new Company(null, "another company", "anotherCompany@anotherCompany.com",
                 now().truncatedTo(SECONDS), "description", false);
         companyDao.save(anotherCompany);
-        User user = new User(null, "username", "email@email.com", "full name", "password",
-                MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+        User user = new User(UUID.randomUUID(), "username", "email@email.com", "full name",
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
         underTest.save(user);
         User updatedFields = new User(null, "upd username", "updEmail@email.com",
-                "upd full name", "password", null, null, now().truncatedTo(SECONDS), anotherCompany);
+                "upd full name", null, now().truncatedTo(SECONDS), anotherCompany);
         User expected = new User(user.getId(), updatedFields.getUsername(), updatedFields.getEmail(),
-                updatedFields.getName(), "password", user.getRole(), user.getCreated(),
-                updatedFields.getUpdated(), updatedFields.getCompany());
+                updatedFields.getName(), user.getCreated(), updatedFields.getUpdated(), updatedFields.getCompany());
 
         // when
         underTest.update(user.getId(), updatedFields);
@@ -360,8 +277,8 @@ public class UserDaoTest {
 
     private User generateDefaultTestUser() {
         Company company = generateDefaultTestPersistentCompany();
-        return new User(null, "username", "email@email.com", "full name", "password",
-                MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+        return new User(UUID.randomUUID(), "username", "email@email.com", "full name",
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 
     private void deleteUser(User user) {
@@ -405,22 +322,14 @@ public class UserDaoTest {
     }
 
     private User generateUserWithRandomEmail(Random random, Company company) {
-        return new User(null, "username", format("email%s@email.com", random.nextInt()), "full name", "pass",
-                MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
-    }
-
-    private User generateUserWithRandomEmailAndName(Random random, Company company, String name) {
-        return new User(null, "username", format("email%s@email.com", random.nextInt()), name, "password",
-                MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+        return new User(UUID.randomUUID(), format("username%s", random.nextInt()),
+                format("email%s@email.com", random.nextInt()), "full name",
+                now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 
     private User generateUserWithRandomEmailAndTimestamp(Random random, Company company, String timestamp) {
-        return new User(null, "username", format("email%s@email.com", random.nextInt()), "full name", "password",
-                MANAGER, parse(timestamp), parse(timestamp), company);
-    }
-
-    private User generateUserWithRandomizedEmail(Random random, Company company, String email) {
-        return new User(null, "username", format(email, random.nextInt()), "full name", "password",
-                MANAGER, now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
+        return new User(UUID.randomUUID(), format("username%s", random.nextInt()),
+                format("email%s@email.com", random.nextInt()), "full name",
+                parse(timestamp), parse(timestamp), company);
     }
 }

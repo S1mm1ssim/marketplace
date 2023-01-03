@@ -14,6 +14,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -35,6 +37,9 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class CompanyDaoTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private SessionFactory sessionFactory;

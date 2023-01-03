@@ -5,24 +5,33 @@ services:
     image: "postgres"
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=marketplace
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketplace
     volumes:
       - marketplace-postgres-data:/var/lib/postgresql/data
     ports:
       - "32768:5432"
-  redis-token-storage:
-    container_name: redis-token-store
-    image: "redis"
-    restart: always
+  keycloak:
+    container_name: modsen-marketplace-keycloak
+    image: quay.io/keycloak/keycloak:20.0.1
+    environment:
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_PORT: 32768
+      DB_DATABASE: marketplace
+      DB_SCHEMA: public
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
-      - "6379:6379"
-    volumes:
-      - token-storage-data:/data
+      - "8079:8080"
+    depends_on:
+      - modsen-marketplace-postgres
+    command:
+      - start-dev
 
 volumes:
   marketplace-postgres-data:
-    driver: local
-  token-storage-data:
     driver: local

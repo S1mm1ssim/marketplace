@@ -1,4 +1,4 @@
-package com.modsensoftware.marketplace.dto;
+package com.modsensoftware.marketplace.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,12 +11,12 @@ import static com.modsensoftware.marketplace.constants.Constants.EMAIL_REGEX;
 import static com.modsensoftware.marketplace.constants.Constants.INVALID_EMAIL_MESSAGE;
 
 /**
- * @author andrey.demyanchik on 11/3/2022
+ * @author andrey.demyanchik on 12/8/2022
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class UserRequestDto {
     private String username;
     @Email(regexp = EMAIL_REGEX, message = INVALID_EMAIL_MESSAGE)
     private String email;

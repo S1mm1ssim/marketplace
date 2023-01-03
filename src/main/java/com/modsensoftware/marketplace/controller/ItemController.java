@@ -53,7 +53,7 @@ public class ItemController {
         return itemService.getItemById(id);
     }
 
-    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
+    @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void createItem(@RequestBody ItemDto itemDto) {
@@ -61,7 +61,7 @@ public class ItemController {
         itemService.createItem(itemDto);
     }
 
-    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
+    @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
@@ -69,7 +69,7 @@ public class ItemController {
         itemService.deleteItem(id);
     }
 
-    @PreAuthorize("hasAuthority('STORAGE_MANAGER')")
+    @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
     public void updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id,
                            @RequestBody ItemDto updatedFields) {

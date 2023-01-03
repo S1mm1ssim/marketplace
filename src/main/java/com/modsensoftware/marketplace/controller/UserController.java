@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.domain.User;
-import com.modsensoftware.marketplace.dto.UserDto;
+import com.modsensoftware.marketplace.dto.request.UserRequestDto;
+import com.modsensoftware.marketplace.dto.response.UserResponseDto;
 import com.modsensoftware.marketplace.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping(produces = {"application/json"})
-    public List<User> getAllUsers(
+    public List<UserResponseDto> getAllUsers(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
             @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber,
             @RequestParam(name = EMAIL_FILTER_NAME, required = false)
@@ -57,22 +57,22 @@ public class UserController {
             @RequestParam(name = COMPANY_ID_FILTER_NAME, required = false) Long companyId
     ) {
         log.debug("Fetching all users for page {}. "
-                            + "Filter by email: {}, name: {}, created between: {}, company id: {}",
-                    pageNumber, email, name, createdBetween, companyId);
+                        + "Filter by email: {}, name: {}, created between: {}, company id: {}",
+                pageNumber, email, name, createdBetween, companyId);
         return userService.getAllUsers(pageNumber, email, name, createdBetween, companyId);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public User getUserById(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
+    public UserResponseDto getUserById(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
         log.debug("Fetching user by id: {}", id);
         return userService.getUserById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createUser(@Valid @RequestBody UserDto userDto) {
+    public String createUser(@Valid @RequestBody UserRequestDto userDto) {
         log.debug("Creating new user from dto: {}", userDto);
-        userService.createUser(userDto);
+        return userService.createUser(userDto);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -84,7 +84,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public void updateUser(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id,
-                           @Valid @RequestBody UserDto updatedFields) {
+                           @Valid @RequestBody UserRequestDto updatedFields) {
         log.debug("Updating user with id: {}\nwith params: {}", id, updatedFields);
         userService.updateUser(id, updatedFields);
     }

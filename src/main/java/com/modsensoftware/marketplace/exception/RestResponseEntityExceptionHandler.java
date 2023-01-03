@@ -28,18 +28,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             OptimisticLockException.class,
             InsufficientItemsInStockException.class,
             InsufficientOrderAmountException.class,
-            NoVersionProvidedException.class
+            NoVersionProvidedException.class,
+            PasswordAbsenceException.class
     })
     protected ResponseEntity<Object> handleBadRequest(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-    }
-
-    @ExceptionHandler(value = {
-            AuthorizationException.class
-    })
-    protected ResponseEntity<Object> handleFailAuth(RuntimeException ex, WebRequest request) {
-        return handleExceptionInternal(ex, ex.getMessage(),
-                new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
 }

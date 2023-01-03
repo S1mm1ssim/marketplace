@@ -16,6 +16,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.OptimisticLockException;
@@ -29,6 +31,9 @@ import static java.lang.String.format;
  */
 @ExtendWith(MockitoExtension.class)
 public class PositionServiceTest {
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Mock
     private PositionDao positionDao;
@@ -66,7 +71,7 @@ public class PositionServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenPositionVersionsMismatch() {
+    public void shouldThrowVersionMismatchExceptionWhenPositionVersionsMismatch() {
         // given
         Long id = 1L;
         long version = 1L;

@@ -1,20 +1,14 @@
 package com.modsensoftware.marketplace.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.modsensoftware.marketplace.enums.Role;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -31,11 +25,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "\"user\"")
-@TypeDef(
-        name = "pgsql_enum",
-        typeClass = PostgreSQLEnumType.class
-)
 @NamedEntityGraph(
         name = "graph.User.company",
         attributeNodes = {
@@ -53,11 +44,10 @@ public class User {
     public static final String COMPANY_FIELD_NAME = "company";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Type(type = "pg-uuid")
     private UUID id;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -65,15 +55,6 @@ public class User {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @JsonIgnore
-    @Column(name = "password", nullable = false)
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "user_role", name = "role", nullable = false)
-    @Type(type = "pgsql_enum")
-    private Role role;
 
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
