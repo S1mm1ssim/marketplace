@@ -1,12 +1,14 @@
 package com.modsensoftware.marketplace.controller;
 
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
 import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,24 +53,26 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createPosition(@Valid @RequestBody PositionRequestDto positionRequestDto) {
-        log.debug("Creating new position from dto: {}", positionRequestDto);
-        positionService.createPosition(positionRequestDto);
+    public Long createPosition(@Valid @RequestBody CreatePositionRequestDto createPositionRequestDto,
+                               Authentication authentication) {
+        log.debug("Creating new position from dto: {}", createPositionRequestDto);
+        return positionService.createPosition(createPositionRequestDto, authentication);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deletePosition(@PathVariable(name = "id") Long id) {
+    public void deletePosition(@PathVariable(name = "id") Long id, Authentication authentication) {
         log.debug("Deleting position by id: {}", id);
-        positionService.deletePosition(id);
+        positionService.deletePosition(id, authentication);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
     public void updatePosition(@PathVariable Long id,
-                               @Valid @RequestBody PositionRequestDto updatedFields) {
+                               @Valid @RequestBody UpdatePositionRequestDto updatedFields,
+                               Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
-        positionService.updatePosition(id, updatedFields);
+        positionService.updatePosition(id, updatedFields, authentication);
     }
 }

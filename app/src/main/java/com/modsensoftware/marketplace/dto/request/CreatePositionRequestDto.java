@@ -14,16 +14,14 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PositionRequestDto {
+public class CreatePositionRequestDto {
     private UUID itemId;
     private Long itemVersion;
     private Long companyId;
-    private UUID createdBy;
 
     @DecimalMin(value = "0.01")
     private BigDecimal amount;
 
     @DecimalMin(value = "0.01")
     private BigDecimal minAmount;
-    private Long version;
 }

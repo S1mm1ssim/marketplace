@@ -135,7 +135,9 @@ public class LoggingAspect {
         String[] parameterNames = signature.getParameterNames();
 
         for (int i = 0; i < parameterNames.length; i++) {
-            map.put(parameterNames[i], joinPoint.getArgs()[i]);
+            if (!parameterNames[i].equals("authentication")) {
+                map.put(parameterNames[i], joinPoint.getArgs()[i]);
+            }
         }
 
         return map;
