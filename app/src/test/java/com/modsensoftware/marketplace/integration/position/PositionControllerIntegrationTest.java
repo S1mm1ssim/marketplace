@@ -4,18 +4,26 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
+import com.modsensoftware.marketplace.dto.request.UserRequestDto;
 import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import com.modsensoftware.marketplace.integration.CompanyStubs;
 import com.modsensoftware.marketplace.integration.LoadBalancerTestConfig;
+import com.modsensoftware.marketplace.service.UserService;
 import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -25,6 +33,7 @@ import org.testcontainers.ext.ScriptUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -34,6 +43,7 @@ import static java.lang.String.format;
  */
 @ActiveProfiles({"wiremock-test", "integration-test"})
 @ContextConfiguration(classes = {LoadBalancerTestConfig.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
 
     @LocalServerPort
@@ -45,11 +55,18 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     private WireMockServer wireMockServer2;
     @Autowired
     private PositionDao positionDao;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private Keycloak keycloak;
 
     private static String accessToken;
+    private static String savedPositionId;
 
-    @Value("${exception.message.positionVersionsMismatch}")
-    private String positionVersionsMismatch;
+    private static final String POSITION_MANAGER_USERNAME = "position-manager";
+    private static boolean wasStorageManagerRegistered = false;
+    @Value("${idm.realm-name}")
+    private String realmName;
 
     @BeforeAll
     protected static void beforeAll() {
@@ -63,34 +80,81 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         RestAssured.port = this.port;
+        if (!wasStorageManagerRegistered) {
+            CompanyStubs.setupGetCompanyWithId(wireMockServer1, 999L);
+            CompanyStubs.setupGetCompanyWithId(wireMockServer2, 999L);
+            // Saving new user
+            String userId = userService.createUser(new UserRequestDto(POSITION_MANAGER_USERNAME, "storage_manager@user.com",
+                    "full name", "password", 999L));
+            // Adding STORAGE_MANAGER role
+            UserResource userResource = keycloak.realm(realmName).users().get(userId);
+            RoleRepresentation storageManagerRole = keycloak.realm(realmName).roles()
+                    .get("STORAGE_MANAGER").toRepresentation();
+            userResource.roles().realmLevel().add(List.of(storageManagerRole));
+            wasStorageManagerRegistered = true;
+        }
         accessToken = getAccessToken(TEST_STORAGE_MANAGER_USERNAME);
     }
 
+    @Order(1)
     @Test
     public void shouldReturn201StatusOnSaveOperation() throws IOException {
+        accessToken = getAccessToken(POSITION_MANAGER_USERNAME);
         CompanyStubs.setupGetCompanyWithId(wireMockServer1, 999L);
         CompanyStubs.setupGetCompanyWithId(wireMockServer2, 999L);
         // given
         String itemUuid = "b6b7764c-ed62-47a4-a68d-3cad4da1e187";
         String companyId = "999";
-        String userUuid = "722cd920-e127-4cc2-93b9-e9b4a8f18873";
         Map<String, String> position = new HashMap<>();
         position.put("itemId", itemUuid);
         position.put("itemVersion", "0");
         position.put("companyId", companyId);
-        position.put("createdBy", userUuid);
         position.put("amount", "2");
         position.put("minAmount", "1");
 
-        RestAssured.given()
+        PositionControllerIntegrationTest.savedPositionId = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .body(position)
                 .post("/positions")
-                .then().statusCode(201);
+                .then().statusCode(201).extract().body().asString();
+    }
+
+    @Order(2)
+    @Test
+    public void canUpdatePosition() {
+        accessToken = getAccessToken(POSITION_MANAGER_USERNAME);
+        String positionId = savedPositionId;
+        String updatedFields = ""
+                + "{\n"
+                + "    \"amount\": 4\n"
+                + "}";
+        RestAssured.given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .body(updatedFields)
+                .when()
+                .put(format("/positions/%s", positionId))
+                .then().statusCode(200);
+
+        Position result = positionDao.get(Long.valueOf(positionId));
+        Assertions.assertThat(result.getAmount()).isEqualTo(4.0);
+    }
+
+    @Order(3)
+    @Test
+    public void shouldReturn204StatusOnDeleteOperation() {
+        accessToken = getAccessToken(POSITION_MANAGER_USERNAME);
+        String positionId = savedPositionId;
+        RestAssured.given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .delete(format("/positions/%s", positionId))
+                .then().statusCode(204);
     }
 
     @Test
@@ -186,62 +250,30 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldReturn204StatusOnDeleteOperation() {
+    public void deleteByAnotherPersonShouldReturnForbidden() {
         String positionId = "1002";
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .delete(format("/positions/%s", positionId))
-                .then().statusCode(204);
+                .then().statusCode(403);
     }
 
     @Test
-    public void canUpdatePosition() {
+    public void updateByAnotherPersonShouldReturnForbidden() {
         String positionId = "999";
-        String itemId = "b6b7764c-ed62-47a4-a68d-3cad4da1e187";
-        String updatedFields = format(""
+        String updatedFields = ""
                 + "{\n"
-                + "    \"itemId\": \"%s\",\n"
                 + "    \"amount\": 4,\n"
                 + "    \"version\": 1\n"
-                + "}", itemId);
+                + "}";
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .body(updatedFields)
                 .when()
                 .put(format("/positions/%s", positionId))
-                .then().statusCode(200);
-
-        Position result = positionDao.get(Long.valueOf(positionId));
-        Assertions.assertThat(result)
-                .hasFieldOrPropertyWithValue("amount", 4.0)
-                .hasFieldOrPropertyWithValue("version", 2L);
-        Assertions.assertThat(result.getItem().getId().toString()).isEqualTo(itemId);
-    }
-
-    @Test
-    public void shouldReturn400StatusOnUpdateWithIncorrectVersion() {
-        String positionId = "999";
-        Position initial = positionDao.get(Long.valueOf(positionId));
-        String updatedFields = ""
-                + "{\n"
-                + "    \"itemId\": \"b6b7764c-ed62-47a4-a68d-3cad4da1e187\",\n"
-                + "    \"amount\": 4,\n"
-                + "    \"version\": 9\n"
-                + "}";
-        String response = RestAssured.given()
-                .contentType("application/json")
-                .header("Authorization", "Bearer " + accessToken)
-                .body(updatedFields)
-                .when()
-                .put(format("/positions/%s", positionId))
-                .then().statusCode(400)
-                .extract().response().asString();
-        Assertions.assertThat(response).isEqualTo(positionVersionsMismatch);
-
-        Position latest = positionDao.get(Long.valueOf(positionId));
-        Assertions.assertThat(latest).isEqualTo(initial);
+                .then().statusCode(403);
     }
 }
