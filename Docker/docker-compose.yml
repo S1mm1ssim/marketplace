@@ -37,6 +37,15 @@ services:
     command:
       - start-dev
 
+  mongodb:
+    container_name: modsen-marketplace-mongodb
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONDO_INITDB_DATABASE: marketplace_positions
+
   zookeeper:
     container_name: modsen-marketplace-zookeeper
     image: confluentinc/cp-zookeeper:latest
