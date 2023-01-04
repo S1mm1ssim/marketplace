@@ -6,22 +6,28 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static com.modsensoftware.marketplace.constants.Constants.INVALID_AMOUNT_MESSAGE;
+import static com.modsensoftware.marketplace.constants.Constants.INVALID_MIN_AMOUNT_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.MIN_AMOUNT_VALUE;
 
 /**
- * @author andrey.demyanchik on 11/24/2022
+ * @author andrey.demyanchik on 12/27/2022
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequestDto {
-
-    private Long positionId;
+@NoArgsConstructor
+public class PositionRequest {
+    private UUID itemId;
+    private Long itemVersion;
+    private Long companyId;
+    private UUID createdBy;
 
     @DecimalMin(value = MIN_AMOUNT_VALUE, message = INVALID_AMOUNT_MESSAGE)
     private BigDecimal amount;
 
-    private Long positionVersion;
+    @DecimalMin(value = MIN_AMOUNT_VALUE, message = INVALID_MIN_AMOUNT_MESSAGE)
+    private BigDecimal minAmount;
+    private Long version;
 }

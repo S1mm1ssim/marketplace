@@ -2,9 +2,9 @@ package com.modsensoftware.marketplace.unit.usertransaction;
 
 import com.modsensoftware.marketplace.dao.UserTransactionDao;
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
-import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequest;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequest;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import com.modsensoftware.marketplace.dto.mapper.UserTransactionMapper;
 import com.modsensoftware.marketplace.service.OrderService;
 import com.modsensoftware.marketplace.service.UserTransactionService;
@@ -67,9 +67,9 @@ public class UserTransactionServiceTest {
     public void canSaveUserTransaction() {
         // given
         UUID userId = UUID.randomUUID();
-        OrderRequestDto orderDto = new OrderRequestDto(1L, new BigDecimal("5"), 0L);
-        UserTransactionRequestDto transactionDto = new UserTransactionRequestDto(userId, List.of(orderDto));
-        BDDMockito.when(userClient.getUserById(userId)).thenReturn(new UserResponseDto());
+        OrderRequest orderDto = new OrderRequest(1L, new BigDecimal("5"), 0L);
+        UserTransactionRequest transactionDto = new UserTransactionRequest(userId, List.of(orderDto));
+        BDDMockito.when(userClient.getUserById(userId)).thenReturn(new UserResponse());
         UserTransaction expectedTransaction = transactionMapper.toUserTransaction(transactionDto);
 
         // when

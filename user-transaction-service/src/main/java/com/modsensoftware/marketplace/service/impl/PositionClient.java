@@ -1,8 +1,8 @@
 package com.modsensoftware.marketplace.service.impl;
 
 import com.modsensoftware.marketplace.config.FeignErrorHandler;
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.PositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,8 +19,8 @@ import javax.validation.Valid;
 public interface PositionClient {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    PositionResponseDto getPositionById(@PathVariable(name = "id") Long id);
+    PositionResponse getPositionById(@PathVariable(name = "id") Long id);
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT, consumes = "application/json")
-    void updatePosition(@PathVariable(name = "id") Long id, @Valid @RequestBody PositionRequestDto updatedFields);
+    void updatePosition(@PathVariable(name = "id") Long id, @Valid @RequestBody PositionRequest updatedFields);
 }

@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * @author andrey.demyanchik on 12/26/2022
@@ -15,12 +14,13 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserResponseDto {
-    private UUID id;
-    private String username;
-    private String email;
-    private String name;
+public class PositionResponse {
+    private Long id;
+    private ItemResponse item;
+    private CompanyResponse company;
+    private UserResponse createdBy;
     private LocalDateTime created;
-    private LocalDateTime updated;
-    private CompanyResponseDto company;
+    private Double amount;
+    private Double minAmount;
+    private Long version;
 }

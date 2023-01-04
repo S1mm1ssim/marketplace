@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.dto.mapper;
 
-import com.modsensoftware.marketplace.dto.request.PositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.PositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @Component
 public class PositionMapper {
 
-    public PositionRequestDto toPositionRequestDto(PositionResponseDto position) {
-        return new PositionRequestDto(
+    public PositionRequest toPositionRequestDto(PositionResponse position) {
+        return new PositionRequest(
                 position.getItem().getId(),
                 position.getItem().getVersion(),
                 position.getCompany().getId(),

@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.dto.mapper;
 
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequest;
 import org.mapstruct.Mapper;
 
 /**
@@ -10,5 +10,5 @@ import org.mapstruct.Mapper;
 @Mapper(uses = {OrderMapper.class})
 public interface UserTransactionMapper {
 
-    UserTransaction toUserTransaction(UserTransactionRequestDto transactionDto);
+    UserTransaction toUserTransaction(UserTransactionRequest transactionDto);
 }

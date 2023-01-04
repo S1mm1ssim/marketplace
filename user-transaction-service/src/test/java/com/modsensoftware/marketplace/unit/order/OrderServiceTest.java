@@ -1,10 +1,10 @@
 package com.modsensoftware.marketplace.unit.order;
 
-import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
-import com.modsensoftware.marketplace.dto.response.CompanyResponseDto;
-import com.modsensoftware.marketplace.dto.response.ItemResponseDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequest;
+import com.modsensoftware.marketplace.dto.response.CompanyResponse;
+import com.modsensoftware.marketplace.dto.response.ItemResponse;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
@@ -58,21 +58,21 @@ public class OrderServiceTest {
     @Test
     public void shouldNotThrowAnyExceptionDuringOrdersValidation() {
         // given
-        PositionResponseDto pos1 = PositionResponseDto.builder()
+        PositionResponse pos1 = PositionResponse.builder()
                 .id(15L)
-                .item(ItemResponseDto.builder().id(UUID.randomUUID()).version(0L).build())
-                .company(CompanyResponseDto.builder().id(2L).build())
-                .createdBy(UserResponseDto.builder().id(UUID.randomUUID()).build())
+                .item(ItemResponse.builder().id(UUID.randomUUID()).version(0L).build())
+                .company(CompanyResponse.builder().id(2L).build())
+                .createdBy(UserResponse.builder().id(UUID.randomUUID()).build())
                 .amount(30d).minAmount(1d).version(0L).build();
-        PositionResponseDto pos2 = PositionResponseDto.builder()
+        PositionResponse pos2 = PositionResponse.builder()
                 .id(16L)
-                .item(ItemResponseDto.builder().id(UUID.randomUUID()).version(0L).build())
-                .company(CompanyResponseDto.builder().id(2L).build())
-                .createdBy(UserResponseDto.builder().id(UUID.randomUUID()).build())
+                .item(ItemResponse.builder().id(UUID.randomUUID()).version(0L).build())
+                .company(CompanyResponse.builder().id(2L).build())
+                .createdBy(UserResponse.builder().id(UUID.randomUUID()).build())
                 .amount(30d).minAmount(1d).version(0L).build();
-        List<OrderRequestDto> orders = new ArrayList<>();
-        orders.add(new OrderRequestDto(15L, new BigDecimal(5), 0L));
-        orders.add(new OrderRequestDto(16L, new BigDecimal(2), 0L));
+        List<OrderRequest> orders = new ArrayList<>();
+        orders.add(new OrderRequest(15L, new BigDecimal(5), 0L));
+        orders.add(new OrderRequest(16L, new BigDecimal(2), 0L));
         BDDMockito.when(positionClient.getPositionById(15L)).thenReturn(pos1);
         BDDMockito.when(positionClient.getPositionById(16L)).thenReturn(pos2);
 
@@ -87,9 +87,9 @@ public class OrderServiceTest {
     public void shouldThrowEntityNotFoundExceptionIfNoPositionVersionProvided() {
         // given
         Long positionId = 16L;
-        List<OrderRequestDto> orders = new ArrayList<>();
+        List<OrderRequest> orders = new ArrayList<>();
         // Null version provided
-        orders.add(new OrderRequestDto(positionId, new BigDecimal(4), null));
+        orders.add(new OrderRequest(positionId, new BigDecimal(4), null));
 
         // when
         // then
@@ -103,10 +103,10 @@ public class OrderServiceTest {
     @Test
     public void shouldThrowInsufficientItemsInStockException() {
         // given
-        PositionResponseDto pos = PositionResponseDto.builder()
+        PositionResponse pos = PositionResponse.builder()
                 .id(16L).amount(3d).minAmount(1d).version(0L).build();
-        List<OrderRequestDto> orders = new ArrayList<>();
-        orders.add(new OrderRequestDto(16L, new BigDecimal(4), 0L));
+        List<OrderRequest> orders = new ArrayList<>();
+        orders.add(new OrderRequest(16L, new BigDecimal(4), 0L));
         BDDMockito.when(positionClient.getPositionById(16L)).thenReturn(pos);
 
         // when
@@ -121,10 +121,10 @@ public class OrderServiceTest {
     @Test
     public void shouldThrowInsufficientOrderAmountException() {
         // given
-        PositionResponseDto pos = PositionResponseDto.builder()
+        PositionResponse pos = PositionResponse.builder()
                 .id(16L).amount(30d).minAmount(5d).version(0L).build();
-        List<OrderRequestDto> orders = new ArrayList<>();
-        orders.add(new OrderRequestDto(16L, new BigDecimal(4), 0L));
+        List<OrderRequest> orders = new ArrayList<>();
+        orders.add(new OrderRequest(16L, new BigDecimal(4), 0L));
         BDDMockito.when(positionClient.getPositionById(16L)).thenReturn(pos);
 
         // when
