@@ -26,8 +26,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             EntityAlreadyExistsException.class,
             InvalidFilterException.class,
             OptimisticLockException.class,
-            InsufficientItemsInStockException.class,
-            InsufficientOrderAmountException.class,
             NoVersionProvidedException.class,
             PasswordAbsenceException.class
     })

@@ -2,10 +2,8 @@ package com.modsensoftware.marketplace.config;
 
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
-import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
-import com.modsensoftware.marketplace.domain.UserTransaction;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -48,8 +46,6 @@ public class SessionFactoryConfig {
         metadataSources.addAnnotatedClass(User.class);
         metadataSources.addAnnotatedClass(Item.class);
         metadataSources.addAnnotatedClass(Position.class);
-        metadataSources.addAnnotatedClass(UserTransaction.class);
-        metadataSources.addAnnotatedClass(Order.class);
         Metadata metadata = metadataSources.buildMetadata();
         try {
             return metadata.getSessionFactoryBuilder().build();

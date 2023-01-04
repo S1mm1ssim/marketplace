@@ -31,7 +31,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{application_host}}/api/v1/positions/1",
+					"raw": "{{application_host}}/api/v1/positions/37",
 					"host": [
 						"{{application_host}}"
 					],
@@ -39,7 +39,7 @@
 						"api",
 						"v1",
 						"positions",
-						"1"
+						"37"
 					]
 				}
 			},
@@ -127,6 +127,16 @@
 		"type": "oauth2",
 		"oauth2": [
 			{
+				"key": "password",
+				"value": "{{user_password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{username}}",
+				"type": "string"
+			},
+			{
 				"key": "tokenName",
 				"value": "Keycloak",
 				"type": "string"
@@ -134,16 +144,6 @@
 			{
 				"key": "challengeAlgorithm",
 				"value": "S256",
-				"type": "string"
-			},
-			{
-				"key": "username",
-				"value": "simmissim",
-				"type": "string"
-			},
-			{
-				"key": "password",
-				"value": "password",
 				"type": "string"
 			},
 			{
@@ -196,13 +196,6 @@
 					""
 				]
 			}
-		}
-	],
-	"variable": [
-		{
-			"key": "application_host",
-			"value": "http://localhost:8080",
-			"type": "string"
 		}
 	]
 }

@@ -11,3 +11,10 @@ spring:
           uri: https://github.com/S1mm1ssim/marketplace-config-repo
           default-label: master
           clone-on-start: true
+
+encrypt:
+  keyStore:
+    location: classpath:/key/apikey.jks
+    password: changeme
+    alias: apikey
+    secret: changeme

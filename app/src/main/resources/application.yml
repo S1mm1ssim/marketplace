@@ -1,11 +1,11 @@
 server:
-  port: 8080
+  port: 8085
 
 spring:
   application:
     name: app
   datasource:
-    url: "jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:32768}/marketplace"
+    url: "jdbc:postgresql://${POSTGRES_ADDRESS:localhost:32768}/marketplace"
     username: "postgres"
     password: "postgres"
     driver-class-name: org.postgresql.Driver

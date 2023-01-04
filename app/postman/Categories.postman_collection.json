@@ -203,12 +203,5 @@
 				]
 			}
 		}
-	],
-	"variable": [
-		{
-			"key": "application_host",
-			"value": "http://localhost:8080",
-			"type": "string"
-		}
 	]
 }

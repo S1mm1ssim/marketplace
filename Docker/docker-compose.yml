@@ -28,7 +28,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
-      - "8079:8080"
+      - "8080:8080"
     restart: unless-stopped
     volumes:
       - keycloak-data:/opt/jboss/keycloak/standalone/data
@@ -56,8 +56,8 @@ services:
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
-      POSTGRES_HOST: modsen-marketplace-postgres
-      POSTGRES_PORT: 5432
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
     ports:
       - "8090:8090"
     depends_on:
@@ -71,16 +71,46 @@ services:
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
-      POSTGRES_HOST: modsen-marketplace-postgres
-      POSTGRES_PORT: 5432
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
     ports:
-      - "8080:8080"
+      - "8085:8085"
     depends_on:
       - config-service
       - eureka-service
       - company-service
       - modsen-marketplace-postgres
       - keycloak
+
+  user-transaction-service:
+    image: marketplace-user-transaction-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
+    ports:
+      - "8100:8100"
+    depends_on:
+      - config-service
+      - eureka-service
+      - modsen-marketplace-postgres
+      - app
+      - keycloak
+
+  gateway-service:
+    image: marketplace-gateway-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+    ports:
+      - "8000:8000"
+    depends_on:
+      - config-service
+      - eureka-service
+      - app
+      - company-service
+      - user-transaction-service
 
 volumes:
   marketplace-postgres-data:

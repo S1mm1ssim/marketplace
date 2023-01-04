@@ -1,0 +1,57 @@
+eureka:
+  client:
+    enabled: false
+
+spring:
+  cloud:
+    config:
+      enabled: false
+  datasource:
+    url: ""
+    username: ""
+    password: ""
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:/changelog/db.changelog-master.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: public
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        jdbc:
+          batch_size: 5
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ""
+
+idm:
+  realm-name: "test-marketplace"
+  server-url: ""
+  client-id: "test-idm-client"
+  client-secret: "**********"
+  grant-type: "password"
+
+
+logging:
+  level:
+    root: info
+    com.modsensoftware.marketplace: debug
+
+default:
+  page:
+    size: 20
+  role: MANAGER
+  role-prefix: ROLE_
+  jwt-realm-access-claim: realm_access
+  jwt-roles-claim: roles
+
+exception:
+  message:
+    sessionFactoryInitFail: "Initialization of SessionFactory failed"
+    insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
+    insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
+    noPositionVersionProvided: "No version for position with id %s was provided"

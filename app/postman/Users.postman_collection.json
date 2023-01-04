@@ -152,62 +152,6 @@
 				}
 			},
 			"response": []
-		},
-		{
-			"name": "Create transaction",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"userId\": \"d179238e-6cb1-4ad6-9958-8b3043ceca0c\",\r\n    \"orderLine\":\r\n    [\r\n        {\r\n            \"positionId\": 29,\r\n            \"amount\": 2,\r\n            \"positionVersion\": 1\r\n        }\r\n    ]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{application_host}}/api/v1/users/transactions",
-					"host": [
-						"{{application_host}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"users",
-						"transactions"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get all transactions for user",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{application_host}}/api/v1/users/d179238e-6cb1-4ad6-9958-8b3043ceca0c/transactions?page=0",
-					"host": [
-						"{{application_host}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"users",
-						"d179238e-6cb1-4ad6-9958-8b3043ceca0c",
-						"transactions"
-					],
-					"query": [
-						{
-							"key": "page",
-							"value": "0"
-						}
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"auth": {
