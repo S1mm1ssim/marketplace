@@ -1,9 +1,10 @@
-version: "3.8"
+version: "3.9"
 
 services:
   modsen-marketplace-postgres:
-    image: "postgres"
-    restart: always
+    container_name: modsen-marketplace-postgres
+    image: postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -12,6 +13,7 @@ services:
       - marketplace-postgres-data:/var/lib/postgresql/data
     ports:
       - "32768:5432"
+
   keycloak:
     container_name: modsen-marketplace-keycloak
     image: quay.io/keycloak/keycloak:20.0.1
@@ -27,11 +29,61 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - "8079:8080"
+    restart: unless-stopped
+    volumes:
+      - keycloak-data:/opt/jboss/keycloak/standalone/data
     depends_on:
       - modsen-marketplace-postgres
     command:
       - start-dev
 
+  config-service:
+    image: marketplace-config-service:latest
+    ports:
+      - "8888:8888"
+
+  eureka-service:
+    image: marketplace-discovery-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-service
+
+  company-service:
+    image: marketplace-company-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_HOST: modsen-marketplace-postgres
+      POSTGRES_PORT: 5432
+    ports:
+      - "8090:8090"
+    depends_on:
+      - config-service
+      - eureka-service
+      - modsen-marketplace-postgres
+      - keycloak
+
+  app:
+    image: marketplace-app:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_HOST: modsen-marketplace-postgres
+      POSTGRES_PORT: 5432
+    ports:
+      - "8080:8080"
+    depends_on:
+      - config-service
+      - eureka-service
+      - company-service
+      - modsen-marketplace-postgres
+      - keycloak
+
 volumes:
   marketplace-postgres-data:
+    driver: local
+  keycloak-data:
     driver: local

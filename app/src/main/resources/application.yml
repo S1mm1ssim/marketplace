@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: app
+  datasource:
+    url: "jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:32768}/marketplace"
+    username: "postgres"
+    password: "postgres"
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        jdbc:
+          batch_size: 5
+  config:
+    import: "optional:configserver:${CONFIG_URI:http://localhost:8888}"
+  cloud:
+    loadbalancer:
+      cache:
+        caffeine:
+          spec: maximumSize=10,initialCapacity=50,expireAfterAccess=300s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: "${EUREKA_URI:http://localhost:8761/eureka}"

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="2022-12-19-drop-user-company-fk" author="Andrdemyan4ik@gmail.com">
+        <dropForeignKeyConstraint baseTableName="user" constraintName="fk_user_company"/>
+        <rollback>
+            <addForeignKeyConstraint baseTableName="user" baseColumnNames="company_id"
+                                     constraintName="fk_user_company"
+                                     referencedTableName="company"
+                                     referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2022-12-19-drop-position-company-fk" author="Andrdemyan4ik@gmail.com">
+        <dropForeignKeyConstraint baseTableName="position" constraintName="fk_position_company"/>
+        <rollback>
+            <addForeignKeyConstraint baseTableName="position" baseColumnNames="company_id"
+                                     constraintName="fk_position_company"
+                                     referencedTableName="company"
+                                     referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2022-12-16-drop-company-table" author="Andrdemyan4ik@gmail.com">
+        <dropTable tableName="company" schemaName="public"/>
+        <rollback>
+            <createTable tableName="company" schemaName="public">
+                <column name="id" type="bigserial" autoIncrement="true">
+                    <constraints primaryKey="true" nullable="false"/>
+                </column>
+                <column name="name" type="varchar(255)">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="email" type="varchar(255)">
+                    <constraints nullable="false" unique="true"/>
+                </column>
+                <column name="created" type="timestamp">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="description" type="clob">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="is_deleted" type="boolean" defaultValue="false">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
