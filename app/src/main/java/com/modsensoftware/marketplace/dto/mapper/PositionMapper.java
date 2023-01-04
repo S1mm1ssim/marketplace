@@ -4,9 +4,9 @@ import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class PositionMapper {
 
     private final UserMapper userMapper;
 
-    public Position toPosition(CreatePositionRequestDto requestDto, UUID userId) {
+    public Position toPosition(CreatePositionRequest requestDto, UUID userId) {
         Item item = Item.builder()
                 .id(requestDto.getItemId())
                 .version(requestDto.getItemVersion())
@@ -43,7 +43,7 @@ public class PositionMapper {
                 .build();
     }
 
-    public Position toPosition(UpdatePositionRequestDto requestDto) {
+    public Position toPosition(UpdatePositionRequest requestDto) {
         Double minAmount = null;
         if (requestDto.getMinAmount() != null) {
             minAmount = requestDto.getMinAmount().doubleValue();
@@ -59,8 +59,8 @@ public class PositionMapper {
     }
 
 
-    public PositionResponseDto toResponseDto(Position position, Company positionCompany, Company userCompany) {
-        return new PositionResponseDto(
+    public PositionResponse toResponseDto(Position position, Company positionCompany, Company userCompany) {
+        return new PositionResponse(
                 position.getId(),
                 position.getItem(),
                 positionCompany,

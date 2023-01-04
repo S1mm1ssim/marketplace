@@ -18,10 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.UUID;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -37,13 +41,14 @@ public class ItemController {
 
     @GetMapping(produces = {"application/json"})
     public List<Item> getAllItems(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
         log.debug("Fetching all items for page {}", pageNumber);
         return itemService.getAllItems(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Item getItemById(@PathVariable(name = "id") UUID id) {
+    public Item getItemById(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
         log.debug("Fetching item by id: {}", id);
         return itemService.getItemById(id);
     }
@@ -59,14 +64,14 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable UUID id) {
+    public void deleteItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id) {
         log.debug("Deleting item by id: {}", id);
         itemService.deleteItem(id);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
-    public void updateItem(@PathVariable(name = "id") UUID id,
+    public void updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) UUID id,
                            @RequestBody ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         itemService.updateItem(id, updatedFields);

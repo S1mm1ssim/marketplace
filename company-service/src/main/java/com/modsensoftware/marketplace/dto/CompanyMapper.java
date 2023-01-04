@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
 
-    Company toCompany(CompanyRequestDto companyRequestDto);
+    Company toCompany(CompanyRequest companyRequest);
 
-    CompanyResponseDto toCompanyResponseDto(Company company);
+    CompanyResponse toCompanyResponseDto(Company company);
 }

@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.controller;
 
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequest;
 import com.modsensoftware.marketplace.service.UserTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class TransactionController {
     @PreAuthorize("hasAnyRole('MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transactions")
-    public void createUserTransaction(@Valid @RequestBody UserTransactionRequestDto transactionDto) {
+    public void createUserTransaction(@Valid @RequestBody UserTransactionRequest transactionDto) {
         log.debug("Creating new transaction from dto: {}", transactionDto);
         transactionService.createUserTransaction(transactionDto);
     }

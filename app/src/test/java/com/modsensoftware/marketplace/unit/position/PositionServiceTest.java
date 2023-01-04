@@ -6,8 +6,8 @@ import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
@@ -86,7 +86,7 @@ public class PositionServiceTest {
         BDDMockito.given(authentication.getName()).willReturn(userId.toString());
         long id = 1L;
         BigDecimal amount = new BigDecimal(10);
-        UpdatePositionRequestDto updatedFields = new UpdatePositionRequestDto(amount, null);
+        UpdatePositionRequest updatedFields = new UpdatePositionRequest(amount, null);
         Position position = Position.builder()
                 .createdBy(User.builder().id(userId).build())
                 .build();
@@ -149,7 +149,7 @@ public class PositionServiceTest {
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
         Long companyId = 2L;
-        CreatePositionRequestDto toBeSaved = new CreatePositionRequestDto(UUID.randomUUID(), 1L,
+        CreatePositionRequest toBeSaved = new CreatePositionRequest(UUID.randomUUID(), 1L,
                 companyId, amount, minAmount);
         BDDMockito.given(companyClient.getCompanyById(companyId)).willReturn(new Company());
         BDDMockito.given(positionMapper.toPosition(toBeSaved, userId)).willReturn(Position.builder()
@@ -185,7 +185,7 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        CreatePositionRequestDto toBeSaved = new CreatePositionRequestDto(UUID.randomUUID(), null,
+        CreatePositionRequest toBeSaved = new CreatePositionRequest(UUID.randomUUID(), null,
                 2L, amount, minAmount);
         // when
         // then

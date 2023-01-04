@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.dto.mapper;
 
 import com.modsensoftware.marketplace.domain.Order;
-import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequest;
 import org.mapstruct.Mapper;
 
 /**
@@ -10,5 +10,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
-    Order toOrder(OrderRequestDto orderRequestDto);
+    Order toOrder(OrderRequest orderRequest);
 }

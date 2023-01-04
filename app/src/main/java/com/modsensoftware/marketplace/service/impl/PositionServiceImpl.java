@@ -4,9 +4,9 @@ import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
 import com.modsensoftware.marketplace.service.PositionService;
@@ -37,14 +37,14 @@ public class PositionServiceImpl implements PositionService {
     private final PositionDao positionDao;
     private final PositionMapper positionMapper;
     private final CompanyClient companyClient;
-    
+
     @Value("${exception.message.noItemVersionProvided}")
     private String noItemVersionProvidedMessage;
     @Value("${exception.message.positionCreatedByAnotherPersonMessage}")
     private String positionCreatedByAnotherPersonMessage;
 
     @Override
-    public PositionResponseDto getPositionById(Long id) {
+    public PositionResponse getPositionById(Long id) {
         log.debug("Fetching company by id: {}", id);
         Position position = positionDao.get(id);
         Company positionCompany = companyClient.getCompanyById(position.getCompanyId());
@@ -53,7 +53,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public List<PositionResponseDto> getAllPositions(int pageNumber) {
+    public List<PositionResponse> getAllPositions(int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         List<Position> positions = positionDao.getAll(pageNumber, Collections.emptyMap());
         List<Company> companies = companyClient.getCompanies();
@@ -72,20 +72,20 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public Long createPosition(CreatePositionRequestDto createPositionRequestDto, Authentication authentication) {
-        log.debug("Creating new position from dto: {}", createPositionRequestDto);
-        if (createPositionRequestDto.getItemVersion() == null) {
-            log.error("Provided createPositionRequestDto didn't contain item's version");
+    public Long createPosition(CreatePositionRequest createPositionRequest, Authentication authentication) {
+        log.debug("Creating new position from dto: {}", createPositionRequest);
+        if (createPositionRequest.getItemVersion() == null) {
+            log.error("Provided createPositionRequest didn't contain item's version");
             throw new NoVersionProvidedException(format(noItemVersionProvidedMessage,
-                    createPositionRequestDto.getItemId()));
+                    createPositionRequest.getItemId()));
         }
-        if (createPositionRequestDto.getCompanyId() != null) {
+        if (createPositionRequest.getCompanyId() != null) {
             // A request is sent to check if a company with such id exists
             // Feign decoder will check status and throw runtime exception if company not found
-            companyClient.getCompanyById(createPositionRequestDto.getCompanyId());
+            companyClient.getCompanyById(createPositionRequest.getCompanyId());
         }
         // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
-        Position position = positionMapper.toPosition(createPositionRequestDto,
+        Position position = positionMapper.toPosition(createPositionRequest,
                 UUID.fromString(authentication.getName()));
         position.setCreated(LocalDateTime.now());
         log.debug("Mapping result: {}", position);
@@ -105,7 +105,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public void updatePosition(Long id, UpdatePositionRequestDto updatedFields, Authentication authentication) {
+    public void updatePosition(Long id, UpdatePositionRequest updatedFields, Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         Position position = positionDao.get(id);
         // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id

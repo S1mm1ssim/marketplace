@@ -2,8 +2,8 @@ package com.modsensoftware.marketplace.integration.user;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.modsensoftware.marketplace.dto.request.UserRequestDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.UserRequest;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import com.modsensoftware.marketplace.integration.CompanyStubs;
@@ -87,8 +87,8 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
-    private UserRequestDto createUserRequestDto(String username, String email, Long companyId) {
-        return new UserRequestDto(username, email, "name", "password", companyId);
+    private UserRequest createUserRequestDto(String username, String email, Long companyId) {
+        return new UserRequest(username, email, "name", "password", companyId);
     }
 
     @Test
@@ -120,14 +120,14 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         String emailFilter = "user.com";
         // when
         // then
-        UserResponseDto[] users = RestAssured.given()
+        UserResponse[] users = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .param("email", emailFilter)
                 .when()
                 .get("/users").then()
                 .statusCode(200)
-                .extract().body().as(UserResponseDto[].class);
+                .extract().body().as(UserResponse[].class);
         Assertions.assertThat(users.length).isEqualTo(expectedUsersAmount);
     }
 
@@ -158,17 +158,17 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         CompanyStubs.setupGetCompanyWithId(wireMockServer1, 1000L);
         CompanyStubs.setupGetCompanyWithId(wireMockServer2, 1000L);
         final String userUuid = USER_IDS.get(1);
-        UserResponseDto expected = userService.getUserById(UUID.fromString(userUuid));
+        UserResponse expected = userService.getUserById(UUID.fromString(userUuid));
 
         // when
         // then
-        UserResponseDto response = RestAssured.given()
+        UserResponse response = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .get(String.format("/users/%s", userUuid)).then()
                 .statusCode(200)
-                .extract().body().as(UserResponseDto.class);
+                .extract().body().as(UserResponse.class);
         Assertions.assertThat(response).isEqualTo(expected);
     }
 
@@ -254,7 +254,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
                 .when()
                 .put(String.format("/users/%s", userUuid)).then()
                 .statusCode(200);
-        UserResponseDto user = userService.getUserById(UUID.fromString(userUuid));
+        UserResponse user = userService.getUserById(UUID.fromString(userUuid));
         Assertions.assertThat(user.getName()).isEqualTo(updatedName);
     }
 

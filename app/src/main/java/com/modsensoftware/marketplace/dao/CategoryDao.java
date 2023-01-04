@@ -48,13 +48,13 @@ public class CategoryDao implements Dao<Category, Long> {
     public Category get(Long id) {
         log.debug("Fetching category entity with id {}", id);
         Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Category> byId = cb.createQuery(Category.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Category> byId = criteriaBuilder.createQuery(Category.class);
         Root<Category> root = byId.from(Category.class);
         Join<Category, Category> parentCategory =
                 root.join(PARENT_CATEGORY_FIELD_NAME, JoinType.LEFT);
 
-        byId.select(root).where(cb.equal(root.get(ID_FIELD_NAME), id));
+        byId.select(root).where(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id));
 
         Query<Category> query = session.createQuery(byId);
         try {
@@ -72,8 +72,8 @@ public class CategoryDao implements Dao<Category, Long> {
     public List<Category> getAll(int pageNumber, Map<String, String> filterProperties) {
         log.debug("Fetching all categories for page {}", pageNumber);
         Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Category> getAll = cb.createQuery(Category.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Category> getAll = criteriaBuilder.createQuery(Category.class);
         Root<Category> root = getAll.from(Category.class);
         Join<Category, Category> parentCategory =
                 root.join(PARENT_CATEGORY_FIELD_NAME, JoinType.LEFT);
@@ -103,8 +103,8 @@ public class CategoryDao implements Dao<Category, Long> {
     public void update(Long id, Category updatedFields) {
         log.debug("Updating category entity with id {} with values from: {}", id, updatedFields);
         Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaUpdate<Category> update = cb.createCriteriaUpdate(Category.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaUpdate<Category> update = criteriaBuilder.createCriteriaUpdate(Category.class);
         Root<Category> root = update.from(Category.class);
 
         int totalFieldsUpdated = 0;
@@ -119,7 +119,7 @@ public class CategoryDao implements Dao<Category, Long> {
             totalFieldsUpdated++;
         }
         if (totalFieldsUpdated > 0) {
-            update.where(cb.equal(root.get(ID_FIELD_NAME), id));
+            update.where(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id));
 
             Transaction transaction = session.beginTransaction();
             session.createQuery(update).executeUpdate();
@@ -132,10 +132,10 @@ public class CategoryDao implements Dao<Category, Long> {
     public void deleteById(Long id) {
         log.debug("Deleting category entity with id: {}", id);
         Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaDelete<Category> delete = cb.createCriteriaDelete(Category.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaDelete<Category> delete = criteriaBuilder.createCriteriaDelete(Category.class);
         Root<Category> root = delete.from(Category.class);
-        delete.where(cb.equal(root.get(ID_FIELD_NAME), id));
+        delete.where(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(delete).executeUpdate();
