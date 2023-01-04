@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequestDto {
+public class OrderRequest {
 
     private Long positionId;
 

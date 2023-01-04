@@ -17,5 +17,5 @@ public class PlacedUserTransaction {
 
     private Long id;
     private UserTransactionStatus status;
-    private List<OrderRequestDto> orderLine;
+    private List<OrderRequest> orderLine;
 }
