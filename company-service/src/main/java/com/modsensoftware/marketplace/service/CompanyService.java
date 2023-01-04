@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service;
 
-import com.modsensoftware.marketplace.dto.CompanyRequestDto;
-import com.modsensoftware.marketplace.dto.CompanyResponseDto;
+import com.modsensoftware.marketplace.dto.CompanyRequest;
+import com.modsensoftware.marketplace.dto.CompanyResponse;
 
 import java.util.List;
 
@@ -10,13 +10,13 @@ import java.util.List;
  */
 public interface CompanyService {
 
-    CompanyResponseDto getCompanyById(Long id);
+    CompanyResponse getCompanyById(Long id);
 
-    List<CompanyResponseDto> getAllCompanies(int pageNumber, String email, String name);
+    List<CompanyResponse> getAllCompanies(int pageNumber, String email, String name);
 
-    void createCompany(CompanyRequestDto companyRequestDto);
+    void createCompany(CompanyRequest companyRequest);
 
     void deleteCompany(Long id);
 
-    void updateCompany(Long id, CompanyRequestDto updatedFields);
+    void updateCompany(Long id, CompanyRequest updatedFields);
 }
