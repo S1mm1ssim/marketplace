@@ -45,6 +45,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
       MONDO_INITDB_DATABASE: marketplace_positions
+    ports:
+      - "27017:27017"
 
   zookeeper:
     container_name: modsen-marketplace-zookeeper
