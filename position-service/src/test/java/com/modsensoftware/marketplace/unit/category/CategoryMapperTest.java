@@ -17,10 +17,10 @@ public class CategoryMapperTest {
 
     private final CategoryMapper underTest = new CategoryMapperImpl();
 
-    @ValueSource(longs = {1})
+    @ValueSource(strings = {"1"})
     @NullSource
     @ParameterizedTest
-    public void shouldMapDtoToCategoryWithProvidedParentIdValue(Long parentId) {
+    public void shouldMapDtoToCategoryWithProvidedParentIdValue(String parentId) {
         // given
         CategoryDto categoryDto = new CategoryDto(null, null, parentId, true);
 
