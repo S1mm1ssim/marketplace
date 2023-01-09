@@ -71,7 +71,7 @@ public class UserTransactionServiceTest {
     public void canSaveUserTransaction() {
         // given
         UUID userId = UUID.randomUUID();
-        OrderRequestDto orderDto = new OrderRequestDto(1L, new BigDecimal("5"));
+        OrderRequestDto orderDto = new OrderRequestDto("1", new BigDecimal("5"));
         UserTransactionRequestDto transactionDto = new UserTransactionRequestDto(userId, List.of(orderDto));
         BDDMockito.when(userClient.getUserById(userId)).thenReturn(new UserResponseDto());
         UserTransaction expectedTransaction = transactionMapper.toUserTransaction(transactionDto);

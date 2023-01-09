@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class PositionResponseDto {
-    private Long id;
+    private String id;
     private ItemResponseDto item;
     private CompanyResponseDto company;
     private UserResponseDto createdBy;

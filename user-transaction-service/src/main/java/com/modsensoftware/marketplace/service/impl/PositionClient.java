@@ -15,5 +15,5 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface PositionClient {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    PositionResponseDto getPositionById(@PathVariable(name = "id") Long id);
+    PositionResponseDto getPositionById(@PathVariable(name = "id") String id);
 }

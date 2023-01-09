@@ -100,8 +100,8 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         // given
         UserStubs.setupGetUserById(wireMockServer3, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
-        PositionStubs.setupGetPositionById(wireMockServer1, 999L);
-        PositionStubs.setupGetPositionById(wireMockServer2, 999L);
+        PositionStubs.setupGetPositionById(wireMockServer1, "999");
+        PositionStubs.setupGetPositionById(wireMockServer2, "999");
 
         String payload = "{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
@@ -138,7 +138,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                 = objectMapper.readValue(replies.iterator().next().value(), PlacedUserTransaction.class);
         Assertions.assertThat(placedTransaction.getStatus()).isEqualTo(UserTransactionStatus.IN_PROGRESS);
         Assertions.assertThat(objectMapper.writeValueAsString(placedTransaction.getOrderLine()))
-                .isEqualTo("[{\"positionId\":999,\"amount\":6.0}]");
+                .isEqualTo("[{\"positionId\":\"999\",\"amount\":6.0}]");
     }
 
     @Test
@@ -146,8 +146,8 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         // given
         UserStubs.setupGetUserById(wireMockServer3, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
-        PositionStubs.setupGetPositionById(wireMockServer1, 999L);
-        PositionStubs.setupGetPositionById(wireMockServer2, 999L);
+        PositionStubs.setupGetPositionById(wireMockServer1, "999");
+        PositionStubs.setupGetPositionById(wireMockServer2, "999");
         String payload = "{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
                 + "    \"orderLine\":\n"
@@ -190,8 +190,8 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         // given
         UserStubs.setupGetUserById(wireMockServer3, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
-        PositionStubs.setupGetPositionById(wireMockServer1, 999L);
-        PositionStubs.setupGetPositionById(wireMockServer2, 999L);
+        PositionStubs.setupGetPositionById(wireMockServer1, "999");
+        PositionStubs.setupGetPositionById(wireMockServer2, "999");
         String invalidPayload = format("{\n"
                 + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
                 + "    \"orderLine\":\n"
