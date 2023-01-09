@@ -7,16 +7,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import reactor.core.publisher.Flux;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,8 +28,8 @@ import java.util.stream.Collectors;
  * @author andrey.demyanchik on 11/30/2022
  */
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
+@EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
@@ -37,46 +39,47 @@ public class WebSecurityConfig {
     private String realmAccessClaimName;
     @Value("${default.jwt-roles-claim}")
     private String rolesClaimName;
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String issuerUri;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
         http
                 .httpBasic().disable()
                 .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests(auth -> auth
-                        .antMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .anyRequest().authenticated()
+                .authorizeExchange(auth -> auth
+                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt()
-                        .jwtAuthenticationConverter(customJwtAuthenticationConverter()));
+                        .jwtAuthenticationConverter(customJwtAuthenticationConverter())
+                );
         return http.build();
     }
 
     @Bean
-    public JwtAuthenticationConverter customJwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+    public ReactiveJwtAuthenticationConverter customJwtAuthenticationConverter() {
+        ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter());
         return converter;
     }
 
     @Bean
-    public Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter() {
+    public Converter<Jwt, Flux<GrantedAuthority>> jwtGrantedAuthoritiesConverter() {
         JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
 
         return new Converter<>() {
             @Override
-            public Collection<GrantedAuthority> convert(Jwt jwt) {
+            public Flux<GrantedAuthority> convert(Jwt jwt) {
                 Collection<GrantedAuthority> grantedAuthorities = delegate.convert(jwt);
 
                 if (jwt.getClaim(realmAccessClaimName) == null) {
-                    return grantedAuthorities;
+                    return Flux.fromIterable(grantedAuthorities);
                 }
                 JSONObject realmAccess = jwt.getClaim(realmAccessClaimName);
                 if (realmAccess.get(rolesClaimName) == null) {
-                    return grantedAuthorities;
+                    return Flux.fromIterable(grantedAuthorities);
                 }
                 JSONArray roles = (JSONArray) realmAccess.get(rolesClaimName);
                 final List<SimpleGrantedAuthority> keycloakAuthorities = roles
@@ -84,8 +87,13 @@ public class WebSecurityConfig {
                         .map(role -> new SimpleGrantedAuthority(rolePrefix + role))
                         .collect(Collectors.toList());
                 grantedAuthorities.addAll(keycloakAuthorities);
-                return grantedAuthorities;
+                return Flux.fromIterable(grantedAuthorities);
             }
         };
+    }
+
+    @Bean
+    public ReactiveJwtDecoder reactiveJwtDecoder() {
+        return ReactiveJwtDecoders.fromOidcIssuerLocation(issuerUri);
     }
 }
