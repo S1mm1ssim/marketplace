@@ -1,7 +1,7 @@
 -- Created during integration test
 DELETE
 FROM user_transaction_service."order"
-WHERE position_id = 999 AND amount = 6;
+WHERE position_id = '999' AND amount = 6;
 
 DELETE
 FROM user_transaction_service.user_transaction

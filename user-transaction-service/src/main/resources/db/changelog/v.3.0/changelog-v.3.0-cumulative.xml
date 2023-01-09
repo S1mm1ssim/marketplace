@@ -7,8 +7,6 @@
         <tagDatabase tag="v.3.0"/>
     </changeSet>
 
-    <include file="2022-11-24-add-transaction-tables.xml" relativeToChangelogFile="true"/>
-    <include file="2022-11-24-add-position-min-amount.xml" relativeToChangelogFile="true"/>
-    <include file="2022-11-27-rename-column.xml" relativeToChangelogFile="true"/>
+    <include file="2023-01-06-change-positionId-type.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
