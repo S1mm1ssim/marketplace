@@ -2,22 +2,10 @@ spring:
   cloud:
     config:
       enabled: false
-  datasource:
-    url: ""
-    username: ""
-    password: ""
-    driver-class-name: org.postgresql.Driver
-  liquibase:
-    change-log: classpath:/changelog/db.changelog-master.xml
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        default_schema: public
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
-        jdbc:
-          batch_size: 5
+  data:
+    mongodb:
+      uri: ""
+      database: "test_marketplace_positions"
   security:
     oauth2:
       resourceserver:
@@ -35,14 +23,19 @@ spring:
     bootstrap-servers: "${spring.embedded.kafka.brokers}"
 
 idm:
-  realm-name: "test-marketplace"
-  server-url: ""
   client-id: "test-idm-client"
   client-secret: "**********"
   grant-type: "password"
-  admin-username: "test-idm-admin"
-  admin-password: "test-idm-admin"
-  pool-size: 10
+
+reactive-feign:
+  http-client:
+    read-timeout: 3000
+    write-timeout: 3000
+    connect-timeout: 3000
+    response-timeout: 3000
+  retry:
+    max-retry: 3
+    retry-interval: 3000
 
 logging:
   level:
