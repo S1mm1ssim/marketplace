@@ -1,29 +1,27 @@
 package com.modsensoftware.marketplace.service.impl;
 
+import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
 import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
 import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
 import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
 import com.modsensoftware.marketplace.service.PositionService;
+import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -36,80 +34,83 @@ import static java.lang.String.format;
 public class PositionServiceImpl implements PositionService {
 
     private final PositionDao positionDao;
+    private final ItemDao itemDao;
     private final PositionMapper positionMapper;
-    private final CompanyClient companyClient;
     private final UserClient userClient;
 
     @Value("${exception.message.noItemVersionProvided}")
     private String noItemVersionProvidedMessage;
     @Value("${exception.message.positionCreatedByAnotherPersonMessage}")
     private String positionCreatedByAnotherPersonMessage;
+    @Value("${exception.message.creatorNotFound}")
+    private String creatorNotFoundMessage;
 
     @Override
-    public PositionResponseDto getPositionById(Long id) {
+    public Mono<PositionResponseDto> getPositionById(String id) {
         log.debug("Fetching position by id: {}", id);
-        Position position = positionDao.get(id);
-        log.debug("Fetching user by id: {}", position.getCreatedBy());
-        UserResponseDto user = userClient.getUserById(position.getCreatedBy());
-        return positionMapper.toResponseDto(position, user);
+        return positionDao.get(id).flatMap(position -> {
+            log.debug("Fetching user by id: {}", position.getCreatedBy());
+            return userClient.getUserById(position.getCreatedBy())
+                    .onErrorMap(error -> new EntityNotFoundException(creatorNotFoundMessage))
+                    .map(user -> positionMapper.toResponseDto(position, user));
+        });
     }
 
     @Override
-    public List<PositionResponseDto> getAllPositions(int pageNumber) {
+    public Flux<PositionResponseDto> getAllPositions(int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
-        List<Position> positions = positionDao.getAll(pageNumber, Collections.emptyMap());
-        List<Company> companies = companyClient.getCompanies();
-        // Creating map of companyId:company pairs
-        Map<Long, Company> companyIdSelfMap = companies.stream()
-                .collect(Collectors.toMap(Company::getId, Function.identity()));
-        return positions.stream()
-                .filter(position -> companyIdSelfMap.containsKey(position.getCompanyId()))
-                .map(position -> {
-                    UserResponseDto user = userClient.getUserById(position.getCreatedBy());
-                    return positionMapper.toResponseDto(position, user);
-                })
-                .collect(Collectors.toList());
+        return positionDao.getAll(pageNumber, Collections.emptyMap())
+                .flatMap(position -> userClient.getUserById(position.getCreatedBy())
+                        .doOnError(error -> log.trace("{}", creatorNotFoundMessage, error))
+                        .onErrorResume(e -> Mono.empty())
+                        .map(user -> positionMapper.toResponseDto(position, user))
+                );
     }
 
     @Override
-    public Long createPosition(CreatePositionRequestDto createPositionRequestDto, Authentication authentication) {
+    public Mono<Position> createPosition(CreatePositionRequestDto createPositionRequestDto, Authentication authentication) {
         log.debug("Creating new position from dto: {}", createPositionRequestDto);
         if (createPositionRequestDto.getItemVersion() == null) {
             log.error("Provided createPositionRequestDto didn't contain item's version");
-            throw new NoVersionProvidedException(format(noItemVersionProvidedMessage,
-                    createPositionRequestDto.getItemId()));
+            return Mono.error(new NoVersionProvidedException(format(noItemVersionProvidedMessage,
+                    createPositionRequestDto.getItemId())));
         }
         // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
-        UserResponseDto user = userClient.getUserById(UUID.fromString(authentication.getName()));
-        Position position = positionMapper.toPosition(createPositionRequestDto, user);
-        position.setCreated(LocalDateTime.now());
-        log.debug("Mapping result: {}", position);
-        return positionDao.save(position);
+        return userClient.getUserById(authentication.getName()).flatMap(user -> {
+            Position position = positionMapper.toPosition(createPositionRequestDto, user);
+            position.setCreated(LocalDateTime.now());
+            return itemDao.get(position.getItem().getId()).map(item -> {
+                position.setItem(item);
+                return position;
+            }).flatMap(positionDao::save);
+        });
     }
 
     @Override
-    public void deletePosition(Long id, Authentication authentication) {
-        Position position = positionDao.get(id);
-        // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
-        if (position.getCreatedBy().equals(UUID.fromString(authentication.getName()))) {
-            log.debug("Deleting position by id: {}", id);
-            positionDao.deleteById(id);
-        } else {
-            log.error("Attempt to delete position with id {} was made by not the same person who created it", id);
-            throw new UnauthorizedOperationException(positionCreatedByAnotherPersonMessage);
-        }
+    public Mono<DeleteResult> deletePosition(String id, Authentication authentication) {
+        return positionDao.get(id).flatMap(position -> {
+            // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
+            if (position.getCreatedBy().equals(authentication.getName())) {
+                log.debug("Deleting position by id: {}", id);
+                return positionDao.deleteById(id);
+            } else {
+                log.error("Attempt to delete position with id {} was made by not the same person who created it", id);
+                return Mono.error(new UnauthorizedOperationException(positionCreatedByAnotherPersonMessage));
+            }
+        });
     }
 
     @Override
-    public void updatePosition(Long id, UpdatePositionRequestDto updatedFields, Authentication authentication) {
+    public Mono<Position> updatePosition(String id, UpdatePositionRequestDto updatedFields, Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
-        Position position = positionDao.get(id);
-        // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
-        if (position.getCreatedBy().equals(UUID.fromString(authentication.getName()))) {
-            positionDao.update(id, positionMapper.toPosition(updatedFields));
-        } else {
-            log.error("Attempt to update position with id {} was made by not the same person who created it", id);
-            throw new UnauthorizedOperationException(positionCreatedByAnotherPersonMessage);
-        }
+        return positionDao.get(id).flatMap(position -> {
+            // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
+            if (position.getCreatedBy().equals(authentication.getName())) {
+                return positionDao.update(id, positionMapper.toPosition(updatedFields));
+            } else {
+                log.error("Attempt to update position with id {} was made by not the same person who created it", id);
+                return Mono.error(new UnauthorizedOperationException(positionCreatedByAnotherPersonMessage));
+            }
+        });
     }
 }

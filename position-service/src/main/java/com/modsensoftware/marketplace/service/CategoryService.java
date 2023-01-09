@@ -2,21 +2,22 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.dto.CategoryDto;
-
-import java.util.List;
+import com.mongodb.client.result.DeleteResult;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
  */
 public interface CategoryService {
 
-    Category getCategoryById(Long id);
+    Mono<Category> getCategoryById(String id);
 
-    List<Category> getAllCategories(int pageNumber);
+    Flux<Category> getAllCategories(int pageNumber);
 
-    void createCategory(CategoryDto categoryDto);
+    Mono<Category> createCategory(CategoryDto categoryDto);
 
-    void deleteCategory(Long id);
+    Mono<DeleteResult> deleteCategory(String id);
 
-    void updateCategory(Long id, CategoryDto updatedFields);
+    Mono<Category> updateCategory(String id, CategoryDto updatedFields);
 }
