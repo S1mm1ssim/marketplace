@@ -1,9 +1,11 @@
 package com.modsensoftware.marketplace.controller;
 
+import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
 import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
 import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
 import com.modsensoftware.marketplace.service.PositionService;
+import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,9 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
@@ -38,14 +41,14 @@ public class PositionController {
     private final PositionService positionService;
 
     @GetMapping(produces = {"application/json"})
-    public List<PositionResponseDto> getAllPositions(
+    public Flux<PositionResponseDto> getAllPositions(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public PositionResponseDto getPositionById(@PathVariable(name = "id") Long id) {
+    public Mono<PositionResponseDto> getPositionById(@PathVariable(name = "id") String id) {
         log.debug("Fetching position by id: {}", id);
         return positionService.getPositionById(id);
     }
@@ -53,8 +56,8 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Long createPosition(@Valid @RequestBody CreatePositionRequestDto createPositionRequestDto,
-                               Authentication authentication) {
+    public Mono<Position> createPosition(@Valid @RequestBody CreatePositionRequestDto createPositionRequestDto,
+                                         Authentication authentication) {
         log.debug("Creating new position from dto: {}", createPositionRequestDto);
         return positionService.createPosition(createPositionRequestDto, authentication);
     }
@@ -62,17 +65,17 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deletePosition(@PathVariable(name = "id") Long id, Authentication authentication) {
+    public Mono<DeleteResult> deletePosition(@PathVariable(name = "id") String id, Authentication authentication) {
         log.debug("Deleting position by id: {}", id);
-        positionService.deletePosition(id, authentication);
+        return positionService.deletePosition(id, authentication);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
-    public void updatePosition(@PathVariable Long id,
-                               @Valid @RequestBody UpdatePositionRequestDto updatedFields,
-                               Authentication authentication) {
+    public Mono<Position> updatePosition(@PathVariable String id,
+                                         @Valid @RequestBody UpdatePositionRequestDto updatedFields,
+                                         Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
-        positionService.updatePosition(id, updatedFields, authentication);
+        return positionService.updatePosition(id, updatedFields, authentication);
     }
 }

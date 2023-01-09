@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.controller;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.ItemDto;
 import com.modsensoftware.marketplace.service.ItemService;
+import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.UUID;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
@@ -36,14 +36,14 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping(produces = {"application/json"})
-    public List<Item> getAllItems(
+    public Flux<Item> getAllItems(
             @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
         log.debug("Fetching all items for page {}", pageNumber);
         return itemService.getAllItems(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Item getItemById(@PathVariable(name = "id") UUID id) {
+    public Mono<Item> getItemById(@PathVariable(name = "id") String id) {
         log.debug("Fetching item by id: {}", id);
         return itemService.getItemById(id);
     }
@@ -51,24 +51,24 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createItem(@RequestBody ItemDto itemDto) {
+    public Mono<Item> createItem(@RequestBody ItemDto itemDto) {
         log.debug("Creating new item from dto: {}", itemDto);
-        itemService.createItem(itemDto);
+        return itemService.createItem(itemDto);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable UUID id) {
+    public Mono<DeleteResult> deleteItem(@PathVariable String id) {
         log.debug("Deleting item by id: {}", id);
-        itemService.deleteItem(id);
+        return itemService.deleteItem(id);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
-    public void updateItem(@PathVariable(name = "id") UUID id,
+    public Mono<Item> updateItem(@PathVariable(name = "id") String id,
                            @RequestBody ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
-        itemService.updateItem(id, updatedFields);
+        return itemService.updateItem(id, updatedFields);
     }
 }
