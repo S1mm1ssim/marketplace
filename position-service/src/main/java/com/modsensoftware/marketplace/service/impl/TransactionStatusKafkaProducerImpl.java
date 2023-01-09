@@ -5,11 +5,9 @@ import com.modsensoftware.marketplace.service.TransactionStatusKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
+import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
+import reactor.core.publisher.Mono;
 
 /**
  * @author andrey.demyanchik on 12/28/2022
@@ -19,28 +17,14 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Component
 public class TransactionStatusKafkaProducerImpl implements TransactionStatusKafkaProducer {
 
-    private final KafkaTemplate<String, PlacedUserTransaction> kafkaTemplate;
+    private final ReactiveKafkaProducerTemplate<String, PlacedUserTransaction> kafkaTemplate;
 
     @Value("${topics.processedTransactions.name}")
     private String processedTransactionsTopicName;
 
     @Override
-    public void publishUserTransactionStatus(PlacedUserTransaction placedUserTransaction) {
+    public Mono<Void> publishUserTransactionStatus(PlacedUserTransaction placedUserTransaction) {
         log.info("Publishing the result of user transaction processing: {}", placedUserTransaction);
-        ListenableFuture<SendResult<String, PlacedUserTransaction>> future
-                = kafkaTemplate.send(processedTransactionsTopicName, placedUserTransaction);
-
-        future.addCallback(new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure(Throwable ex) {
-                log.error("Failed to send processed transaction", ex);
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, PlacedUserTransaction> result) {
-                log.info("Sent processed transaction: {} with offset: {}",
-                        placedUserTransaction, result.getRecordMetadata().offset());
-            }
-        });
+        return kafkaTemplate.send(processedTransactionsTopicName, placedUserTransaction).then();
     }
 }
