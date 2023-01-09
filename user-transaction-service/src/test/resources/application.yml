@@ -58,6 +58,11 @@ eureka:
   client:
     enabled: false
 
+idm:
+  client-id: "test-idm-client"
+  client-secret: "**********"
+  grant-type: "password"
+
 topics:
   processedTransactions:
     name: userTransactionStatusResultsTest
