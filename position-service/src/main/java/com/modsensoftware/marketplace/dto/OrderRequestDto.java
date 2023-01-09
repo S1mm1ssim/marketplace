@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class OrderRequestDto {
 
-    private Long positionId;
+    private String positionId;
 
     @DecimalMin(value = "0.01")
     private BigDecimal amount;

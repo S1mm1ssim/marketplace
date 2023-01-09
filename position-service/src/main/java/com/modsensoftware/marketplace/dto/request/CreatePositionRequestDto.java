@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -15,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreatePositionRequestDto {
-    private UUID itemId;
+    private String itemId;
     private Long itemVersion;
 
     @DecimalMin(value = "0.01")
