@@ -1,32 +1,24 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.utils.Utils;
+import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.graph.RootGraph;
-import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import static com.modsensoftware.marketplace.domain.Item.CATEGORY_FIELD_NAME;
-import static com.modsensoftware.marketplace.domain.Item.ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MONGO_ID_FIELD_NAME;
 import static java.lang.String.format;
 
 /**
@@ -35,9 +27,9 @@ import static java.lang.String.format;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class ItemDao implements Dao<Item, UUID> {
+public class ItemDao implements Dao<Item, String> {
 
-    private final SessionFactory sessionFactory;
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
     private final CategoryDao categoryDao;
 
     @Value("${default.page.size}")
@@ -45,97 +37,56 @@ public class ItemDao implements Dao<Item, UUID> {
     @Value("${exception.message.itemNotFound}")
     private String itemNotFoundMessage;
 
-    private static final String ITEM_ENTITY_GRAPH = "graph.Item.category.parent";
-    private static final String GRAPH_TYPE = "javax.persistence.loadgraph";
-
     @Override
-    public Item get(UUID id) {
+    public Mono<Item> get(String id) {
         log.debug("Fetching item entity with id {}", id);
-        Session session = sessionFactory.openSession();
-        RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Item> byId = cb.createQuery(Item.class);
-        Root<Item> root = byId.from(Item.class);
-        Join<Item, Category> category = root.join(CATEGORY_FIELD_NAME);
-
-        byId.select(root).where(cb.equal(root.get(ID_FIELD_NAME), id));
-
-        Query<Item> query = session.createQuery(byId);
-        query.setHint(GRAPH_TYPE, entityGraph);
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            log.error("Item with uuid {} not found", id);
-            throw new EntityNotFoundException(format(itemNotFoundMessage, id), e);
-        } finally {
-            session.close();
-        }
+        return reactiveMongoTemplate
+                .findById(id, Item.class)
+                .defaultIfEmpty(new Item())
+                .flatMap(item -> {
+                    if (item.equals(new Item())) {
+                        log.info("No item found for id {}", id);
+                        return Mono.error(new EntityNotFoundException(format(itemNotFoundMessage, id)));
+                    }
+                    log.info("Fetched item {}", item);
+                    return Mono.just(item);
+                });
     }
 
     @Override
-    public List<Item> getAll(int pageNumber, Map<String, String> filterProperties) {
+    public Flux<Item> getAll(int pageNumber, Map<String, String> filterProperties) {
         log.debug("Fetching all items for page {}", pageNumber);
-        Session session = sessionFactory.openSession();
-        RootGraph<?> entityGraph = session.getEntityGraph(ITEM_ENTITY_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Item> getAll = cb.createQuery(Item.class);
-        Root<Item> root = getAll.from(Item.class);
-        Join<Item, Category> category = root.join(CATEGORY_FIELD_NAME);
-
-        getAll.select(root);
-
-        Query<Item> query = session.createQuery(getAll);
-        query.setFirstResult(pageSize * pageNumber);
-        query.setMaxResults(pageSize);
-        query.setHint(GRAPH_TYPE, entityGraph);
-        List<Item> results = query.getResultList();
-        session.close();
-        return results;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Query getAllPaged = new Query().with(pageable);
+        return reactiveMongoTemplate.find(getAllPaged, Item.class);
     }
 
     @Override
-    public UUID save(Item item) {
+    public Mono<Item> save(Item item) {
         log.debug("Saving item entity: {}", item);
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.persist(item);
-        transaction.commit();
-        session.close();
-        return item.getId();
+        return reactiveMongoTemplate.insert(item);
     }
 
     @Override
-    public void update(UUID id, Item updatedFields) {
+    public Mono<Item> update(String id, Item updatedFields) {
         log.debug("Updating item entity with id {} with values from: {}", id, updatedFields);
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        try {
-            Item item = session.find(Item.class, id, LockModeType.OPTIMISTIC);
-            Utils.setIfNotNull(updatedFields.getName(), item::setName);
-            Utils.setIfNotNull(updatedFields.getDescription(), item::setDescription);
-            if (updatedFields.getCategory().getId() != null) {
-                Category updCategory = categoryDao.get(updatedFields.getCategory().getId());
-                item.setCategory(updCategory);
-            }
-            session.merge(item);
-        } finally {
-            transaction.commit();
-            session.close();
-        }
+        return reactiveMongoTemplate.findById(id, Item.class)
+                .flatMap(item -> {
+                    Utils.setIfNotNull(updatedFields.getName(), item::setName);
+                    Utils.setIfNotNull(updatedFields.getDescription(), item::setDescription);
+                    if (updatedFields.getCategory().getId() != null) {
+                        return categoryDao.get(updatedFields.getCategory().getId()).flatMap(category -> {
+                            item.setCategory(category);
+                            return Mono.just(item);
+                        });
+                    }
+                    return Mono.just(item);
+                }).flatMap(reactiveMongoTemplate::save);
     }
 
     @Override
-    public void deleteById(UUID id) {
+    public Mono<DeleteResult> deleteById(String id) {
         log.debug("Deleting item entity with id: {}", id);
-        Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaDelete<Item> delete = cb.createCriteriaDelete(Item.class);
-        Root<Item> root = delete.from(Item.class);
-        delete.where(cb.equal(root.get(ID_FIELD_NAME), id));
-
-        Transaction transaction = session.beginTransaction();
-        session.createQuery(delete).executeUpdate();
-        transaction.commit();
-        session.close();
+        return reactiveMongoTemplate.remove(new Query(Criteria.where(MONGO_ID_FIELD_NAME).is(id)), Item.class);
     }
 }
