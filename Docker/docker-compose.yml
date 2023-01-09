@@ -121,7 +121,7 @@ services:
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
-      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      MONGO_ADDRESS: root:root@mongodb:27017
       KEYCLOAK_URI: http://keycloak:8080
       KAFKA_ADDRESS: kafka:9092
     ports:
@@ -129,9 +129,8 @@ services:
     depends_on:
       - config-service
       - eureka-service
-      - company-service
       - user-service
-      - modsen-marketplace-postgres
+      - mongodb
       - keycloak
 
   user-transaction-service:
