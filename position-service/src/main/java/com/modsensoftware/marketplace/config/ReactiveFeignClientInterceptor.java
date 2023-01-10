@@ -3,6 +3,7 @@ package com.modsensoftware.marketplace.config;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 1/7/2023
  */
+@Profile("!wiremock-test")
 @Slf4j
 @Component
 public class ReactiveFeignClientInterceptor implements ReactiveHttpRequestInterceptor {
