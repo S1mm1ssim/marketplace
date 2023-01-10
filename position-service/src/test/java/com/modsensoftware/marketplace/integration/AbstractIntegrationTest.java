@@ -1,21 +1,18 @@
 package com.modsensoftware.marketplace.integration;
 
-import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
+import com.modsensoftware.marketplace.CustomMongoContainer;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-import org.testcontainers.jdbc.JdbcDatabaseDelegate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -45,18 +42,15 @@ public abstract class AbstractIntegrationTest {
     @Value("${idm.grant-type}")
     private String grantType;
 
-    private static final RestTemplate restTemplate = new RestTemplate();
+    private static final WebClient webClient = WebClient.create();
 
     @Container
-    public static CustomPostgreSQLContainer postgreSQLContainer
-            = CustomPostgreSQLContainer.getInstance();
+    public static CustomMongoContainer mongoContainer
+            = CustomMongoContainer.getInstance();
 
     @Container
     public static CustomKeycloakContainer keycloakContainer
             = CustomKeycloakContainer.getInstance();
-
-    protected static final JdbcDatabaseDelegate dbDelegate
-            = new JdbcDatabaseDelegate(postgreSQLContainer, "");
 
     @BeforeAll
     protected static void beforeAll() {
@@ -68,20 +62,21 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected String getAccessToken(String username) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("client_id", clientId);
-        map.add("username", username);
-        map.add("password", TEST_USER_PASSWORD);
-        map.add("client_secret", clientSecret);
-        map.add("grant_type", grantType);
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("client_id", clientId);
+        formData.add("username", username);
+        formData.add("password", TEST_USER_PASSWORD);
+        formData.add("client_secret", clientSecret);
+        formData.add("grant_type", grantType);
 
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
-
-        ResponseEntity<AccessTokenResponse> accessToken
-                = restTemplate.exchange(issuerUri + GET_ACCESS_TOKEN_PATH, HttpMethod.POST,
-                entity, AccessTokenResponse.class);
-        return accessToken.getBody().getToken();
+        AccessTokenResponse accessTokenResponse = webClient
+                .method(HttpMethod.POST)
+                .uri(issuerUri + GET_ACCESS_TOKEN_PATH)
+                .bodyValue(formData)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .retrieve()
+                .bodyToMono(AccessTokenResponse.class)
+                .block();
+        return accessTokenResponse.getToken();
     }
 }
