@@ -73,12 +73,12 @@ services:
       - zookeeper
 
   config-service:
-    image: marketplace-config-service:latest
+    image: simmissim/marketplace-config-service:latest
     ports:
       - "8888:8888"
 
   eureka-service:
-    image: marketplace-discovery-service:latest
+    image: simmissim/marketplace-discovery-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
     ports:
@@ -87,7 +87,7 @@ services:
       - config-service
 
   company-service:
-    image: marketplace-company-service:latest
+    image: simmissim/marketplace-company-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -102,7 +102,7 @@ services:
       - keycloak
 
   user-service:
-    image: marketplace-user-service:latest
+    image: simmissim/marketplace-user-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -117,7 +117,7 @@ services:
       - keycloak
 
   position-service:
-    image: marketplace-position-service:latest
+    image: simmissim/marketplace-position-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -134,7 +134,7 @@ services:
       - keycloak
 
   user-transaction-service:
-    image: marketplace-user-transaction-service:latest
+    image: simmissim/marketplace-user-transaction-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -152,7 +152,7 @@ services:
       - keycloak
 
   gateway-service:
-    image: marketplace-gateway-service:latest
+    image: simmissim/marketplace-gateway-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
