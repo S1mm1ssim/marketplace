@@ -240,17 +240,16 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         // given
         final String userUuid = USER_IDS.get(1);
         String updatedName = "updated name";
-        String updatedFields = String.format("{\n"
-                + "    \"name\": \"%s\",\n"
-                + "    \"password\": \"password\"\n"
-                + "}", updatedName);
+        Map<String, String> body = new HashMap<>();
+        body.put("name", updatedName);
+        body.put("password", "password");
 
         // when
         // then
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
-                .body(updatedFields)
+                .body(body)
                 .when()
                 .put(String.format("/users/%s", userUuid)).then()
                 .statusCode(200);
@@ -263,16 +262,15 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
         // given
         final String userUuid = USER_IDS.get(0);
         String updatedName = "updated name";
-        String updatedFields = String.format("{\n"
-                + "    \"firstName\": \"%s\"\n"
-                + "}", updatedName);
+        Map<String, String> body = new HashMap<>();
+        body.put("firstName", updatedName);
 
         // when
         // then
         String response = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
-                .body(updatedFields)
+                .body(body)
                 .when()
                 .put(format("/users/%s", userUuid)).then()
                 .statusCode(400).extract().response().asString();

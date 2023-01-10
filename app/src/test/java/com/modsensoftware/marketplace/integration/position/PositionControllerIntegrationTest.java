@@ -128,14 +128,12 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     public void canUpdatePosition() {
         accessToken = getAccessToken(POSITION_MANAGER_USERNAME);
         String positionId = savedPositionId;
-        String updatedFields = ""
-                + "{\n"
-                + "    \"amount\": 4\n"
-                + "}";
+        Map<String, String> body = new HashMap<>();
+        body.put("amount", "4");
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
-                .body(updatedFields)
+                .body(body)
                 .when()
                 .put(format("/positions/%s", positionId))
                 .then().statusCode(200);
@@ -263,15 +261,13 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void updateByAnotherPersonShouldReturnForbidden() {
         String positionId = "999";
-        String updatedFields = ""
-                + "{\n"
-                + "    \"amount\": 4,\n"
-                + "    \"version\": 1\n"
-                + "}";
+        Map<String, String> body = new HashMap<>();
+        body.put("amount", "4");
+        body.put("version", "1");
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
-                .body(updatedFields)
+                .body(body)
                 .when()
                 .put(format("/positions/%s", positionId))
                 .then().statusCode(403);
