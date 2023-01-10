@@ -10,8 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
@@ -41,7 +39,7 @@ public class UserStubs {
     }
 
     public static void setupDeterministicGetUserWithId(WireMockServer mockServer, String userId) throws IOException {
-        UserResponseDto user = new UserResponseDto(UUID.fromString(userId), "test-storage-manager",
+        UserResponseDto user = new UserResponseDto(userId, "test-storage-manager",
                 "email@email.com", "full name", now(), now(), Company.builder().id(999L).build());
         mockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/users/" + userId))
                 .willReturn(

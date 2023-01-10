@@ -4,11 +4,7 @@ spring:
       client:
         simple:
           instances:
-            COMPANY-SERVICE[0]:
-              uri: http://localhost:9561
-            COMPANY-SERVICE[1]:
-              uri: http://localhost:9562
             USER-SERVICE[0]:
-              uri: http://localhost:9563
+              uri: http://localhost:9561
             USER-SERVICE[1]:
-              uri: http://localhost:9564
+              uri: http://localhost:9562
