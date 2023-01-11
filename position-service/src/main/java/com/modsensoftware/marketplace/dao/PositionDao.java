@@ -48,11 +48,11 @@ public class PositionDao implements Dao<Position, Long> {
         log.debug("Fetching position entity with id {}", id);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(POSITION_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Position> byId = cb.createQuery(Position.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Position> byId = criteriaBuilder.createQuery(Position.class);
         Root<Position> root = byId.from(Position.class);
 
-        byId.select(root).where(cb.and(cb.equal(root.get(ID_FIELD_NAME), id)));
+        byId.select(root).where(criteriaBuilder.and(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id)));
 
         Query<Position> query = session.createQuery(byId);
         query.setHint(GRAPH_TYPE, entityGraph);
@@ -73,8 +73,8 @@ public class PositionDao implements Dao<Position, Long> {
         log.debug("Fetching all positions for page {}", pageNumber);
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(POSITION_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Position> getAll = cb.createQuery(Position.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Position> getAll = criteriaBuilder.createQuery(Position.class);
         Root<Position> root = getAll.from(Position.class);
 
         Query<Position> query = session.createQuery(getAll);
@@ -116,10 +116,10 @@ public class PositionDao implements Dao<Position, Long> {
     public void deleteById(Long id) {
         log.debug("Deleting position entity with id: {}", id);
         Session session = sessionFactory.openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaDelete<Position> delete = cb.createCriteriaDelete(Position.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaDelete<Position> delete = criteriaBuilder.createCriteriaDelete(Position.class);
         Root<Position> root = delete.from(Position.class);
-        delete.where(cb.equal(root.get(ID_FIELD_NAME), id));
+        delete.where(criteriaBuilder.equal(root.get(ID_FIELD_NAME), id));
 
         Transaction transaction = session.beginTransaction();
         session.createQuery(delete).executeUpdate();

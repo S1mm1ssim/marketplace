@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service.impl;
 
 import com.modsensoftware.marketplace.config.FeignErrorHandler;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,5 +15,5 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface PositionClient {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    PositionResponseDto getPositionById(@PathVariable(name = "id") Long id);
+    PositionResponse getPositionById(@PathVariable(name = "id") Long id);
 }

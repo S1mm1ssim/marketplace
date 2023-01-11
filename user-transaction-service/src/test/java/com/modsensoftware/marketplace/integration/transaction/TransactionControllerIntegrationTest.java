@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.modsensoftware.marketplace.domain.UserTransaction;
 import com.modsensoftware.marketplace.domain.UserTransactionStatus;
 import com.modsensoftware.marketplace.dto.PlacedUserTransaction;
+import com.modsensoftware.marketplace.dto.request.OrderRequest;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import com.modsensoftware.marketplace.integration.LoadBalancerTestConfig;
 import com.modsensoftware.marketplace.integration.PositionStubs;
@@ -37,6 +38,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.ext.ScriptUtils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -103,23 +107,19 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         PositionStubs.setupGetPositionById(wireMockServer1, 999L);
         PositionStubs.setupGetPositionById(wireMockServer2, 999L);
 
-        String payload = "{\n"
-                + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
-                + "    \"orderLine\":\n"
-                + "    [\n"
-                + "        {\n"
-                + "            \"positionId\": 999,\n"
-                + "            \"amount\": 6\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}";
+        Map<String, String> body = new HashMap<>();
+        body.put("userId", "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        body.put("orderLine", objectMapper.writeValueAsString(
+                        List.of(new OrderRequest(999L, new BigDecimal("6")))
+                )
+        );
 
         // when
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .body(payload)
+                .body(body)
                 .post("/users/transactions")
                 .then().statusCode(201);
 
@@ -148,16 +148,12 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         PositionStubs.setupGetPositionById(wireMockServer1, 999L);
         PositionStubs.setupGetPositionById(wireMockServer2, 999L);
-        String payload = "{\n"
-                + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
-                + "    \"orderLine\":\n"
-                + "    [\n"
-                + "        {\n"
-                + "            \"positionId\": 999,\n"
-                + "            \"amount\": 6\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}";
+        Map<String, String> body = new HashMap<>();
+        body.put("userId", "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        body.put("orderLine", objectMapper.writeValueAsString(
+                        List.of(new OrderRequest(999L, new BigDecimal("6")))
+                )
+        );
 
         // when
         for (int i = 0; i < 10; i++) {
@@ -165,7 +161,7 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                     .contentType("application/json")
                     .header("Authorization", "Bearer " + accessToken)
                     .when()
-                    .body(payload)
+                    .body(body)
                     .post("/users/transactions")
                     .then().statusCode(201);
         }
@@ -192,16 +188,12 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         PositionStubs.setupGetPositionById(wireMockServer1, 999L);
         PositionStubs.setupGetPositionById(wireMockServer2, 999L);
-        String invalidPayload = format("{\n"
-                + "    \"userId\": \"b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d\",\n"
-                + "    \"orderLine\":\n"
-                + "    [\n"
-                + "        {\n"
-                + "            \"positionId\": %s,\n"
-                + "            \"amount\": %s\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}", positionId, amount);
+        Map<String, String> invalidPayload = new HashMap<>();
+        invalidPayload.put("userId", "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        invalidPayload.put("orderLine", objectMapper.writeValueAsString(
+                        List.of(new OrderRequest(positionId, new BigDecimal(amount)))
+                )
+        );
 
         // when
         String response = RestAssured.given()

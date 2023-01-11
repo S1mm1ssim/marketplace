@@ -17,7 +17,7 @@ public class CategoryMapperTest {
 
     private final CategoryMapper underTest = new CategoryMapperImpl();
 
-    @ValueSource(longs = {1})
+    @ValueSource(longs = {1, 0, 999, -1, 155, -999})
     @NullSource
     @ParameterizedTest
     public void shouldMapDtoToCategoryWithProvidedParentIdValue(Long parentId) {

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.UserTransactionStatus;
-import com.modsensoftware.marketplace.dto.OrderRequestDto;
+import com.modsensoftware.marketplace.dto.OrderRequest;
 import com.modsensoftware.marketplace.dto.PlacedUserTransaction;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -22,7 +22,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
-import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.ext.ScriptUtils;
 
 import java.math.BigDecimal;
@@ -62,8 +61,8 @@ public class TransactionProcessorKafkaTest extends AbstractIntegrationTest {
     public void shouldProcessUserTransactionAndProduceMessage() throws JsonProcessingException {
         // given
         Long positionId = 999L;
-        List<OrderRequestDto> orders = new ArrayList<>();
-        orders.add(new OrderRequestDto(positionId, new BigDecimal("10")));
+        List<OrderRequest> orders = new ArrayList<>();
+        orders.add(new OrderRequest(positionId, new BigDecimal("10")));
         PlacedUserTransaction placedTransaction = new PlacedUserTransaction(1L, IN_PROGRESS, orders);
         double expectedPositionAmount = 140d;
 

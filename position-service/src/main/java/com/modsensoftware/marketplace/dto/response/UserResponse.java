@@ -1,6 +1,5 @@
 package com.modsensoftware.marketplace.dto.response;
 
-import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.Company;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,20 +7,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * @author andrey.demyanchik on 12/19/2022
+ * @author andrey.demyanchik on 12/8/2022
  */
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PositionResponseDto {
-    private Long id;
-    private Item item;
-    private Company company;
-    private UserResponseDto createdBy;
+@Builder
+public class UserResponse {
+    private UUID id;
+    private String username;
+    private String email;
+    private String name;
     private LocalDateTime created;
-    private Double amount;
-    private Double minAmount;
+    private LocalDateTime updated;
+    private Company company;
 }

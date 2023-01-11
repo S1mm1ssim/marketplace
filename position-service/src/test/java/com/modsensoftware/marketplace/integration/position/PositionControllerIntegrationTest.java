@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import com.modsensoftware.marketplace.integration.CompanyStubs;
 import com.modsensoftware.marketplace.integration.LoadBalancerTestConfig;
@@ -162,13 +162,13 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         UserStubs.setupGetUserWithId(wireMockServer4, "c048ef0e-fe46-4c65-9c01-d88af74ba0ab");
         UserStubs.setupGetUserWithId(wireMockServer3, "722cd920-e127-4cc2-93b9-e9b4a8f18873");
         UserStubs.setupGetUserWithId(wireMockServer4, "722cd920-e127-4cc2-93b9-e9b4a8f18873");
-        PositionResponseDto[] positions = RestAssured.given()
+        PositionResponse[] positions = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .get("/positions")
                 .then().statusCode(200)
-                .extract().body().as(PositionResponseDto[].class);
+                .extract().body().as(PositionResponse[].class);
         Assertions.assertThat(positions.length).isGreaterThanOrEqualTo(2);
     }
 
