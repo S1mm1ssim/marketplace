@@ -2,6 +2,7 @@ package com.modsensoftware.marketplace.dao;
 
 import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.UserTransaction;
+import com.modsensoftware.marketplace.domain.UserTransactionStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -76,5 +77,17 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
         session.persist(userTransaction);
         transaction.commit();
         session.close();
+    }
+
+    @Override
+    public void updateTransactionStatus(Long transactionId, UserTransactionStatus status) {
+        log.info("Updating transaction with id {} to status {}", transactionId, status);
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            UserTransaction userTransaction = session.find(UserTransaction.class, transactionId);
+            userTransaction.setStatus(status);
+            session.merge(userTransaction);
+            transaction.commit();
+        }
     }
 }

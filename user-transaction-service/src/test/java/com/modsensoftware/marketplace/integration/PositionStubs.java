@@ -31,9 +31,4 @@ public class PositionStubs {
                                 ))
                 ));
     }
-
-    public static void setupPutPosition(WireMockServer mockServer, long positionId) {
-        mockServer.stubFor(WireMock.put(WireMock.urlEqualTo("/api/v1/positions/" + positionId))
-                .willReturn(WireMock.ok()));
-    }
 }

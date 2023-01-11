@@ -22,6 +22,4 @@ public class OrderRequest {
 
     @DecimalMin(value = MIN_AMOUNT_VALUE, message = INVALID_AMOUNT_MESSAGE)
     private BigDecimal amount;
-
-    private Long positionVersion;
 }

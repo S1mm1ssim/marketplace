@@ -22,5 +22,4 @@ public class PositionResponse {
     private LocalDateTime created;
     private Double amount;
     private Double minAmount;
-    private Long version;
 }

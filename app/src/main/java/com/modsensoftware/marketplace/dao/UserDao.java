@@ -103,13 +103,14 @@ public class UserDao implements Dao<User, UUID> {
     }
 
     @Override
-    public void save(User user) {
+    public UUID save(User user) {
         log.debug("Saving user entity: {}", user);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(user);
         transaction.commit();
         session.close();
+        return user.getId();
     }
 
     @Override

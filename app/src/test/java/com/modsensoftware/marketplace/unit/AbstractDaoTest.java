@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -13,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * @author andrey.demyanchik on 12/20/2022
  */
 @Testcontainers
+@EmbeddedKafka(topics = {"userTransactionStatusResultsTest", "userTransactionProcessingTest"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class AbstractDaoTest {
 

@@ -89,13 +89,14 @@ public class CategoryDao implements Dao<Category, Long> {
     }
 
     @Override
-    public void save(Category category) {
+    public Long save(Category category) {
         log.debug("Saving category entity: {}", category);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(category);
         transaction.commit();
         session.close();
+        return category.getId();
     }
 
     @Override

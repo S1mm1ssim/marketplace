@@ -1,25 +1,26 @@
 package com.modsensoftware.marketplace.service.impl;
 
 import com.modsensoftware.marketplace.dao.PositionDao;
-import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.PositionRequest;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
 import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
+import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
 import com.modsensoftware.marketplace.service.PositionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.OptimisticLockException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,14 +35,13 @@ import static java.lang.String.format;
 public class PositionServiceImpl implements PositionService {
 
     private final PositionDao positionDao;
-    private final UserDao userDao;
     private final PositionMapper positionMapper;
     private final CompanyClient companyClient;
 
-    @Value("${exception.message.positionVersionsMismatch}")
-    private String positionVersionsMismatch;
     @Value("${exception.message.noItemVersionProvided}")
     private String noItemVersionProvidedMessage;
+    @Value("${exception.message.positionCreatedByAnotherPersonMessage}")
+    private String positionCreatedByAnotherPersonMessage;
 
     @Override
     public PositionResponse getPositionById(Long id) {
@@ -72,52 +72,48 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public void createPosition(PositionRequest positionRequest) {
-        log.debug("Creating new position from dto: {}", positionRequest);
-        if (positionRequest.getItemVersion() == null) {
-            log.error("Provided positionRequest didn't contain item's version");
+    public Long createPosition(CreatePositionRequest createPositionRequest, Authentication authentication) {
+        log.debug("Creating new position from dto: {}", createPositionRequest);
+        if (createPositionRequest.getItemVersion() == null) {
+            log.error("Provided createPositionRequest didn't contain item's version");
             throw new NoVersionProvidedException(format(noItemVersionProvidedMessage,
-                    positionRequest.getItemId()));
+                    createPositionRequest.getItemId()));
         }
-        if (positionRequest.getCompanyId() != null) {
+        if (createPositionRequest.getCompanyId() != null) {
             // A request is sent to check if a company with such id exists
             // Feign decoder will check status and throw runtime exception if company not found
-            companyClient.getCompanyById(positionRequest.getCompanyId());
+            companyClient.getCompanyById(createPositionRequest.getCompanyId());
         }
-        Position position = positionMapper.toPosition(positionRequest);
+        // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
+        Position position = positionMapper.toPosition(createPositionRequest,
+                UUID.fromString(authentication.getName()));
         position.setCreated(LocalDateTime.now());
         log.debug("Mapping result: {}", position);
-        positionDao.save(position);
+        return positionDao.save(position);
     }
 
     @Override
-    public void deletePosition(Long id) {
-        log.debug("Deleting position by id: {}", id);
-        positionDao.deleteById(id);
+    public void deletePosition(Long id, Authentication authentication) {
+        Position position = positionDao.get(id);
+        if (position.getCreatedBy().getId().equals(UUID.fromString(authentication.getName()))) {
+            log.debug("Deleting position by id: {}", id);
+            positionDao.deleteById(id);
+        } else {
+            log.error("Attempt to delete position with id {} was made by not the same person who created it", id);
+            throw new UnauthorizedOperationException(positionCreatedByAnotherPersonMessage);
+        }
     }
 
     @Override
-    public void updatePosition(Long id, PositionRequest updatedFields) {
+    public void updatePosition(Long id, UpdatePositionRequest updatedFields, Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         Position position = positionDao.get(id);
-        if (position.getVersion().equals(updatedFields.getVersion())) {
-            log.debug("Position versions match");
-            if (updatedFields.getCompanyId() != null) {
-                // A request is sent to check if a company with such id exists
-                // Feign decoder will check status and throw runtime exception if company not found
-                companyClient.getCompanyById(updatedFields.getCompanyId());
-            }
-            if (updatedFields.getCreatedBy() != null) {
-                User user = userDao.get(updatedFields.getCreatedBy());
-                // A request is sent to check if a company with such id exists
-                // Feign decoder will check status and throw runtime exception if company not found
-                companyClient.getCompanyById(user.getCompanyId());
-            }
+        // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
+        if (position.getCreatedBy().getId().equals(UUID.fromString(authentication.getName()))) {
             positionDao.update(id, positionMapper.toPosition(updatedFields));
         } else {
-            log.error("Position versions do not match. Provided: {}, in the database: {}",
-                    updatedFields.getVersion(), position.getVersion());
-            throw new OptimisticLockException(positionVersionsMismatch);
+            log.error("Attempt to update position with id {} was made by not the same person who created it", id);
+            throw new UnauthorizedOperationException(positionCreatedByAnotherPersonMessage);
         }
     }
 }

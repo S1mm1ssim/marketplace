@@ -24,6 +24,16 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ""
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    bootstrap-servers: "${spring.embedded.kafka.brokers}"
 
 logging:
   level:
@@ -43,7 +53,14 @@ exception:
     sessionFactoryInitFail: "Initialization of SessionFactory failed"
     insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
-    noPositionVersionProvided: "No version for position with id %s was provided"
+
 eureka:
   client:
     enabled: false
+
+topics:
+  processedTransactions:
+    name: userTransactionStatusResultsTest
+    groupId: userTransactionStatusResultsTest_group_id
+  transactionsPlacedForProcessing:
+    name: userTransactionProcessingTest

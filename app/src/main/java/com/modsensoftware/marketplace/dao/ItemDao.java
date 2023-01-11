@@ -94,13 +94,14 @@ public class ItemDao implements Dao<Item, UUID> {
     }
 
     @Override
-    public void save(Item item) {
+    public UUID save(Item item) {
         log.debug("Saving item entity: {}", item);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(item);
         transaction.commit();
         session.close();
+        return item.getId();
     }
 
     @Override

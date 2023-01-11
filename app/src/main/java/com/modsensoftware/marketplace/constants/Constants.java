@@ -26,5 +26,4 @@ public final class Constants {
     public static final String COMPANY_ID_FILTER_NAME = "companyId";
 
     public static final String ID_PATH_VARIABLE_NAME = "id";
-    public static final String USER_ID_PATH_VARIABLE_NAME = "userId";
 }

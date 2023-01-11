@@ -4,10 +4,13 @@ import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
-import com.modsensoftware.marketplace.dto.request.PositionRequest;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
 import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 /**
  * @author andrey.demyanchik on 11/3/2022
@@ -18,7 +21,7 @@ public class PositionMapper {
 
     private final UserMapper userMapper;
 
-    public Position toPosition(PositionRequest requestDto) {
+    public Position toPosition(CreatePositionRequest requestDto, UUID userId) {
         Item item = Item.builder()
                 .id(requestDto.getItemId())
                 .version(requestDto.getItemVersion())
@@ -34,10 +37,24 @@ public class PositionMapper {
         return Position.builder()
                 .item(item)
                 .companyId(requestDto.getCompanyId())
-                .createdBy(User.builder().id(requestDto.getCreatedBy()).build())
+                .createdBy(User.builder().id(userId).build())
                 .amount(amount)
                 .minAmount(minAmount)
-                .version(requestDto.getVersion())
+                .build();
+    }
+
+    public Position toPosition(UpdatePositionRequest requestDto) {
+        Double minAmount = null;
+        if (requestDto.getMinAmount() != null) {
+            minAmount = requestDto.getMinAmount().doubleValue();
+        }
+        Double amount = null;
+        if (requestDto.getAmount() != null) {
+            amount = requestDto.getAmount().doubleValue();
+        }
+        return Position.builder()
+                .amount(amount)
+                .minAmount(minAmount)
                 .build();
     }
 
@@ -50,8 +67,7 @@ public class PositionMapper {
                 userMapper.toResponseDto(position.getCreatedBy(), userCompany),
                 position.getCreated(),
                 position.getAmount(),
-                position.getMinAmount(),
-                position.getVersion()
+                position.getMinAmount()
         );
     }
 }

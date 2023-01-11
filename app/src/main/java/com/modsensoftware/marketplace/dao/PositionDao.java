@@ -1,8 +1,6 @@
 package com.modsensoftware.marketplace.dao;
 
-import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.utils.Utils;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +34,6 @@ import static java.lang.String.format;
 public class PositionDao implements Dao<Position, Long> {
 
     private final SessionFactory sessionFactory;
-    private final ItemDao itemDao;
-    private final UserDao userDao;
 
     @Value("${default.page.size}")
     private int pageSize;
@@ -60,12 +56,14 @@ public class PositionDao implements Dao<Position, Long> {
 
         Query<Position> query = session.createQuery(byId);
         query.setHint(GRAPH_TYPE, entityGraph);
+        Transaction transaction = session.beginTransaction();
         try {
             return query.getSingleResult();
         } catch (NoResultException e) {
             log.error("Position entity with id {} not found", id);
             throw new EntityNotFoundException(format(positionNotFoundMessage, id), e);
         } finally {
+            transaction.commit();
             session.close();
         }
     }
@@ -83,19 +81,22 @@ public class PositionDao implements Dao<Position, Long> {
         query.setFirstResult(pageSize * pageNumber);
         query.setMaxResults(pageSize);
         query.setHint(GRAPH_TYPE, entityGraph);
+        Transaction transaction = session.beginTransaction();
         List<Position> results = query.getResultList();
+        transaction.commit();
         session.close();
         return results;
     }
 
     @Override
-    public void save(Position position) {
+    public Long save(Position position) {
         log.debug("Saving position entity: {}", position);
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         session.persist(position);
         transaction.commit();
         session.close();
+        return position.getId();
     }
 
     @Override
@@ -103,17 +104,9 @@ public class PositionDao implements Dao<Position, Long> {
         log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
-            Position position = session.find(Position.class, id, LockModeType.OPTIMISTIC);
-            if (updatedFields.getItem().getId() != null) {
-                Item updItem = itemDao.get(updatedFields.getItem().getId());
-                position.setItem(updItem);
-            }
-            if (updatedFields.getCreatedBy().getId() != null) {
-                User updUser = userDao.get(updatedFields.getCreatedBy().getId());
-                position.setCreatedBy(updUser);
-            }
-            Utils.setIfNotNull(updatedFields.getCompanyId(), position::setCompanyId);
+            Position position = session.find(Position.class, id, LockModeType.PESSIMISTIC_WRITE);
             Utils.setIfNotNull(updatedFields.getAmount(), position::setAmount);
+            Utils.setIfNotNull(updatedFields.getMinAmount(), position::setMinAmount);
             session.merge(position);
             transaction.commit();
         }

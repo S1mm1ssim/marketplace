@@ -2,11 +2,13 @@ package com.modsensoftware.marketplace.unit.usertransaction;
 
 import com.modsensoftware.marketplace.dao.UserTransactionDao;
 import com.modsensoftware.marketplace.domain.UserTransaction;
+import com.modsensoftware.marketplace.domain.UserTransactionStatus;
+import com.modsensoftware.marketplace.dto.mapper.UserTransactionMapper;
 import com.modsensoftware.marketplace.dto.request.OrderRequest;
 import com.modsensoftware.marketplace.dto.request.UserTransactionRequest;
 import com.modsensoftware.marketplace.dto.response.UserResponse;
-import com.modsensoftware.marketplace.dto.mapper.UserTransactionMapper;
 import com.modsensoftware.marketplace.service.OrderService;
+import com.modsensoftware.marketplace.service.TransactionProcessingKafkaProducer;
 import com.modsensoftware.marketplace.service.UserTransactionService;
 import com.modsensoftware.marketplace.service.impl.UserClient;
 import com.modsensoftware.marketplace.service.impl.UserTransactionServiceImpl;
@@ -38,6 +40,8 @@ public class UserTransactionServiceTest {
     private UserTransactionDao transactionDao;
     @Mock
     private OrderService orderService;
+    @Mock
+    private TransactionProcessingKafkaProducer producer;
 
     private final UserTransactionMapper transactionMapper
             = Mappers.getMapper(UserTransactionMapper.class);
@@ -46,7 +50,7 @@ public class UserTransactionServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new UserTransactionServiceImpl(userClient, transactionDao, orderService);
+        underTest = new UserTransactionServiceImpl(userClient, transactionDao, orderService, producer);
     }
 
     @Test
@@ -67,10 +71,11 @@ public class UserTransactionServiceTest {
     public void canSaveUserTransaction() {
         // given
         UUID userId = UUID.randomUUID();
-        OrderRequest orderDto = new OrderRequest(1L, new BigDecimal("5"), 0L);
+        OrderRequest orderDto = new OrderRequest(1L, new BigDecimal("5"));
         UserTransactionRequest transactionDto = new UserTransactionRequest(userId, List.of(orderDto));
         BDDMockito.when(userClient.getUserById(userId)).thenReturn(new UserResponse());
         UserTransaction expectedTransaction = transactionMapper.toUserTransaction(transactionDto);
+        expectedTransaction.setStatus(UserTransactionStatus.IN_PROGRESS);
 
         // when
         underTest.createUserTransaction(transactionDto);
@@ -79,8 +84,12 @@ public class UserTransactionServiceTest {
         BDDMockito.verify(orderService).validateOrders(transactionDto.getOrderLine());
         ArgumentCaptor<UserTransaction> transactionCaptor = ArgumentCaptor.forClass(UserTransaction.class);
         BDDMockito.verify(transactionDao).save(transactionCaptor.capture());
+
         UserTransaction transactionBeingSaved = transactionCaptor.getValue();
         transactionBeingSaved.setCreated(null);
         Assertions.assertThat(transactionBeingSaved).isEqualTo(expectedTransaction);
+        BDDMockito.verify(producer).publishUserTransactionProcessing(
+                transactionMapper.toPlacedUserTransaction(expectedTransaction)
+        );
     }
 }

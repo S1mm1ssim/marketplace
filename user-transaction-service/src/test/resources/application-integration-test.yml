@@ -54,4 +54,3 @@ exception:
     sessionFactoryInitFail: "Initialization of SessionFactory failed"
     insufficientItemsInStock: "Not enough items in stock for position with id=%s. Wanted amount=%s. Currently in stock=%s"
     insufficientOrderAmount: "Wanted amount=%s is less than position's(id=%s) minimum amount=%s"
-    noPositionVersionProvided: "No version for position with id %s was provided"
