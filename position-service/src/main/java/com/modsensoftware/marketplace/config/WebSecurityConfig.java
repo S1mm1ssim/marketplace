@@ -48,7 +48,8 @@ public class WebSecurityConfig {
                 .httpBasic().disable()
                 .csrf().disable()
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html", "/webjars/**", "/v3/api-docs/**",
+                                "/actuator/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
