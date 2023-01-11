@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.Valid;
+
 import java.util.List;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
@@ -81,7 +82,7 @@ public class CompanyController {
 
     @PreAuthorize("hasAnyRole('DIRECTOR')")
     @PutMapping("/{id}")
-    public void updateCompany(@PathVariable(name = "ID_PATH_VARIABLE_NAME") Long id,
+    public void updateCompany(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id,
                               @Valid @RequestBody CompanyRequest updatedFields) {
         log.debug("Updating company: {}\nwith params: {}", id, updatedFields);
         companyService.updateCompany(id, updatedFields);

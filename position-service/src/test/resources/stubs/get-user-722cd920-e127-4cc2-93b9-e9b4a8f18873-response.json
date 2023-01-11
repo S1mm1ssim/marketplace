@@ -1,0 +1,15 @@
+{
+  "id": "722cd920-e127-4cc2-93b9-e9b4a8f18873",
+  "username": "user2",
+  "email": "user2@gmail.com",
+  "name": "user2",
+  "created": "2023-01-03T15:52:01.985529",
+  "updated": "2023-01-03T15:52:01.985529",
+  "company": {
+    "id": 1000,
+    "name": "company2",
+    "email": "test2@test.com",
+    "created": "2022-12-19T16:21:15.982533",
+    "description": "Test"
+  }
+}

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author andrey.demyanchik on 12/27/2022
  */
-@FeignClient(name = "APP", contextId = "APP-position-client", path = "/api/v1/positions",
+@FeignClient(name = "POSITION-SERVICE", path = "/api/v1/positions",
         configuration = {FeignErrorHandler.class})
 public interface PositionClient {
 
