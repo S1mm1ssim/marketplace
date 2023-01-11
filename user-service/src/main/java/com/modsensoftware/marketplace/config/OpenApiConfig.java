@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "Marketplace API",
-                description = "A marketplace where companies can place positions and users can buy them.",
+                title = "User API",
+                description = "API provides endpoints for users.",
                 termsOfService = "Terms of service.",
                 contact = @Contact(
                         name = "Andrey Demyanchik", email = "Andrdemyan4ik@gmail.com"
