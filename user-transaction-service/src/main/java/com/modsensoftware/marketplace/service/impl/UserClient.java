@@ -12,8 +12,12 @@ import java.util.UUID;
 /**
  * @author andrey.demyanchik on 12/26/2022
  */
-@FeignClient(name = "USER-SERVICE", path = "/api/v1/users",
-        configuration = {FeignErrorHandler.class})
+@FeignClient(
+        value = "${feign-clients.user-client.name}",
+        url = "${feign-clients.user-client.url}",
+        path = "${feign-clients.user-client.path}",
+        configuration = {FeignErrorHandler.class}
+)
 public interface UserClient {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

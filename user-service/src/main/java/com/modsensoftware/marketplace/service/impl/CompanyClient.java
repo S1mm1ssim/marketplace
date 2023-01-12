@@ -12,8 +12,12 @@ import java.util.List;
 /**
  * @author andrey.demyanchik on 12/19/2022
  */
-@FeignClient(value = "COMPANY-SERVICE", path = "/api/v1/companies",
-        configuration = {FeignErrorHandler.class})
+@FeignClient(
+        value = "${feign-clients.company-client.name}",
+        url = "${feign-clients.company-client.url}",
+        path = "${feign-clients.company-client.path}",
+        configuration = {FeignErrorHandler.class}
+)
 public interface CompanyClient {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)

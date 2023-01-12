@@ -34,7 +34,7 @@ public class CustomKeycloakContainer extends KeycloakContainer {
         super.start();
         System.setProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri",
                 keycloakContainer.getAuthServerUrl() + REALM_PATH);
-        System.setProperty("reactive-feign.oauth2.client.provider.position-service.token-uri",
+        System.setProperty("reactive-feign.oauth2.client.provider.USER-SERVICE.token-uri",
                 keycloakContainer.getAuthServerUrl() + REALM_PATH + "/protocol/openid-connect/token");
         System.setProperty("idm.server-url", keycloakContainer.getAuthServerUrl());
         log.info("Started Keycloak container on port {}", keycloakContainer.getHttpPort());

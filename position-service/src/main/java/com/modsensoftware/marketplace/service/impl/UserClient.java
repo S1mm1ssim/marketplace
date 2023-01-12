@@ -11,8 +11,12 @@ import reactor.core.publisher.Mono;
 /**
  * @author andrey.demyanchik on 1/3/2023
  */
-@ReactiveFeignClient(value = "USER-SERVICE", path = "/api/v1/users",
-        configuration = {ReactiveFeignConfig.class})
+@ReactiveFeignClient(
+        value = "${reactive-feign-clients.user-client.name}",
+        url = "${reactive-feign-clients.user-client.url}",
+        path = "${reactive-feign-clients.user-client.path}",
+        configuration = {ReactiveFeignConfig.class}
+)
 public interface UserClient {
 
     @RequestMapping(value = "{id}", produces = {"application/json"}, method = RequestMethod.GET)
