@@ -107,10 +107,8 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void canUpdatePosition() {
         String positionId = savedPositionId;
-        String updatedFields = ""
-                + "{\n"
-                + "    \"amount\": 4\n"
-                + "}";
+        Map<String, String> updatedFields = new HashMap<>();
+        updatedFields.put("amount", "4");
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
@@ -241,11 +239,9 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void updateByAnotherPersonShouldReturnForbidden() {
         String positionId = "999";
-        String updatedFields = ""
-                + "{\n"
-                + "    \"amount\": 4,\n"
-                + "    \"version\": 1\n"
-                + "}";
+        Map<String, String> updatedFields = new HashMap<>();
+        updatedFields.put("amount", "4");
+        updatedFields.put("version", "1");
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
