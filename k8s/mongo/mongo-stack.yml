@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  serviceName: mongo-service
+  selector:
+    matchLabels:
+      app: mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo:5
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-root
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-root
+                  key: password
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: MONGO_INITDB_DATABASE
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "1Gi"
+            requests:
+              cpu: "50m"
+              memory: "250Mi"
+          ports:
+            - containerPort: 27017
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mongosh --port $MONGODB_PORT_NUMBER --eval "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 45
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mongosh --port $MONGODB_PORT_NUMBER --eval "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 45
+            failureThreshold: 3
+            successThreshold: 1
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+              subPath: mongo
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+data:
+  MONGO_ADDRESS: mongo-service:27017
+  MONGO_INITDB_DATABASE: marketplace_positions
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-root
+type: Opaque
+stringData:
+  username: root
+  password: root
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+  clusterIP: None
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteOnce
