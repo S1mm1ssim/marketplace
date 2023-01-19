@@ -5,6 +5,7 @@ metadata:
   labels:
     name: marketplace-ingress
   annotations:
+    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   rules:
@@ -24,8 +25,8 @@ spec:
                 name: user-transaction-service
                 port:
                   number: 8100
-          - path: /api/v1/users/(.+)/transactions
-            pathType: Exact
+          - path: /api/v1/users/.+/transactions
+            pathType: Prefix
             backend:
               service:
                 name: user-transaction-service
