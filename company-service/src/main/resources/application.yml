@@ -32,6 +32,11 @@ spring:
           batch_size: 5
   config:
     import: "optional:configserver:${CONFIG_URI:http://localhost:8888}"
+  cloud:
+    loadbalancer:
+      cache:
+        caffeine:
+          spec: maximumSize=10,initialCapacity=50,expireAfterAccess=300s
 
 eureka:
   client:
