@@ -18,10 +18,14 @@ spring:
           uri: lb://user-transaction-service
           predicates:
             - Path=/api/v1/users/transactions, /api/v1/users/{segment}/transactions
-        - id: app
-          uri: lb://app
+        - id: user-service
+          uri: lb://user-service
           predicates:
-            - Path=/api/v1/**
+            - Path=/api/v1/users/**
+        - id: position-service
+          uri: lb://position-service
+          predicates:
+            - Path=/api/v1/items/**, /api/v1/categories/**, /api/v1/positions/**
   config:
     import: "optional:configserver:${CONFIG_URI:http://localhost:8888}"
 

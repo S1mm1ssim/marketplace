@@ -49,7 +49,7 @@ import static java.lang.String.format;
 /**
  * @author andrey.demyanchik on 11/28/2022
  */
-@ActiveProfiles({"integration-test", "wiremock-test"})
+@ActiveProfiles("wiremock-test")
 @EmbeddedKafka(topics = {"userTransactionStatusResultsTest", "userTransactionProcessingTest"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ContextConfiguration(classes = {LoadBalancerTestConfig.class})
@@ -65,6 +65,10 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     private WireMockServer wireMockServer1;
     @Autowired
     private WireMockServer wireMockServer2;
+    @Autowired
+    private WireMockServer wireMockServer3;
+    @Autowired
+    private WireMockServer wireMockServer4;
 
     private static String accessToken;
 
@@ -98,8 +102,8 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     @Test
     public void shouldReturn201StatusOnCreateValidUserTransactionAndPublishToTopic() throws IOException {
         // given
-        UserStubs.setupGetUserById(wireMockServer1, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
-        UserStubs.setupGetUserById(wireMockServer2, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        UserStubs.setupGetUserById(wireMockServer3, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         PositionStubs.setupGetPositionById(wireMockServer1, 999L);
         PositionStubs.setupGetPositionById(wireMockServer2, 999L);
 
@@ -140,8 +144,8 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
     @Test
     public void shouldLoadBalanceFeignGetPositionAndUser() throws IOException {
         // given
-        UserStubs.setupGetUserById(wireMockServer1, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
-        UserStubs.setupGetUserById(wireMockServer2, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        UserStubs.setupGetUserById(wireMockServer3, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         PositionStubs.setupGetPositionById(wireMockServer1, 999L);
         PositionStubs.setupGetPositionById(wireMockServer2, 999L);
         Map<String, String> body = new HashMap<>();
@@ -163,9 +167,9 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
         }
 
         // then
-        wireMockServer1.verify(WireMock.moreThan(0),
+        wireMockServer3.verify(WireMock.moreThan(0),
                 WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/users/b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d")));
-        wireMockServer2.verify(WireMock.moreThan(0),
+        wireMockServer4.verify(WireMock.moreThan(0),
                 WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/users/b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d")));
         wireMockServer1.verify(WireMock.moreThan(0),
                 WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/positions/999")));
@@ -180,8 +184,8 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                                                                          Double amount,
                                                                          String exceptionMessage) throws IOException {
         // given
-        UserStubs.setupGetUserById(wireMockServer1, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
-        UserStubs.setupGetUserById(wireMockServer2, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        UserStubs.setupGetUserById(wireMockServer3, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
+        UserStubs.setupGetUserById(wireMockServer4, "b273ba0f-3b83-4cd4-a8bc-d44e5067ce6d");
         PositionStubs.setupGetPositionById(wireMockServer1, 999L);
         PositionStubs.setupGetPositionById(wireMockServer2, 999L);
         Map<String, String> invalidPayload = new HashMap<>();

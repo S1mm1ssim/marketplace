@@ -90,8 +90,23 @@ services:
       - modsen-marketplace-postgres
       - keycloak
 
-  app:
-    image: marketplace-app:latest
+  user-service:
+    image: marketplace-user-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
+    ports:
+      - "8095:8095"
+    depends_on:
+      - config-service
+      - eureka-service
+      - modsen-marketplace-postgres
+      - keycloak
+
+  position-service:
+    image: marketplace-position-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -104,6 +119,7 @@ services:
       - config-service
       - eureka-service
       - company-service
+      - user-service
       - modsen-marketplace-postgres
       - keycloak
 
@@ -121,7 +137,8 @@ services:
       - config-service
       - eureka-service
       - modsen-marketplace-postgres
-      - app
+      - position-service
+      - user-service
       - keycloak
 
   gateway-service:
@@ -134,7 +151,8 @@ services:
     depends_on:
       - config-service
       - eureka-service
-      - app
+      - position-service
+      - user-service
       - company-service
       - user-transaction-service
 
