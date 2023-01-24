@@ -49,6 +49,8 @@ public class CompanyDaoTest {
     @Container
     public static CustomPostgreSQLContainer postgreSQLContainer
             = CustomPostgreSQLContainer.getInstance();
+    @Container
+    public static RedisContainer redisContainer = RedisContainer.getInstance();
 
     @Value("${default.page.size}")
     private int pageSize;

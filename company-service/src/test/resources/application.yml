@@ -46,3 +46,7 @@ exception:
 eureka:
   client:
     enabled: false
+
+cache:
+  company:
+    ttl-seconds: 1
