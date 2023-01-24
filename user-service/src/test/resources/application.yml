@@ -63,3 +63,7 @@ exception:
 eureka:
   client:
     enabled: false
+
+cache:
+  user:
+    ttl-millis: 10

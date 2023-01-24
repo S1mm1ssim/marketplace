@@ -132,7 +132,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldLoadBalanceGetAllPositions() throws IOException {
+    public void shouldLoadBalanceGetAllUsers() throws IOException {
         // given
         CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer1);
         CompanyStubs.setupGetAllCompanyMockResponse(wireMockServer2);
@@ -173,7 +173,7 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldLoadBalanceGetPositionById() throws IOException {
+    public void shouldLoadBalanceGetUserById() throws IOException {
         // given
         CompanyStubs.setupGetCompanyWithId(wireMockServer1, 1000L);
         CompanyStubs.setupGetCompanyWithId(wireMockServer2, 1000L);
@@ -189,9 +189,9 @@ public class UserControllerIntegrationTest extends AbstractIntegrationTest {
                     .statusCode(200);
         }
         wireMockServer1.verify(WireMock.moreThan(0),
-                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/")));
+                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/1000")));
         wireMockServer2.verify(WireMock.moreThan(0),
-                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/")));
+                WireMock.getRequestedFor(WireMock.urlEqualTo("/api/v1/companies/1000")));
     }
 
     @ValueSource(strings = {
