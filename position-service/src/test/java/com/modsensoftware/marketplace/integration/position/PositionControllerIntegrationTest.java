@@ -166,7 +166,7 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         UserStubs.setupGetUserWithId(wireMockServer2, "c048ef0e-fe46-4c65-9c01-d88af74ba0ab");
         UserStubs.setupGetUserWithId(wireMockServer1, "722cd920-e127-4cc2-93b9-e9b4a8f18873");
         UserStubs.setupGetUserWithId(wireMockServer2, "722cd920-e127-4cc2-93b9-e9b4a8f18873");
-        PositionResponseDto[] positions = RestAssured.given()
+        PositionResponse[] positions = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()

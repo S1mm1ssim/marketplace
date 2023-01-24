@@ -81,7 +81,7 @@ public class PositionServiceTest {
         BDDMockito.given(userClient.getUserById(userId)).willReturn(Mono.just(user));
 
         // when
-        Mono<PositionResponseDto> positionById = underTest.getPositionById(positionId);
+        Mono<PositionResponse> positionById = underTest.getPositionById(positionId);
 
         // then
         positionById

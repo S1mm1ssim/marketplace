@@ -77,7 +77,7 @@ public class PositionServiceImpl implements PositionService {
         }
         // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
         return userClient.getUserById(authentication.getName()).flatMap(user -> {
-            Position position = positionMapper.toPosition(createPositionRequestDto, user);
+            Position position = positionMapper.toPosition(createPositionRequest, user);
             position.setCreated(LocalDateTime.now());
             return itemDao.get(position.getItem().getId()).map(item -> {
                 position.setItem(item);
