@@ -2,7 +2,7 @@ package com.modsensoftware.marketplace.unit;
 
 import com.modsensoftware.marketplace.dao.CompanyDao;
 import com.modsensoftware.marketplace.domain.Company;
-import com.modsensoftware.marketplace.dto.CompanyRequestDto;
+import com.modsensoftware.marketplace.dto.CompanyRequest;
 import com.modsensoftware.marketplace.dto.CompanyMapper;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
 import com.modsensoftware.marketplace.service.CompanyServiceImpl;
@@ -60,7 +60,7 @@ public class CompanyServiceTest {
     @Test
     public void canCreateCompany() {
         // given
-        CompanyRequestDto dto = new CompanyRequestDto("Name", "Email", "Description");
+        CompanyRequest dto = new CompanyRequest("Name", "Email", "Description");
         BDDMockito.given(companyDao.existsByEmail(BDDMockito.any())).willReturn(false);
 
         // when
@@ -79,7 +79,7 @@ public class CompanyServiceTest {
     public void saveShouldThrowEntityAlreadyExistsException() {
         // given
         String email = "Email";
-        CompanyRequestDto dto = new CompanyRequestDto("Name", email, "Description");
+        CompanyRequest dto = new CompanyRequest("Name", email, "Description");
         BDDMockito.given(companyDao.existsByEmail(email)).willReturn(true);
         // when
         // then

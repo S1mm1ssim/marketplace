@@ -11,15 +11,13 @@ import java.time.LocalDateTime;
  * @author andrey.demyanchik on 12/26/2022
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class PositionResponseDto {
-    private String id;
-    private ItemResponseDto item;
-    private CompanyResponseDto company;
-    private UserResponseDto createdBy;
+public class CompanyResponse {
+    private Long id;
+    private String name;
+    private String email;
     private LocalDateTime created;
-    private Double amount;
-    private Double minAmount;
+    private String description;
 }

@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.UserTransaction;
-import com.modsensoftware.marketplace.dto.request.UserTransactionRequestDto;
+import com.modsensoftware.marketplace.dto.request.UserTransactionRequest;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface UserTransactionService {
 
-    void createUserTransaction(UserTransactionRequestDto transactionDto);
+    void createUserTransaction(UserTransactionRequest transactionDto);
 
     List<UserTransaction> getAllTransactionsForUser(String userId, int pageNumber);
 }

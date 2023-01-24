@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service.impl;
 
-import com.modsensoftware.marketplace.dto.request.OrderRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.OrderRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.exception.InsufficientItemsInStockException;
 import com.modsensoftware.marketplace.exception.InsufficientOrderAmountException;
 import com.modsensoftware.marketplace.service.OrderService;
@@ -30,11 +30,11 @@ public class OrderServiceImpl implements OrderService {
     private String insufficientOrderAmountMessage;
 
     @Override
-    public void validateOrders(Collection<OrderRequestDto> orders) {
+    public void validateOrders(Collection<OrderRequest> orders) {
         log.debug("Validating orders: {}", orders);
         orders.forEach(orderDto -> {
             log.debug("Validating order: {}", orderDto);
-            PositionResponseDto position = positionClient.getPositionById(orderDto.getPositionId());
+            PositionResponse position = positionClient.getPositionById(orderDto.getPositionId());
             if (position.getAmount() < orderDto.getAmount().doubleValue()) {
                 log.error("Wanted amount is bigger than position with id {} has in stock", position.getId());
                 log.debug("Wanted amount: {}. Currently in stock: {}",

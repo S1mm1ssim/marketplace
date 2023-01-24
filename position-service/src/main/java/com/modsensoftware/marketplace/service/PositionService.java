@@ -1,9 +1,9 @@
 package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.mongodb.client.result.DeleteResult;
 import org.springframework.security.core.Authentication;
 import reactor.core.publisher.Flux;
@@ -14,13 +14,13 @@ import reactor.core.publisher.Mono;
  */
 public interface PositionService {
 
-    Mono<PositionResponseDto> getPositionById(String id);
+    Mono<PositionResponse> getPositionById(String id);
 
-    Flux<PositionResponseDto> getAllPositions(int pageNumber);
+    Flux<PositionResponse> getAllPositions(int pageNumber);
 
-    Mono<Position> createPosition(CreatePositionRequestDto createPositionRequestDto, Authentication authentication);
+    Mono<Position> createPosition(CreatePositionRequest createPositionRequest, Authentication authentication);
 
     Mono<DeleteResult> deletePosition(String id, Authentication authentication);
 
-    Mono<Position> updatePosition(String id, UpdatePositionRequestDto updatedFields, Authentication authentication);
+    Mono<Position> updatePosition(String id, UpdatePositionRequest updatedFields, Authentication authentication);
 }

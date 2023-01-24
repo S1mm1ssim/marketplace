@@ -4,8 +4,8 @@ import com.modsensoftware.marketplace.dao.UserTransactionDao;
 import com.modsensoftware.marketplace.domain.Order;
 import com.modsensoftware.marketplace.domain.UserTransaction;
 import com.modsensoftware.marketplace.domain.UserTransactionStatus;
-import com.modsensoftware.marketplace.dto.response.CompanyResponseDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.response.CompanyResponse;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import com.modsensoftware.marketplace.unit.AbstractDaoTest;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
@@ -58,8 +58,8 @@ public class UserTransactionDaoTest extends AbstractDaoTest {
     @Test
     public void canGetAllTransactionsForUserWithPagination() {
         // given
-        UserResponseDto user1 = generateUser("customer1@email.com", "username3", CompanyResponseDto.builder().id(1L).build());
-        UserResponseDto user2 = generateUser("customer2@email.com", "username4", CompanyResponseDto.builder().id(2L).build());
+        UserResponse user1 = generateUser("customer1@email.com", "username3", CompanyResponse.builder().id(1L).build());
+        UserResponse user2 = generateUser("customer2@email.com", "username4", CompanyResponse.builder().id(2L).build());
 
         String positionId = "1";
         List<UserTransaction> userTransactions = generateTransactionsForUsers(positionId, user1, user2);
@@ -81,8 +81,8 @@ public class UserTransactionDaoTest extends AbstractDaoTest {
         userTransactions.forEach(this::deleteUserTransaction);
     }
 
-    private UserResponseDto generateUser(String email, String username, CompanyResponseDto company) {
-        return new UserResponseDto(UUID.randomUUID(), username, email, "full name",
+    private UserResponse generateUser(String email, String username, CompanyResponse company) {
+        return new UserResponse(UUID.randomUUID(), username, email, "full name",
                 now().truncatedTo(SECONDS), now().truncatedTo(SECONDS), company);
     }
 
@@ -101,7 +101,7 @@ public class UserTransactionDaoTest extends AbstractDaoTest {
         session.close();
     }
 
-    private List<UserTransaction> generateTransactionsForUsers(String positionId, UserResponseDto user1, UserResponseDto user2) {
+    private List<UserTransaction> generateTransactionsForUsers(String positionId, UserResponse user1, UserResponse user2) {
         List<UserTransaction> userTransactions = new ArrayList<>();
         // Generating pageSize + 1 userTransactions for each user
         for (int i = 0; i < pageSize + 1; i++) {

@@ -4,6 +4,7 @@ import com.modsensoftware.marketplace.CustomMongoContainer;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.representations.AccessTokenResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -35,12 +36,9 @@ public abstract class AbstractIntegrationTest {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
-    @Value("${idm.client-id}")
-    private String clientId;
-    @Value("${idm.client-secret}")
-    private String clientSecret;
-    @Value("${idm.grant-type}")
-    private String grantType;
+
+    @Autowired
+    private IdmClientProperties idmClient;
 
     private static final WebClient webClient = WebClient.create();
 
@@ -63,11 +61,11 @@ public abstract class AbstractIntegrationTest {
 
     protected String getAccessToken(String username) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("client_id", clientId);
+        formData.add("client_id", idmClient.getClientId());
         formData.add("username", username);
         formData.add("password", TEST_USER_PASSWORD);
-        formData.add("client_secret", clientSecret);
-        formData.add("grant_type", grantType);
+        formData.add("client_secret", idmClient.getClientSecret());
+        formData.add("grant_type", idmClient.getGrantType());
 
         AccessTokenResponse accessTokenResponse = webClient
                 .method(HttpMethod.POST)
