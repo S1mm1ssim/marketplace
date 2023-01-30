@@ -2,7 +2,6 @@ package com.modsensoftware.marketplace.config.cache;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsensoftware.marketplace.constants.Constants;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
@@ -26,6 +25,13 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.modsensoftware.marketplace.constants.Constants.CATEGORIES_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.ITEMS_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.POSITIONS_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_CATEGORY_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_ITEM_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_POSITION_CACHE_NAME;
 
 /**
  * @author andrey.demyanchik on 1/25/2023
@@ -56,22 +62,18 @@ public class AsyncCacheAspect {
         classTtlMap.put(Item.class, itemTtlSeconds);
         classTtlMap.put(PositionResponseDto.class, positionTtlSeconds);
 
-        cacheNameTypeRefMap.put(Constants.SINGLE_POSITION_CACHE_NAME,
-                new TypeReference<PositionResponseDto>() {
-                });
-        cacheNameTypeRefMap.put(Constants.SINGLE_CATEGORY_CACHE_NAME, new TypeReference<Category>() {
+        cacheNameTypeRefMap.put(SINGLE_POSITION_CACHE_NAME, new TypeReference<PositionResponseDto>() {
         });
-        cacheNameTypeRefMap.put(Constants.SINGLE_ITEM_CACHE_NAME, new TypeReference<Item>() {
+        cacheNameTypeRefMap.put(POSITIONS_CACHE_NAME, new TypeReference<List<PositionResponseDto>>() {
         });
-        cacheNameTypeRefMap.put(Constants.POSITIONS_CACHE_NAME,
-                new TypeReference<List<PositionResponseDto>>() {
-                });
-        cacheNameTypeRefMap.put(Constants.CATEGORIES_CACHE_NAME,
-                new TypeReference<List<Category>>() {
-                });
-        cacheNameTypeRefMap.put(Constants.ITEMS_CACHE_NAME,
-                new TypeReference<List<Item>>() {
-                });
+        cacheNameTypeRefMap.put(SINGLE_CATEGORY_CACHE_NAME, new TypeReference<Category>() {
+        });
+        cacheNameTypeRefMap.put(CATEGORIES_CACHE_NAME, new TypeReference<List<Category>>() {
+        });
+        cacheNameTypeRefMap.put(SINGLE_ITEM_CACHE_NAME, new TypeReference<Item>() {
+        });
+        cacheNameTypeRefMap.put(ITEMS_CACHE_NAME, new TypeReference<List<Item>>() {
+        });
     }
 
     @Pointcut("@annotation(AsyncCacheable)")
