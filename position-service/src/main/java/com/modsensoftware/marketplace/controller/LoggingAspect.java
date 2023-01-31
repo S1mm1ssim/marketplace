@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,12 +67,24 @@ public class LoggingAspect {
     public void logGetResponse(JoinPoint joinPoint, Object entity) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         GetMapping mapping = signature.getMethod().getAnnotation(GetMapping.class);
-
-        try {
-            log.info("<== path(s): {}, method(s): {}, returning: {}",
-                    mapping.path(), HttpMethod.GET, mapper.writeValueAsString(entity));
-        } catch (JsonProcessingException e) {
-            log.error("Error while converting", e);
+        if (entity instanceof Mono) {
+            ((Mono<?>) entity).doOnNext(value -> {
+                try {
+                    log.info("<== path(s): {}, method(s): {}, returning: {}",
+                            mapping.path(), HttpMethod.GET, mapper.writeValueAsString(value));
+                } catch (JsonProcessingException e) {
+                    log.error("Error while converting", e);
+                }
+            }).subscribe();
+        } else if (entity instanceof Flux) {
+            ((Flux<?>) entity).doOnNext(value -> {
+                try {
+                    log.info("<== path(s): {}, method(s): {}, returning: {}",
+                            mapping.path(), HttpMethod.GET, mapper.writeValueAsString(value));
+                } catch (JsonProcessingException e) {
+                    log.error("Error while converting", e);
+                }
+            }).subscribe();
         }
     }
 
