@@ -55,6 +55,9 @@ services:
       MONDO_INITDB_DATABASE: marketplace_positions
     ports:
       - "27017:27017"
+    volumes:
+      - ../config/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - marketplace-mongo-data:/data/db
 
   redis:
     container_name: modsen-marketplace-redis
@@ -251,6 +254,8 @@ services:
 
 volumes:
   marketplace-postgres-data:
+    driver: local
+  marketplace-mongo-data:
     driver: local
   keycloak-postgres-data:
     driver: local
