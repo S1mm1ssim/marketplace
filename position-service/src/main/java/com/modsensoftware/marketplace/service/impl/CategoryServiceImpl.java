@@ -10,7 +10,6 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -70,10 +69,10 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryDao.deleteById(id);
     }
 
-    @Caching(
-            evict = {@CacheEvict(cacheNames = CATEGORIES_CACHE_NAME, allEntries = true)},
-            put = {@CachePut(cacheNames = SINGLE_CATEGORY_CACHE_NAME, key = "#id")}
-    )
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CATEGORIES_CACHE_NAME, allEntries = true),
+            @CacheEvict(cacheNames = SINGLE_CATEGORY_CACHE_NAME, key = "#id")
+    })
     @Override
     public Mono<Category> updateCategory(String id, CategoryDto updatedFields) {
         log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
