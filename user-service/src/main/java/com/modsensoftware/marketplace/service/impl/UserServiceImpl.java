@@ -21,6 +21,9 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.NotFoundException;
@@ -38,6 +41,8 @@ import static com.modsensoftware.marketplace.constants.Constants.COMPANY_ID_FILT
 import static com.modsensoftware.marketplace.constants.Constants.CREATED_BETWEEN_FILTER_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.EMAIL_FILTER_NAME;
 import static com.modsensoftware.marketplace.constants.Constants.NAME_FILTER_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_USER_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.USERS_CACHE_NAME;
 import static java.lang.String.format;
 
 /**
@@ -64,6 +69,7 @@ public class UserServiceImpl implements UserService {
     @Value("${default.role}")
     private String defaultRole;
 
+    @Cacheable(cacheNames = SINGLE_USER_CACHE_NAME, key = "#id")
     @Override
     public UserResponse getUserById(UUID id) {
         log.debug("Fetching user by id: {}", id);
@@ -72,6 +78,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponseDto(user, company);
     }
 
+    @Cacheable(cacheNames = USERS_CACHE_NAME)
     @Override
     public List<UserResponse> getAllUsers(int pageNumber, String email,
                                           String name, String createdBetween,
@@ -100,6 +107,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(cacheNames = USERS_CACHE_NAME, allEntries = true)
     @Override
     public String createUser(UserRequest userDto) {
         log.debug("Registering new user from dto: {}", userDto);
@@ -134,6 +142,10 @@ public class UserServiceImpl implements UserService {
         return userId;
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = USERS_CACHE_NAME, allEntries = true),
+            @CacheEvict(cacheNames = SINGLE_USER_CACHE_NAME, key = "#id")
+    })
     @Override
     public void deleteUser(UUID id) {
         log.debug("Deleting user by id: {}", id);
@@ -147,6 +159,10 @@ public class UserServiceImpl implements UserService {
         userDao.deleteById(id);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = USERS_CACHE_NAME, allEntries = true),
+            @CacheEvict(cacheNames = SINGLE_USER_CACHE_NAME, key = "#id")
+    })
     @Override
     public void updateUser(UUID id, UserRequest updatedFields) {
         if (updatedFields.getPassword() == null) {

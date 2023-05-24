@@ -22,6 +22,6 @@ public final class Constants {
     public static final String NAME_FILTER_NAME = "name";
     public static final String CREATED_BETWEEN_FILTER_NAME = "created";
     public static final String COMPANY_ID_FILTER_NAME = "companyId";
-
-    public static final String ID_PATH_VARIABLE_NAME = "id";
+    public static final String USERS_CACHE_NAME = "users";
+    public static final String SINGLE_USER_CACHE_NAME = "user";
 }

@@ -7,6 +7,8 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
@@ -19,6 +21,8 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 import static com.modsensoftware.marketplace.constants.Constants.MONGO_ID_FIELD_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.POSITIONS_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_POSITION_CACHE_NAME;
 import static java.lang.String.format;
 
 /**
@@ -64,6 +68,10 @@ public class PositionDao implements Dao<Position, String> {
         return reactiveMongoTemplate.insert(position);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = POSITIONS_CACHE_NAME, allEntries = true),
+            @CacheEvict(cacheNames = SINGLE_POSITION_CACHE_NAME, key = "#id")
+    })
     @Override
     public Mono<Position> update(String id, Position updatedFields) {
         log.debug("Updating position entity with id {} with values from: {}", id, updatedFields);

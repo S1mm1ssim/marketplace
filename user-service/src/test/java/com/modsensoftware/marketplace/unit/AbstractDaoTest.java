@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.unit;
 
 import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
+import com.modsensoftware.marketplace.RedisContainer;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,9 @@ public class AbstractDaoTest {
     @Container
     public static CustomPostgreSQLContainer postgreSQLContainer
             = CustomPostgreSQLContainer.getInstance();
+
+    @Container
+    public static RedisContainer redisContainer = RedisContainer.getInstance();
 
     @Autowired
     protected SessionFactory sessionFactory;

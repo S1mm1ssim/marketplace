@@ -1,5 +1,6 @@
 package com.modsensoftware.marketplace.service.impl;
 
+import com.modsensoftware.marketplace.config.cache.AsyncCacheable;
 import com.modsensoftware.marketplace.dao.CategoryDao;
 import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.domain.Item;
@@ -10,6 +11,8 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -17,6 +20,9 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+
+import static com.modsensoftware.marketplace.constants.Constants.ITEMS_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_ITEM_CACHE_NAME;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
@@ -33,18 +39,21 @@ public class ItemServiceImpl implements ItemService {
     @Value("${exception.message.itemVersionsMismatch}")
     private String itemVersionsMismatchMessage;
 
+    @AsyncCacheable(cacheName = SINGLE_ITEM_CACHE_NAME, key = "#p1")
     @Override
     public Mono<Item> getItemById(String id) {
         log.debug("Fetching item by id: {}", id);
         return itemDao.get(id);
     }
 
+    @AsyncCacheable(cacheName = ITEMS_CACHE_NAME)
     @Override
     public Flux<Item> getAllItems(int pageNumber) {
         log.debug("Fetching all items for page {}", pageNumber);
         return itemDao.getAll(pageNumber, Collections.emptyMap());
     }
 
+    @CacheEvict(cacheNames = ITEMS_CACHE_NAME, allEntries = true)
     @Override
     public Mono<Item> createItem(ItemDto itemDto) {
         log.debug("Creating new item from dto: {}", itemDto);
@@ -56,12 +65,20 @@ public class ItemServiceImpl implements ItemService {
         }).flatMap(itemDao::save);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = SINGLE_ITEM_CACHE_NAME, key = "#id"),
+            @CacheEvict(cacheNames = ITEMS_CACHE_NAME, allEntries = true)
+    })
     @Override
     public Mono<DeleteResult> deleteItem(String id) {
         log.debug("Deleting item by id: {}", id);
         return itemDao.deleteById(id);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = SINGLE_ITEM_CACHE_NAME, key = "#id"),
+            @CacheEvict(cacheNames = ITEMS_CACHE_NAME, allEntries = true)
+    })
     @Override
     public Mono<Item> updateItem(String id, ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);

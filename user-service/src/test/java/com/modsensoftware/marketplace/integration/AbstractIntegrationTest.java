@@ -1,6 +1,7 @@
 package com.modsensoftware.marketplace.integration;
 
 import com.modsensoftware.marketplace.CustomPostgreSQLContainer;
+import com.modsensoftware.marketplace.RedisContainer;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.representations.AccessTokenResponse;
@@ -50,6 +51,9 @@ public abstract class AbstractIntegrationTest {
     @Container
     public static CustomKeycloakContainer keycloakContainer
             = CustomKeycloakContainer.getInstance();
+
+    @Container
+    public static RedisContainer redisContainer = RedisContainer.getInstance();
 
     protected static final JdbcDatabaseDelegate dbDelegate
             = new JdbcDatabaseDelegate(postgreSQLContainer, "");

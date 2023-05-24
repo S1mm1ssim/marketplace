@@ -25,4 +25,10 @@ public final class Constants {
     public static final String INVALID_MIN_AMOUNT_MESSAGE = "Minimal amount must be more or equal to 0.01.";
     public static final String MIN_AMOUNT_VALUE = "0.01";
     public static final String MONGO_ID_FIELD_NAME = "_id";
+    public static final String CATEGORIES_CACHE_NAME = "categories";
+    public static final String SINGLE_CATEGORY_CACHE_NAME = "category";
+    public static final String ITEMS_CACHE_NAME = "items";
+    public static final String SINGLE_ITEM_CACHE_NAME = "item";
+    public static final String POSITIONS_CACHE_NAME = "positions";
+    public static final String SINGLE_POSITION_CACHE_NAME = "position";
 }

@@ -84,3 +84,11 @@ topics:
   transactionsPlacedForProcessing:
     name: userTransactionProcessingTest
     groupId: userTransactionProcessingTest_group_id
+
+cache:
+  category:
+    ttl-seconds: 1
+  item:
+    ttl-seconds: 1
+  position:
+    ttl-seconds: 1

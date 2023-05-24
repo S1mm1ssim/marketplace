@@ -1,5 +1,6 @@
 package com.modsensoftware.marketplace.service.impl;
 
+import com.modsensoftware.marketplace.config.cache.AsyncCacheable;
 import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
@@ -15,6 +16,8 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -23,6 +26,8 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static com.modsensoftware.marketplace.constants.Constants.POSITIONS_CACHE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.SINGLE_POSITION_CACHE_NAME;
 import static java.lang.String.format;
 
 /**
@@ -45,6 +50,7 @@ public class PositionServiceImpl implements PositionService {
     @Value("${exception.message.creatorNotFound}")
     private String creatorNotFoundMessage;
 
+    @AsyncCacheable(cacheName = SINGLE_POSITION_CACHE_NAME, key = "#p1")
     @Override
     public Mono<PositionResponse> getPositionById(String id) {
         log.debug("Fetching position by id: {}", id);
@@ -56,6 +62,7 @@ public class PositionServiceImpl implements PositionService {
         });
     }
 
+    @AsyncCacheable(cacheName = POSITIONS_CACHE_NAME)
     @Override
     public Flux<PositionResponse> getAllPositions(int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
@@ -67,6 +74,7 @@ public class PositionServiceImpl implements PositionService {
                 );
     }
 
+    @CacheEvict(cacheNames = POSITIONS_CACHE_NAME, allEntries = true)
     @Override
     public Mono<Position> createPosition(CreatePositionRequest createPositionRequest, Authentication authentication) {
         log.debug("Creating new position from dto: {}", createPositionRequest);
@@ -86,6 +94,10 @@ public class PositionServiceImpl implements PositionService {
         });
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = SINGLE_POSITION_CACHE_NAME, key = "#id"),
+            @CacheEvict(cacheNames = POSITIONS_CACHE_NAME, allEntries = true)
+    })
     @Override
     public Mono<DeleteResult> deletePosition(String id, Authentication authentication) {
         return positionDao.get(id).flatMap(position -> {
