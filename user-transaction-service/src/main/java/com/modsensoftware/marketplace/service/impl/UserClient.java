@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service.impl;
 
 import com.modsensoftware.marketplace.config.FeignErrorHandler;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,5 +21,5 @@ import java.util.UUID;
 public interface UserClient {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    UserResponseDto getUserById(@PathVariable(name = "id") UUID id);
+    UserResponse getUserById(@PathVariable(name = "id") UUID id);
 }

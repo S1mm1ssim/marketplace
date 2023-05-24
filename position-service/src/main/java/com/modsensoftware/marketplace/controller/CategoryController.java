@@ -20,7 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.constraints.Min;
+
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -36,13 +41,14 @@ public class CategoryController {
 
     @GetMapping(produces = {"application/json"})
     public Flux<Category> getAllCategories(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
         log.debug("Fetching all categories for page {}", pageNumber);
         return categoryService.getAllCategories(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Mono<Category> getCategoryById(@PathVariable(name = "id") String id) {
+    public Mono<Category> getCategoryById(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id) {
         log.debug("Fetching category by id: {}", id);
         return categoryService.getCategoryById(id);
     }
@@ -56,13 +62,13 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public Mono<DeleteResult> deleteCategory(@PathVariable(name = "id") String id) {
+    public Mono<DeleteResult> deleteCategory(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id) {
         log.debug("Deleting category by id: {}", id);
         return categoryService.deleteCategory(id);
     }
 
     @PutMapping("/{id}")
-    public Mono<Category> updateCategory(@PathVariable(name = "id") String id,
+    public Mono<Category> updateCategory(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id,
                                @RequestBody CategoryDto updatedFields) {
         log.debug("Updating category with id: {}\nwith params: {}", id, updatedFields);
         return categoryService.updateCategory(id, updatedFields);

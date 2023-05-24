@@ -1,9 +1,9 @@
 package com.modsensoftware.marketplace.controller;
 
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.service.PositionService;
 import com.mongodb.client.result.DeleteResult;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -41,14 +45,15 @@ public class PositionController {
     private final PositionService positionService;
 
     @GetMapping(produces = {"application/json"})
-    public Flux<PositionResponseDto> getAllPositions(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+    public Flux<PositionResponse> getAllPositions(
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         return positionService.getAllPositions(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Mono<PositionResponseDto> getPositionById(@PathVariable(name = "id") String id) {
+    public Mono<PositionResponse> getPositionById(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id) {
         log.debug("Fetching position by id: {}", id);
         return positionService.getPositionById(id);
     }
@@ -56,24 +61,25 @@ public class PositionController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Mono<Position> createPosition(@Valid @RequestBody CreatePositionRequestDto createPositionRequestDto,
+    public Mono<Position> createPosition(@Valid @RequestBody CreatePositionRequest createPositionRequest,
                                          Authentication authentication) {
-        log.debug("Creating new position from dto: {}", createPositionRequestDto);
-        return positionService.createPosition(createPositionRequestDto, authentication);
+        log.debug("Creating new position from dto: {}", createPositionRequest);
+        return positionService.createPosition(createPositionRequest, authentication);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public Mono<DeleteResult> deletePosition(@PathVariable(name = "id") String id, Authentication authentication) {
+    public Mono<DeleteResult> deletePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id,
+                               Authentication authentication) {
         log.debug("Deleting position by id: {}", id);
         return positionService.deletePosition(id, authentication);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
-    public Mono<Position> updatePosition(@PathVariable String id,
-                                         @Valid @RequestBody UpdatePositionRequestDto updatedFields,
+    public Mono<Position> updatePosition(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id,
+                                         @Valid @RequestBody UpdatePositionRequest updatedFields,
                                          Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         return positionService.updatePosition(id, updatedFields, authentication);

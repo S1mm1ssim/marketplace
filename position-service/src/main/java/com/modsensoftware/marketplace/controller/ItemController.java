@@ -18,10 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.constraints.Min;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.modsensoftware.marketplace.constants.Constants.DEFAULT_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+import static com.modsensoftware.marketplace.constants.Constants.MIN_PAGE_NUMBER;
+import static com.modsensoftware.marketplace.constants.Constants.NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.PAGE_FILTER_NAME;
 
 /**
@@ -37,13 +42,14 @@ public class ItemController {
 
     @GetMapping(produces = {"application/json"})
     public Flux<Item> getAllItems(
-            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER) int pageNumber) {
+            @RequestParam(name = PAGE_FILTER_NAME, defaultValue = DEFAULT_PAGE_NUMBER)
+            @Min(value = MIN_PAGE_NUMBER, message = NEGATIVE_PAGE_NUMBER_MESSAGE) int pageNumber) {
         log.debug("Fetching all items for page {}", pageNumber);
         return itemService.getAllItems(pageNumber);
     }
 
     @GetMapping(value = "/{id}", produces = {"application/json"})
-    public Mono<Item> getItemById(@PathVariable(name = "id") String id) {
+    public Mono<Item> getItemById(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id) {
         log.debug("Fetching item by id: {}", id);
         return itemService.getItemById(id);
     }
@@ -59,14 +65,14 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public Mono<DeleteResult> deleteItem(@PathVariable String id) {
+    public Mono<DeleteResult> deleteItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id) {
         log.debug("Deleting item by id: {}", id);
         return itemService.deleteItem(id);
     }
 
     @PreAuthorize("hasAnyRole('STORAGE_MANAGER')")
     @PutMapping("/{id}")
-    public Mono<Item> updateItem(@PathVariable(name = "id") String id,
+    public Mono<Item> updateItem(@PathVariable(name = ID_PATH_VARIABLE_NAME) String id,
                            @RequestBody ItemDto updatedFields) {
         log.debug("Updating item with id: {}\nwith params: {}", id, updatedFields);
         return itemService.updateItem(id, updatedFields);

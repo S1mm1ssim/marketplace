@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.service;
 
-import com.modsensoftware.marketplace.dto.request.UserRequestDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.UserRequest;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,14 +11,14 @@ import java.util.UUID;
  */
 public interface UserService {
 
-    UserResponseDto getUserById(UUID id);
+    UserResponse getUserById(UUID id);
 
-    List<UserResponseDto> getAllUsers(int pageNumber, String email,
-                                      String name, String createdBetween, Long companyId);
+    List<UserResponse> getAllUsers(int pageNumber, String email,
+                                   String name, String createdBetween, Long companyId);
 
-    String createUser(UserRequestDto userDto);
+    String createUser(UserRequest userDto);
 
     void deleteUser(UUID id);
 
-    void updateUser(UUID id, UserRequestDto updatedFields);
+    void updateUser(UUID id, UserRequest updatedFields);
 }

@@ -5,6 +5,7 @@ import com.modsensoftware.marketplace.RedisContainer;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.representations.AccessTokenResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
@@ -37,12 +38,9 @@ public abstract class AbstractIntegrationTest {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
-    @Value("${idm.client-id}")
-    private String clientId;
-    @Value("${idm.client-secret}")
-    private String clientSecret;
-    @Value("${idm.grant-type}")
-    private String grantType;
+
+    @Autowired
+    private IdmClientProperties idmClient;
 
     private static final RestTemplate restTemplate = new RestTemplate();
 
@@ -73,11 +71,11 @@ public abstract class AbstractIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("client_id", clientId);
+        map.add("client_id", idmClient.getClientId());
         map.add("username", username);
         map.add("password", TEST_USER_PASSWORD);
-        map.add("client_secret", clientSecret);
-        map.add("grant_type", grantType);
+        map.add("client_secret", idmClient.getClientSecret());
+        map.add("grant_type", idmClient.getGrantType());
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 

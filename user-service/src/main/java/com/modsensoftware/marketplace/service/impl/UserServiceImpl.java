@@ -4,8 +4,8 @@ import com.modsensoftware.marketplace.dao.UserDao;
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.UserMapper;
-import com.modsensoftware.marketplace.dto.request.UserRequestDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.UserRequest;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import com.modsensoftware.marketplace.exception.EntityAlreadyExistsException;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.PasswordAbsenceException;
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
 
     @Cacheable(cacheNames = SINGLE_USER_CACHE_NAME, key = "#id")
     @Override
-    public UserResponseDto getUserById(UUID id) {
+    public UserResponse getUserById(UUID id) {
         log.debug("Fetching user by id: {}", id);
         User user = userDao.get(id);
         Company company = companyClient.getCompanyById(user.getCompanyId());
@@ -80,9 +80,9 @@ public class UserServiceImpl implements UserService {
 
     @Cacheable(cacheNames = USERS_CACHE_NAME)
     @Override
-    public List<UserResponseDto> getAllUsers(int pageNumber, String email,
-                                             String name, String createdBetween,
-                                             Long companyId) {
+    public List<UserResponse> getAllUsers(int pageNumber, String email,
+                                          String name, String createdBetween,
+                                          Long companyId) {
         log.debug("Fetching all users for page {}. "
                         + "Filter by email: {}, name: {}, created between: {}, company id: {}",
                 pageNumber, email, name, createdBetween, companyId);
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     @CacheEvict(cacheNames = USERS_CACHE_NAME, allEntries = true)
     @Override
-    public String createUser(UserRequestDto userDto) {
+    public String createUser(UserRequest userDto) {
         log.debug("Registering new user from dto: {}", userDto);
         if (userDto.getCompanyId() != null) {
             // A request is sent to check if a company with such id exists
@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(cacheNames = SINGLE_USER_CACHE_NAME, key = "#id")
     })
     @Override
-    public void updateUser(UUID id, UserRequestDto updatedFields) {
+    public void updateUser(UUID id, UserRequest updatedFields) {
         if (updatedFields.getPassword() == null) {
             log.error("Could not update user. Password is not provided");
             throw new PasswordAbsenceException(userPasswordAbsentMessage);

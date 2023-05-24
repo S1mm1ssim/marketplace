@@ -46,14 +46,14 @@ public class UserTransactionDao implements Dao<UserTransaction, Long> {
                 filterProperties.get(USER_ID_FIELD_NAME));
         Session session = sessionFactory.openSession();
         RootGraph<?> entityGraph = session.getEntityGraph(TRANSACTION_ENTITY_GRAPH);
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<UserTransaction> getAll = cb.createQuery(UserTransaction.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<UserTransaction> getAll = criteriaBuilder.createQuery(UserTransaction.class);
         Root<UserTransaction> root = getAll.from(UserTransaction.class);
 
         getAll.select(root).where(
-                cb.equal(root.get(USER_ID_FIELD_NAME), userId)
+                criteriaBuilder.equal(root.get(USER_ID_FIELD_NAME), userId)
         ).orderBy(
-                cb.desc(root.get(CREATED_FIELD_NAME))
+                criteriaBuilder.desc(root.get(CREATED_FIELD_NAME))
         );
 
         Query<UserTransaction> query = session.createQuery(getAll);

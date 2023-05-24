@@ -2,8 +2,8 @@ package com.modsensoftware.marketplace.dto.mapper;
 
 import com.modsensoftware.marketplace.domain.User;
 import com.modsensoftware.marketplace.dto.Company;
-import com.modsensoftware.marketplace.dto.request.UserRequestDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.UserRequest;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -18,7 +18,7 @@ import java.util.Collections;
 @Component
 public class UserMapper {
 
-    public UserRepresentation toKeycloakUserRepresentation(UserRequestDto userDto) {
+    public UserRepresentation toKeycloakUserRepresentation(UserRequest userDto) {
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setEnabled(true);
         userRepresentation.setUsername(userDto.getUsername());
@@ -31,8 +31,8 @@ public class UserMapper {
         return userRepresentation;
     }
 
-    public UserResponseDto toResponseDto(User user, Company company) {
-        return new UserResponseDto(
+    public UserResponse toResponseDto(User user, Company company) {
+        return new UserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -43,7 +43,7 @@ public class UserMapper {
         );
     }
 
-    public User toUser(UserRequestDto requestDto) {
+    public User toUser(UserRequest requestDto) {
         return User.builder()
                 .username(requestDto.getUsername())
                 .email(requestDto.getEmail())

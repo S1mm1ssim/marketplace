@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PositionResponseDto {
+public class PositionResponse {
     private String id;
     private Item item;
     private Company company;
-    private UserResponseDto createdBy;
+    private UserResponse createdBy;
     private LocalDateTime created;
     private Double amount;
     private Double minAmount;

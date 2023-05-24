@@ -2,10 +2,10 @@ package com.modsensoftware.marketplace.dto.mapper;
 
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PositionMapper {
 
-    public Position toPosition(CreatePositionRequestDto requestDto, UserResponseDto user) {
+    public Position toPosition(CreatePositionRequest requestDto, UserResponse user) {
         Item item = Item.builder()
                 .id(requestDto.getItemId())
                 .version(requestDto.getItemVersion())
@@ -38,7 +38,7 @@ public class PositionMapper {
                 .build();
     }
 
-    public Position toPosition(UpdatePositionRequestDto requestDto) {
+    public Position toPosition(UpdatePositionRequest requestDto) {
         Double minAmount = null;
         if (requestDto.getMinAmount() != null) {
             minAmount = requestDto.getMinAmount().doubleValue();
@@ -54,8 +54,8 @@ public class PositionMapper {
     }
 
 
-    public PositionResponseDto toResponseDto(Position position, UserResponseDto user) {
-        return new PositionResponseDto(
+    public PositionResponse toResponseDto(Position position, UserResponse user) {
+        return new PositionResponse(
                 position.getId(),
                 position.getItem(),
                 user.getCompany(),

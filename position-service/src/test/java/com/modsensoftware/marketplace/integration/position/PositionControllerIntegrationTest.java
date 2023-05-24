@@ -6,7 +6,7 @@ import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
 import com.modsensoftware.marketplace.integration.LoadBalancerTestConfig;
 import com.modsensoftware.marketplace.integration.UserStubs;
@@ -111,10 +111,8 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void canUpdatePosition() {
         String positionId = savedPositionId;
-        String updatedFields = ""
-                + "{\n"
-                + "    \"amount\": 4\n"
-                + "}";
+        Map<String, String> updatedFields = new HashMap<>();
+        updatedFields.put("amount", "4");
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
@@ -168,13 +166,13 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
         UserStubs.setupGetUserWithId(wireMockServer2, "c048ef0e-fe46-4c65-9c01-d88af74ba0ab");
         UserStubs.setupGetUserWithId(wireMockServer1, "722cd920-e127-4cc2-93b9-e9b4a8f18873");
         UserStubs.setupGetUserWithId(wireMockServer2, "722cd920-e127-4cc2-93b9-e9b4a8f18873");
-        PositionResponseDto[] positions = RestAssured.given()
+        PositionResponse[] positions = RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
                 .get("/positions")
                 .then().statusCode(200)
-                .extract().body().as(PositionResponseDto[].class);
+                .extract().body().as(PositionResponse[].class);
         Assertions.assertThat(positions.length).isGreaterThanOrEqualTo(2);
     }
 
@@ -251,11 +249,9 @@ public class PositionControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void updateByAnotherPersonShouldReturnForbidden() {
         String positionId = "999";
-        String updatedFields = ""
-                + "{\n"
-                + "    \"amount\": 4,\n"
-                + "    \"version\": 1\n"
-                + "}";
+        Map<String, String> updatedFields = new HashMap<>();
+        updatedFields.put("amount", "4");
+        updatedFields.put("version", "1");
         RestAssured.given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + accessToken)

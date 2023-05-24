@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
+import static com.modsensoftware.marketplace.constants.Constants.ID_PATH_VARIABLE_NAME;
+
 /**
  * @author andrey.demyanchik on 12/19/2022
  */
@@ -24,5 +26,5 @@ public interface CompanyClient {
     List<Company> getCompanies();
 
     @RequestMapping(value = "/{id}", produces = {"application/json"}, method = RequestMethod.GET)
-    Company getCompanyById(@PathVariable(name = "id") Long id);
+    Company getCompanyById(@PathVariable(name = ID_PATH_VARIABLE_NAME) Long id);
 }

@@ -6,7 +6,7 @@ import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
-import com.modsensoftware.marketplace.dto.OrderRequestDto;
+import com.modsensoftware.marketplace.dto.OrderRequest;
 import com.modsensoftware.marketplace.dto.PlacedUserTransaction;
 import com.modsensoftware.marketplace.dto.UserTransactionStatus;
 import com.modsensoftware.marketplace.integration.AbstractIntegrationTest;
@@ -80,8 +80,8 @@ public class TransactionProcessorKafkaTest extends AbstractIntegrationTest {
     public void shouldProcessUserTransactionAndProduceMessage() throws JsonProcessingException {
         // given
         String positionId = setupPosition.getId();
-        List<OrderRequestDto> orders = new ArrayList<>();
-        orders.add(new OrderRequestDto(positionId, new BigDecimal("10")));
+        List<OrderRequest> orders = new ArrayList<>();
+        orders.add(new OrderRequest(positionId, new BigDecimal("10")));
         PlacedUserTransaction placedTransaction = new PlacedUserTransaction(1L, IN_PROGRESS, orders);
         double expectedPositionAmount = 140d;
 

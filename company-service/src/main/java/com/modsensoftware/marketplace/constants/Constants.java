@@ -9,6 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Constants {
 
+    public static final String INVALID_EMAIL_MESSAGE = "Email must be valid.";
+    public static final String NEGATIVE_PAGE_NUMBER_MESSAGE = "Page number can not be negative.";
+
+    public static final long MIN_PAGE_NUMBER = 0L;
+    public static final String EMAIL_REGEX = "(\\w+)@(\\w+\\.)(\\w+)(\\.\\w+)*";
+
     public static final String PAGE_FILTER_NAME = "page";
     public static final String DEFAULT_PAGE_NUMBER = "0";
     public static final String EMAIL_FILTER_NAME = "email";

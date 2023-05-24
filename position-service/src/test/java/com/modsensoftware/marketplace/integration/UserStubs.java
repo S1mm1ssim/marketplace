@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.modsensoftware.marketplace.dto.Company;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
@@ -39,7 +39,7 @@ public class UserStubs {
     }
 
     public static void setupDeterministicGetUserWithId(WireMockServer mockServer, String userId) throws IOException {
-        UserResponseDto user = new UserResponseDto(userId, "test-storage-manager",
+        UserResponse user = new UserResponse(userId, "test-storage-manager",
                 "email@email.com", "full name", now(), now(), Company.builder().id(999L).build());
         mockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/users/" + userId))
                 .willReturn(

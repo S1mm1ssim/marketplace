@@ -5,9 +5,9 @@ import com.modsensoftware.marketplace.dao.ItemDao;
 import com.modsensoftware.marketplace.dao.PositionDao;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
@@ -52,7 +52,7 @@ public class PositionServiceImpl implements PositionService {
 
     @AsyncCacheable(cacheName = SINGLE_POSITION_CACHE_NAME, key = "#p1")
     @Override
-    public Mono<PositionResponseDto> getPositionById(String id) {
+    public Mono<PositionResponse> getPositionById(String id) {
         log.debug("Fetching position by id: {}", id);
         return positionDao.get(id).flatMap(position -> {
             log.debug("Fetching user by id: {}", position.getCreatedBy());
@@ -64,7 +64,7 @@ public class PositionServiceImpl implements PositionService {
 
     @AsyncCacheable(cacheName = POSITIONS_CACHE_NAME)
     @Override
-    public Flux<PositionResponseDto> getAllPositions(int pageNumber) {
+    public Flux<PositionResponse> getAllPositions(int pageNumber) {
         log.debug("Fetching all positions for page {}", pageNumber);
         return positionDao.getAll(pageNumber, Collections.emptyMap())
                 .flatMap(position -> userClient.getUserById(position.getCreatedBy())
@@ -76,16 +76,16 @@ public class PositionServiceImpl implements PositionService {
 
     @CacheEvict(cacheNames = POSITIONS_CACHE_NAME, allEntries = true)
     @Override
-    public Mono<Position> createPosition(CreatePositionRequestDto createPositionRequestDto, Authentication authentication) {
-        log.debug("Creating new position from dto: {}", createPositionRequestDto);
-        if (createPositionRequestDto.getItemVersion() == null) {
-            log.error("Provided createPositionRequestDto didn't contain item's version");
+    public Mono<Position> createPosition(CreatePositionRequest createPositionRequest, Authentication authentication) {
+        log.debug("Creating new position from dto: {}", createPositionRequest);
+        if (createPositionRequest.getItemVersion() == null) {
+            log.error("Provided createPositionRequest didn't contain item's version");
             return Mono.error(new NoVersionProvidedException(format(noItemVersionProvidedMessage,
-                    createPositionRequestDto.getItemId())));
+                    createPositionRequest.getItemId())));
         }
         // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id
         return userClient.getUserById(authentication.getName()).flatMap(user -> {
-            Position position = positionMapper.toPosition(createPositionRequestDto, user);
+            Position position = positionMapper.toPosition(createPositionRequest, user);
             position.setCreated(LocalDateTime.now());
             return itemDao.get(position.getItem().getId()).map(item -> {
                 position.setItem(item);
@@ -113,7 +113,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public Mono<Position> updatePosition(String id, UpdatePositionRequestDto updatedFields, Authentication authentication) {
+    public Mono<Position> updatePosition(String id, UpdatePositionRequest updatedFields, Authentication authentication) {
         log.debug("Updating position with id: {}\nwith params: {}", id, updatedFields);
         return positionDao.get(id).flatMap(position -> {
             // Authentication#getName maps to the JWT’s sub property, if one is present. Keycloak by default returns user id

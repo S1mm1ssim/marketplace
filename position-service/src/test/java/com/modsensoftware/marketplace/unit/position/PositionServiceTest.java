@@ -6,10 +6,10 @@ import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.domain.Position;
 import com.modsensoftware.marketplace.dto.Company;
 import com.modsensoftware.marketplace.dto.mapper.PositionMapper;
-import com.modsensoftware.marketplace.dto.request.CreatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.request.UpdatePositionRequestDto;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
-import com.modsensoftware.marketplace.dto.response.UserResponseDto;
+import com.modsensoftware.marketplace.dto.request.CreatePositionRequest;
+import com.modsensoftware.marketplace.dto.request.UpdatePositionRequest;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
+import com.modsensoftware.marketplace.dto.response.UserResponse;
 import com.modsensoftware.marketplace.exception.EntityNotFoundException;
 import com.modsensoftware.marketplace.exception.NoVersionProvidedException;
 import com.modsensoftware.marketplace.exception.UnauthorizedOperationException;
@@ -67,7 +67,7 @@ public class PositionServiceTest {
         String positionId = "12345";
         Long companyId = 1L;
         String userId = UUID.randomUUID().toString();
-        UserResponseDto user = UserResponseDto.builder()
+        UserResponse user = UserResponse.builder()
                 .id(userId)
                 .username("username")
                 .email("email@email.com")
@@ -81,7 +81,7 @@ public class PositionServiceTest {
         BDDMockito.given(userClient.getUserById(userId)).willReturn(Mono.just(user));
 
         // when
-        Mono<PositionResponseDto> positionById = underTest.getPositionById(positionId);
+        Mono<PositionResponse> positionById = underTest.getPositionById(positionId);
 
         // then
         positionById
@@ -97,7 +97,7 @@ public class PositionServiceTest {
         BDDMockito.given(authentication.getName()).willReturn(userId);
         String id = "12345";
         BigDecimal amount = new BigDecimal(10);
-        UpdatePositionRequestDto updatedFields = new UpdatePositionRequestDto(amount, null);
+        UpdatePositionRequest updatedFields = new UpdatePositionRequest(amount, null);
         Position position = Position.builder()
                 .createdBy(userId)
                 .build();
@@ -174,7 +174,7 @@ public class PositionServiceTest {
         // given
         String userId = UUID.randomUUID().toString();
         Long companyId = 2L;
-        UserResponseDto user = UserResponseDto.builder()
+        UserResponse user = UserResponse.builder()
                 .id(userId)
                 .company(Company.builder().id(companyId).build())
                 .build();
@@ -182,7 +182,7 @@ public class PositionServiceTest {
 
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        CreatePositionRequestDto toBeSaved = new CreatePositionRequestDto(UUID.randomUUID().toString(), 1L, amount, minAmount);
+        CreatePositionRequest toBeSaved = new CreatePositionRequest(UUID.randomUUID().toString(), 1L, amount, minAmount);
         Item item = Item.builder().id(toBeSaved.getItemId()).version(toBeSaved.getItemVersion()).build();
         Position expected = Position.builder()
                 .id("12345")
@@ -211,7 +211,7 @@ public class PositionServiceTest {
         // given
         BigDecimal amount = new BigDecimal(10);
         BigDecimal minAmount = new BigDecimal(1);
-        CreatePositionRequestDto toBeSaved = new CreatePositionRequestDto(
+        CreatePositionRequest toBeSaved = new CreatePositionRequest(
                 UUID.randomUUID().toString(), null, amount, minAmount);
         // when
         Mono<Position> positionMono = underTest.createPosition(toBeSaved, authentication);

@@ -13,8 +13,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserTransactionRequestDto {
+public class UserTransactionRequest {
 
     private UUID userId;
-    private List<OrderRequestDto> orderLine;
+    private List<OrderRequest> orderLine;
 }
