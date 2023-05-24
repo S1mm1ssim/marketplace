@@ -3,11 +3,9 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <changeSet id="add-tag-5.0" author="Andrdemyan4ik@gmail.com">
-        <tagDatabase tag="v.5.0"/>
+    <changeSet id="2023-01-06-change-positionId-type" author="Andrdemyan4ik@gmail.com">
+        <modifyDataType tableName="order" columnName="position_id" newDataType="varchar(24)"
+                        schemaName="user_transaction_service"/>
     </changeSet>
-
-    <include file="2022-12-16-drop-user-role-password.xml" relativeToChangelogFile="true"/>
-    <include file="2022-12-16-add-unique-key-user-username.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

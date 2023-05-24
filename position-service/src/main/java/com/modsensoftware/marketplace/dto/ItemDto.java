@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
  * @author andrey.demyanchik on 11/3/2022
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class ItemDto {
     private String name;
     private String description;
-    private Long categoryId;
+    private String categoryId;
     private Long version;
 }

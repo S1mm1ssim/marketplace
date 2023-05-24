@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * @author andrey.demyanchik on 12/8/2022
@@ -17,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class UserResponse {
-    private UUID id;
+    private String id;
     private String username;
     private String email;
     private String name;

@@ -2,22 +2,22 @@ package com.modsensoftware.marketplace.service;
 
 import com.modsensoftware.marketplace.domain.Item;
 import com.modsensoftware.marketplace.dto.ItemDto;
-
-import java.util.List;
-import java.util.UUID;
+import com.mongodb.client.result.DeleteResult;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * @author andrey.demyanchik on 11/2/2022
  */
 public interface ItemService {
 
-    Item getItemById(UUID id);
+    Mono<Item> getItemById(String id);
 
-    List<Item> getAllItems(int pageNumber);
+    Flux<Item> getAllItems(int pageNumber);
 
-    void createItem(ItemDto itemDto);
+    Mono<Item> createItem(ItemDto itemDto);
 
-    void deleteItem(UUID id);
+    Mono<DeleteResult> deleteItem(String id);
 
-    void updateItem(UUID id, ItemDto updatedFields);
+    Mono<Item> updateItem(String id, ItemDto updatedFields);
 }

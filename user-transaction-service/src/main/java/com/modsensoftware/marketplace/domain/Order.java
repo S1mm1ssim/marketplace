@@ -33,7 +33,7 @@ public class Order {
     private Double amount;
 
     @Column(name = "position_id", nullable = false)
-    private Long positionId;
+    private String positionId;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

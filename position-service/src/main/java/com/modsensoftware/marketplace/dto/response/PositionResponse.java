@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PositionResponse {
-    private Long id;
+    private String id;
     private Item item;
     private Company company;
     private UserResponse createdBy;

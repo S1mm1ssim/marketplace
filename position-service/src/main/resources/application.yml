@@ -4,21 +4,10 @@ server:
 spring:
   application:
     name: position-service
-  datasource:
-    url: "jdbc:postgresql://${POSTGRES_ADDRESS:localhost:32768}/marketplace"
-    username: "postgres"
-    password: "postgres"
-    driver-class-name: org.postgresql.Driver
-  liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.xml
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
-        jdbc:
-          batch_size: 5
+  data:
+    mongodb:
+      uri: "mongodb://${MONGO_ADDRESS:root:root@localhost:27017}/marketplace_positions?authMechanism=SCRAM-SHA-1"
+      database: "marketplace_positions"
   config:
     import: "optional:configserver:${CONFIG_URI:http://localhost:8888}"
   cloud:

@@ -24,4 +24,5 @@ public final class Constants {
     public static final String INVALID_AMOUNT_MESSAGE = "Amount must be more or equal to 0.01.";
     public static final String INVALID_MIN_AMOUNT_MESSAGE = "Minimal amount must be more or equal to 0.01.";
     public static final String MIN_AMOUNT_VALUE = "0.01";
+    public static final String MONGO_ID_FIELD_NAME = "_id";
 }

@@ -37,6 +37,17 @@ services:
     command:
       - start-dev
 
+  mongodb:
+    container_name: modsen-marketplace-mongodb
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONDO_INITDB_DATABASE: marketplace_positions
+    ports:
+      - "27017:27017"
+
   zookeeper:
     container_name: modsen-marketplace-zookeeper
     image: confluentinc/cp-zookeeper:latest
@@ -110,7 +121,7 @@ services:
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
-      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      MONGO_ADDRESS: root:root@mongodb:27017
       KEYCLOAK_URI: http://keycloak:8080
       KAFKA_ADDRESS: kafka:9092
     ports:
@@ -118,9 +129,8 @@ services:
     depends_on:
       - config-service
       - eureka-service
-      - company-service
       - user-service
-      - modsen-marketplace-postgres
+      - mongodb
       - keycloak
 
   user-transaction-service:

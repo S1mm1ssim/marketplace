@@ -1,19 +1,22 @@
 package com.modsensoftware.marketplace.dao;
 
-import java.util.List;
+import com.mongodb.client.result.DeleteResult;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.Map;
 
 /**
  * @author andrey.demyanchik on 11/1/2022
  */
 public interface Dao<T, ID> {
-    T get(ID id);
+    Mono<T> get(ID id);
 
-    List<T> getAll(int pageNumber, Map<String, String> filterProperties);
+    Flux<T> getAll(int pageNumber, Map<String, String> filterProperties);
 
-    ID save(T t);
+    Mono<T> save(T t);
 
-    void update(ID id, T updatedFields);
+    Mono<T> update(ID id, T updatedFields);
 
-    void deleteById(ID id);
+    Mono<DeleteResult> deleteById(ID id);
 }

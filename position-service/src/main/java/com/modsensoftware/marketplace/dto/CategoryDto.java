@@ -16,7 +16,7 @@ public class CategoryDto {
 
     // If parent id comes as null from client it does not affect anything
     // Only nonNull values matter
-    private Long parentId;
+    private String parentId;
 
     // If nullParent is true then parentId on entity will be set to null
     private Boolean nullParent;

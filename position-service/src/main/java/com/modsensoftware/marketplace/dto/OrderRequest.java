@@ -18,7 +18,7 @@ import static com.modsensoftware.marketplace.constants.Constants.MIN_AMOUNT_VALU
 @AllArgsConstructor
 public class OrderRequest {
 
-    private Long positionId;
+    private String positionId;
 
     @DecimalMin(value = MIN_AMOUNT_VALUE, message = INVALID_AMOUNT_MESSAGE)
     private BigDecimal amount;

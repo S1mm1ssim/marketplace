@@ -16,7 +16,7 @@ import static java.nio.charset.Charset.defaultCharset;
  */
 public class PositionStubs {
 
-    public static void setupGetPositionById(WireMockServer mockServer, long positionId) throws IOException {
+    public static void setupGetPositionById(WireMockServer mockServer, String positionId) throws IOException {
         mockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/api/v1/positions/" + positionId))
                 .willReturn(
                         WireMock.aResponse()

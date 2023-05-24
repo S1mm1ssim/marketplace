@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import static com.modsensoftware.marketplace.constants.Constants.INVALID_AMOUNT_MESSAGE;
 import static com.modsensoftware.marketplace.constants.Constants.INVALID_MIN_AMOUNT_MESSAGE;
@@ -19,7 +18,7 @@ import static com.modsensoftware.marketplace.constants.Constants.MIN_AMOUNT_VALU
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreatePositionRequest {
-    private UUID itemId;
+    private String itemId;
     private Long itemVersion;
 
     @DecimalMin(value = MIN_AMOUNT_VALUE, message = INVALID_AMOUNT_MESSAGE)
