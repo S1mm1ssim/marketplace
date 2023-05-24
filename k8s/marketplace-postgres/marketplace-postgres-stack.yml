@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marketplace-postgres
+spec:
+  selector:
+    matchLabels:
+      app: marketplace-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: marketplace-postgres
+    spec:
+      containers:
+        - name: marketplace-postgres
+          image: "postgres:alpine"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: marketplace-postgres-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: marketplace-postgres-admin
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marketplace-postgres-admin
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command:
+                ["pg_isready", "-U", "postgres", "-d", "marketplace", "-q"]
+            initialDelaySeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            exec:
+              command:
+                [
+                  "psql",
+                  "-w",
+                  "-U",
+                  "postgres",
+                  "-d",
+                  "marketplace",
+                  "-c",
+                  "SELECT 1",
+                ]
+            initialDelaySeconds: 25
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: marketplace-data
+              subPath: postgres
+      volumes:
+        - name: marketplace-data
+          persistentVolumeClaim:
+            claimName: marketplace-postgres-pvc
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marketplace-postgres-config
+data:
+  POSTGRES_ADDRESS: marketplace-postgres-service:5432
+  POSTGRES_DB: marketplace
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: marketplace-postgres-admin
+type: Opaque
+stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marketplace-postgres-service
+spec:
+  selector:
+    app: marketplace-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: marketplace-postgres-pvc
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteOnce

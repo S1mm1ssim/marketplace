@@ -3,7 +3,7 @@ version: "3.9"
 services:
   modsen-marketplace-postgres:
     container_name: modsen-marketplace-postgres
-    image: postgres
+    image: postgres:latest
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -14,26 +14,34 @@ services:
     ports:
       - "32768:5432"
 
+  keycloak-postgres:
+    container_name: keycloak-postgres
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: keycloak
+    volumes:
+      - keycloak-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "32769:5432"
+
   keycloak:
     container_name: modsen-marketplace-keycloak
     image: quay.io/keycloak/keycloak:20.0.1
     environment:
-      DB_VENDOR: postgres
-      DB_ADDR: postgres
-      DB_PORT: 32768
-      DB_DATABASE: marketplace
-      DB_SCHEMA: public
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
     restart: unless-stopped
-    volumes:
-      - keycloak-data:/opt/jboss/keycloak/standalone/data
     depends_on:
-      - modsen-marketplace-postgres
+      - keycloak-postgres
     command:
       - start-dev
 
@@ -73,12 +81,12 @@ services:
       - zookeeper
 
   config-service:
-    image: marketplace-config-service:latest
+    image: simmissim/marketplace-config-service:latest
     ports:
       - "8888:8888"
 
   eureka-service:
-    image: marketplace-discovery-service:latest
+    image: simmissim/marketplace-discovery-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
     ports:
@@ -87,7 +95,7 @@ services:
       - config-service
 
   company-service:
-    image: marketplace-company-service:latest
+    image: simmissim/marketplace-company-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -102,7 +110,7 @@ services:
       - keycloak
 
   user-service:
-    image: marketplace-user-service:latest
+    image: simmissim/marketplace-user-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -117,7 +125,7 @@ services:
       - keycloak
 
   position-service:
-    image: marketplace-position-service:latest
+    image: simmissim/marketplace-position-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -134,7 +142,7 @@ services:
       - keycloak
 
   user-transaction-service:
-    image: marketplace-user-transaction-service:latest
+    image: simmissim/marketplace-user-transaction-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -152,7 +160,7 @@ services:
       - keycloak
 
   gateway-service:
-    image: marketplace-gateway-service:latest
+    image: simmissim/marketplace-gateway-service:latest
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -169,5 +177,5 @@ services:
 volumes:
   marketplace-postgres-data:
     driver: local
-  keycloak-data:
+  keycloak-postgres-data:
     driver: local

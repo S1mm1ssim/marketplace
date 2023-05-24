@@ -39,6 +39,12 @@ logging:
     root: info
     com.modsensoftware.marketplace: debug
 
+feign-clients:
+  company-client:
+    name: COMPANY-SERVICE
+    url: ""
+    path: "/api/v1/companies"
+
 default:
   page:
     size: 20

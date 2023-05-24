@@ -29,13 +29,13 @@ public class ReactiveFeignClientInterceptor implements ReactiveHttpRequestInterc
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER = "Bearer";
-    @Value("${reactive-feign.oauth2.client.provider.position-service.token-uri}")
+    @Value("${reactive-feign.oauth2.client.provider.USER-SERVICE.token-uri}")
     private String providerUri;
-    @Value("${reactive-feign.oauth2.client.registration.position-service.client-id}")
+    @Value("${reactive-feign.oauth2.client.registration.USER-SERVICE.client-id}")
     private String clientId;
-    @Value("${reactive-feign.oauth2.client.registration.position-service.client-secret}")
+    @Value("${reactive-feign.oauth2.client.registration.USER-SERVICE.client-secret}")
     private String clientSecret;
-    @Value("${reactive-feign.oauth2.client.registration.position-service.authorization-grant-type}")
+    @Value("${reactive-feign.oauth2.client.registration.USER-SERVICE.authorization-grant-type}")
     private String authorizationGrantType;
 
     private final WebClient webClient = WebClient.create();

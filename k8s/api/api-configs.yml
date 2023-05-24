@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-api-config
+data:
+  SPRING_PROFILES_ACTIVE: default,kubernetes,gke
+  CONFIG_URI: http://config-service:8888
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: company-api-config
+data:
+  KEYCLOAK_URI: http://keycloak-service:8080
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: position-api-config
+data:
+  USER_SERVICE_URL: http://user-service:8095
+  KEYCLOAK_URI: http://keycloak-service:8080
+  KAFKA_ADDRESS: "kafka-hs:9092"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-api-config
+data:
+  COMPANY_SERVICE_URL: http://company-service:8090
+  KEYCLOAK_URI: http://keycloak-service:8080
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-transaction-api-config
+data:
+  USER_SERVICE_URL: http://user-service:8095
+  POSITION_SERVICE_URL: http://position-service:8085
+  KEYCLOAK_URI: http://keycloak-service:8080
+  KAFKA_ADDRESS: "kafka-hs:9092"
