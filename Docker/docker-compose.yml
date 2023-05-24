@@ -95,7 +95,7 @@ services:
       - config-service
 
   company-service:
-    image: simmissim/marketplace-company-service:latest
+    image: simmissim/marketplace-company-service:grafana
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -110,7 +110,7 @@ services:
       - keycloak
 
   user-service:
-    image: simmissim/marketplace-user-service:latest
+    image: simmissim/marketplace-user-service:grafana
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -125,7 +125,7 @@ services:
       - keycloak
 
   position-service:
-    image: simmissim/marketplace-position-service:latest
+    image: simmissim/marketplace-position-service:grafana
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -142,7 +142,7 @@ services:
       - keycloak
 
   user-transaction-service:
-    image: simmissim/marketplace-user-transaction-service:latest
+    image: simmissim/marketplace-user-transaction-service:grafana
     environment:
       CONFIG_URI: http://config-service:8888
       EUREKA_URI: http://eureka-service:8761/eureka
@@ -173,6 +173,27 @@ services:
       - user-service
       - company-service
       - user-transaction-service
+
+  prometheus:
+    container_name: modsen-marketplace-prometheus
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    container_name: modsen-marketplace-grafana
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../config/grafana/provisioning/providers:/etc/grafana/provisioning/dashboards
+      - ../config/grafana/grafana-dashboards:/var/lib/grafana/dashboards
 
 volumes:
   marketplace-postgres-data:
