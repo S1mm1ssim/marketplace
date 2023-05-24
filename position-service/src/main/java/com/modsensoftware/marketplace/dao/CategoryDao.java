@@ -80,6 +80,8 @@ public class CategoryDao implements Dao<Category, String> {
                                     toBeUpdated.setParent(p);
                                     return Mono.just(toBeUpdated);
                                 });
+                    } else if (parent == null) {
+                        toBeUpdated.setParent(null);
                     }
                     return Mono.just(toBeUpdated);
                 }).flatMap(reactiveMongoTemplate::save);
