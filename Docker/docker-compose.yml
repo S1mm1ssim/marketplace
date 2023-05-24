@@ -195,8 +195,57 @@ services:
       - ../config/grafana/provisioning/providers:/etc/grafana/provisioning/dashboards
       - ../config/grafana/grafana-dashboards:/var/lib/grafana/dashboards
 
+  elasticsearch:
+    container_name: modsen-marketplace-elasticsearch
+    image: elasticsearch:8.6.0
+    environment:
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      discovery.type: "single-node"
+      xpack.security.enabled: "false"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+  logstash:
+    container_name: modsen-marketplace-logstash
+    image: logstash:8.6.0
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      http.host: "0.0.0.0"
+      path.config: /usr/share/logstash/pipeline
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "elasticsearch:9200"
+      XPACK_MONITORING_ENABLED: "true"
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    volumes:
+      - ../config/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    container_name: modsen-marketplace-kibana
+    image: kibana:8.6.0
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    ports:
+      - "5601:5601"
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+      - logstash
+
 volumes:
   marketplace-postgres-data:
     driver: local
   keycloak-postgres-data:
+    driver: local
+  elasticsearch-data:
     driver: local
