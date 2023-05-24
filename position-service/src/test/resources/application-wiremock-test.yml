@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            USER-SERVICE[0]:
+              uri: http://localhost:9561
+            USER-SERVICE[1]:
+              uri: http://localhost:9562

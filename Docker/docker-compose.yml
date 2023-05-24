@@ -1,0 +1,263 @@
+version: "3.9"
+
+services:
+  modsen-marketplace-postgres:
+    container_name: modsen-marketplace-postgres
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketplace
+    volumes:
+      - marketplace-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "32768:5432"
+
+  keycloak-postgres:
+    container_name: keycloak-postgres
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: keycloak
+    volumes:
+      - keycloak-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "32769:5432"
+
+  keycloak:
+    container_name: modsen-marketplace-keycloak
+    image: quay.io/keycloak/keycloak:20.0.1
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - keycloak-postgres
+    command:
+      - start-dev
+
+  mongodb:
+    container_name: modsen-marketplace-mongodb
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONDO_INITDB_DATABASE: marketplace_positions
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../config/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - marketplace-mongo-data:/data/db
+
+  redis:
+    container_name: modsen-marketplace-redis
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    container_name: modsen-marketplace-zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  kafka:
+    container_name: modsen-marketplace-kafka
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+
+  config-service:
+    image: simmissim/marketplace-config-service:latest
+    ports:
+      - "8888:8888"
+
+  eureka-service:
+    image: simmissim/marketplace-discovery-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-service
+
+  company-service:
+    image: simmissim/marketplace-company-service:grafana
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
+    ports:
+      - "8090:8090"
+    depends_on:
+      - config-service
+      - eureka-service
+      - modsen-marketplace-postgres
+      - keycloak
+
+  user-service:
+    image: simmissim/marketplace-user-service:grafana
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
+    ports:
+      - "8095:8095"
+    depends_on:
+      - config-service
+      - eureka-service
+      - modsen-marketplace-postgres
+      - keycloak
+
+  position-service:
+    image: simmissim/marketplace-position-service:grafana
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      MONGO_ADDRESS: root:root@mongodb:27017
+      KEYCLOAK_URI: http://keycloak:8080
+      KAFKA_ADDRESS: kafka:9092
+    ports:
+      - "8085:8085"
+    depends_on:
+      - config-service
+      - eureka-service
+      - user-service
+      - mongodb
+      - keycloak
+
+  user-transaction-service:
+    image: simmissim/marketplace-user-transaction-service:grafana
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+      POSTGRES_ADDRESS: modsen-marketplace-postgres:5432
+      KEYCLOAK_URI: http://keycloak:8080
+      KAFKA_ADDRESS: kafka:9092
+    ports:
+      - "8100:8100"
+    depends_on:
+      - config-service
+      - eureka-service
+      - modsen-marketplace-postgres
+      - position-service
+      - user-service
+      - keycloak
+
+  gateway-service:
+    image: simmissim/marketplace-gateway-service:latest
+    environment:
+      CONFIG_URI: http://config-service:8888
+      EUREKA_URI: http://eureka-service:8761/eureka
+    ports:
+      - "8000:8000"
+    depends_on:
+      - config-service
+      - eureka-service
+      - position-service
+      - user-service
+      - company-service
+      - user-transaction-service
+
+  prometheus:
+    container_name: modsen-marketplace-prometheus
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    container_name: modsen-marketplace-grafana
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../config/grafana/provisioning/providers:/etc/grafana/provisioning/dashboards
+      - ../config/grafana/grafana-dashboards:/var/lib/grafana/dashboards
+
+  elasticsearch:
+    container_name: modsen-marketplace-elasticsearch
+    image: elasticsearch:8.6.0
+    environment:
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      discovery.type: "single-node"
+      xpack.security.enabled: "false"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+  logstash:
+    container_name: modsen-marketplace-logstash
+    image: logstash:8.6.0
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      http.host: "0.0.0.0"
+      path.config: /usr/share/logstash/pipeline
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "elasticsearch:9200"
+      XPACK_MONITORING_ENABLED: "true"
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    volumes:
+      - ../config/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    container_name: modsen-marketplace-kibana
+    image: kibana:8.6.0
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    ports:
+      - "5601:5601"
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+      - logstash
+
+volumes:
+  marketplace-postgres-data:
+    driver: local
+  marketplace-mongo-data:
+    driver: local
+  keycloak-postgres-data:
+    driver: local
+  elasticsearch-data:
+    driver: local

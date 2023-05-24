@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            POSITION-SERVICE[0]:
+              uri: http://localhost:9561
+            POSITION-SERVICE[1]:
+              uri: http://localhost:9562
+            USER-SERVICE[0]:
+              uri: http://localhost:9563
+            USER-SERVICE[1]:
+              uri: http://localhost:9564

@@ -1,0 +1,60 @@
+server:
+  port: 8085
+
+management:
+  endpoints.web.exposure.include: 'prometheus, health'
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+
+spring:
+  application:
+    name: position-service
+  redis:
+    host: "${REDIS_HOST:localhost}"
+    port: "${REDIS_PORT:6379}"
+  data:
+    mongodb:
+      uri: "mongodb://${MONGO_ADDRESS:root:root@localhost:27017}/marketplace_positions?authMechanism=SCRAM-SHA-1"
+      database: "marketplace_positions"
+  config:
+    import: "optional:configserver:${CONFIG_URI:http://localhost:8888}"
+  cloud:
+    loadbalancer:
+      cache:
+        caffeine:
+          spec: maximumSize=10,initialCapacity=50,expireAfterAccess=300s
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    bootstrap-servers: "${KAFKA_ADDRESS:localhost:29092}"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: "${EUREKA_URI:http://localhost:8761/eureka}"
+
+topics:
+  processedTransactions:
+    name: userTransactionStatusResults
+  transactionsPlacedForProcessing:
+    name: userTransactionProcessing
+    groupId: userTransactionProcessing_group_id
+
+cache:
+  category:
+    ttl-seconds: 900
+  item:
+    ttl-seconds: 900
+  position:
+    ttl-seconds: 180

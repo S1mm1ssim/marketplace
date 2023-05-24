@@ -1,0 +1,62 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: marketplace-ingress
+  labels:
+    name: marketplace-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/api/v1/companies"
+            pathType: Prefix
+            backend:
+              service:
+                name: company-service
+                port:
+                  number: 8090
+          - path: /api/v1/users/transactions
+            pathType: Exact
+            backend:
+              service:
+                name: user-transaction-service
+                port:
+                  number: 8100
+          - path: /api/v1/users/.+/transactions
+            pathType: Prefix
+            backend:
+              service:
+                name: user-transaction-service
+                port:
+                  number: 8100
+          - path: "/api/v1/users"
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8095
+          - path: "/api/v1/categories"
+            pathType: Prefix
+            backend:
+              service:
+                name: position-service
+                port:
+                  number: 8085
+          - path: "/api/v1/items"
+            pathType: Prefix
+            backend:
+              service:
+                name: position-service
+                port:
+                  number: 8085
+          - path: "/api/v1/positions"
+            pathType: Prefix
+            backend:
+              service:
+                name: position-service
+                port:
+                  number: 8085

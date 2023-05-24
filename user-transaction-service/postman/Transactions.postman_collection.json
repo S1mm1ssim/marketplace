@@ -1,0 +1,141 @@
+{
+	"info": {
+		"_postman_id": "3fa201a7-5e06-4fcb-985d-26bf19052faa",
+		"name": "Transactions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16950885"
+	},
+	"item": [
+		{
+			"name": "Get all transactions for user",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{application_host}}/api/v1/users/880ba95f-6058-40aa-8893-b95cc7f57206/transactions?page=0",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"880ba95f-6058-40aa-8893-b95cc7f57206",
+						"transactions"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create transaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"880ba95f-6058-40aa-8893-b95cc7f57206\",\r\n    \"orderLine\":\r\n    [\r\n        {\r\n            \"positionId\": 37,\r\n            \"amount\": 2,\r\n            \"positionVersion\": 0\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{application_host}}/api/v1/users/transactions",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "password",
+				"value": "{{user_password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{username}}",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "Keycloak",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "password_credentials",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{client_secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{client_name}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

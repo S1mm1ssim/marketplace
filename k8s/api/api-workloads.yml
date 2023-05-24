@@ -1,0 +1,300 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+spec:
+  selector:
+    matchLabels:
+      app: config-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: config-server
+    spec:
+      containers:
+        - name: config-server
+          image: us.gcr.io/internship-marketplace/marketplace-config-service:1
+          resources:
+            requests:
+              memory: "400Mi"
+              cpu: "75m"
+            limits:
+              memory: "600Mi"
+              cpu: "130m"
+          ports:
+            - containerPort: 8888
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8888
+            initialDelaySeconds: 210
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8888
+            initialDelaySeconds: 210
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: company-api
+spec:
+  selector:
+    matchLabels:
+      app: company-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: company-api
+    spec:
+      containers:
+        - name: company-api
+          image: us.gcr.io/internship-marketplace/marketplace-company-service:1
+          envFrom:
+            - configMapRef:
+                name: common-api-config
+            - configMapRef:
+                name: company-api-config
+          env:
+            - name: POSTGRES_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: marketplace-postgres-config
+                  key: POSTGRES_ADDRESS
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "80m"
+            limits:
+              memory: "600Mi"
+              cpu: "140m"
+          ports:
+            - containerPort: 8090
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8090
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8090
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-api
+spec:
+  selector:
+    matchLabels:
+      app: user-api
+  template:
+    metadata:
+      labels:
+        app: user-api
+    spec:
+      containers:
+        - name: user-api
+          image: us.gcr.io/internship-marketplace/marketplace-user-service:1
+          envFrom:
+            - configMapRef:
+                name: common-api-config
+            - configMapRef:
+                name: user-api-config
+          env:
+            - name: POSTGRES_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: marketplace-postgres-config
+                  key: POSTGRES_ADDRESS
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "80m"
+            limits:
+              memory: "700Mi"
+              cpu: "140m"
+          ports:
+            - containerPort: 8095
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8095
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8095
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-api
+spec:
+  selector:
+    matchLabels:
+      app: position-api
+  template:
+    metadata:
+      labels:
+        app: position-api
+    spec:
+      containers:
+        - name: position-api
+          image: us.gcr.io/internship-marketplace/marketplace-position-service:1
+          envFrom:
+            - configMapRef:
+                name: common-api-config
+            - configMapRef:
+                name: position-api-config
+          env:
+            - name: MONGO_ROOT_USERNAME
+              value: "root"
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mongo-root
+              #     key: username
+            - name: MONGO_ROOT_PASSWORD
+              value: root
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mongo-root
+              #     key: password
+            - name: MONGO_ADDRESS_NO_CRED
+              value: "mongo-service:27017"
+              # valueFrom:
+              #   configMapKeyRef:
+              #     name: mongo-config
+              #     key: "$(MONGO_ROOT_USERNAME):$(MONGO_ROOT_PASSWORD)@$(MONGO_ADDRESS)"
+            - name: MONGO_ADDRESS
+              value: "$(MONGO_ROOT_USERNAME):$(MONGO_ROOT_PASSWORD)@$(MONGO_ADDRESS_NO_CRED)"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "80m"
+            limits:
+              memory: "700Mi"
+              cpu: "140m"
+          ports:
+            - containerPort: 8085
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8085
+            initialDelaySeconds: 350
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8085
+            initialDelaySeconds: 350
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-transaction-api
+spec:
+  selector:
+    matchLabels:
+      app: user-transaction-api
+  template:
+    metadata:
+      labels:
+        app: user-transaction-api
+    spec:
+      containers:
+        - name: user-transaction-api
+          image: us.gcr.io/internship-marketplace/marketplace-user-transaction-service:1
+          envFrom:
+            - configMapRef:
+                name: common-api-config
+            - configMapRef:
+                name: user-transaction-api-config
+          env:
+            - name: POSTGRES_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: marketplace-postgres-config
+                  key: POSTGRES_ADDRESS
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "80m"
+            limits:
+              memory: "700Mi"
+              cpu: "140m"
+          ports:
+            - containerPort: 8100
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8100
+            initialDelaySeconds: 350
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8100
+            initialDelaySeconds: 350
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1

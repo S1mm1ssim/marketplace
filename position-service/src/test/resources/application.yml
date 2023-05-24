@@ -1,0 +1,94 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  data:
+    mongodb:
+      uri: ""
+      database: "test_marketplace_positions"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ""
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    bootstrap-servers: "${spring.embedded.kafka.brokers}"
+
+idm:
+  client-id: "test-idm-client"
+  client-secret: "**********"
+  grant-type: "password"
+
+reactive-feign:
+  http-client:
+    read-timeout: 3000
+    write-timeout: 3000
+    connect-timeout: 3000
+    response-timeout: 3000
+  oauth2:
+    client:
+      registration:
+        USER-SERVICE:
+          authorization-grant-type: client_credentials
+          client-id: test-idm-client
+          client-secret: "**********"
+      provider:
+        USER-SERVICE:
+          token-uri: ""
+
+reactive-feign-clients:
+  user-client:
+    name: USER-SERVICE
+    url: ""
+    path: "/api/v1/users"
+
+logging:
+  level:
+    root: info
+    com.modsensoftware.marketplace: debug
+
+default:
+  page:
+    size: 20
+  role: MANAGER
+  role-prefix: ROLE_
+  jwt-realm-access-claim: realm_access
+  jwt-roles-claim: roles
+
+exception:
+  message:
+    sessionFactoryInitFail: "Initialization of SessionFactory failed"
+    categoryNotFound: "Category entity with id=%s is not present."
+    itemNotFound: "Item entity with uuid=%s is not present."
+    positionNotFound: "Position entity with id=%s is not found."
+    itemVersionsMismatch: "Provided item version does not match with the one in the database"
+    noItemVersionProvided: "No version for item with id %s was provided"
+    positionCreatedByAnotherPersonMessage: "Could not execute operation. Position was created by another person."
+    creatorNotFound: "User who created this position is no longer present."
+
+eureka:
+  client:
+    enabled: false
+
+topics:
+  processedTransactions:
+    name: userTransactionStatusResultsTest
+  transactionsPlacedForProcessing:
+    name: userTransactionProcessingTest
+    groupId: userTransactionProcessingTest_group_id
+
+cache:
+  category:
+    ttl-seconds: 1
+  item:
+    ttl-seconds: 1
+  position:
+    ttl-seconds: 1

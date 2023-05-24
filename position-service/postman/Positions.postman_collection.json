@@ -1,0 +1,201 @@
+{
+	"info": {
+		"_postman_id": "4d7c5561-44f5-4416-8783-0c75e4044ef0",
+		"name": "Positions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16950885"
+	},
+	"item": [
+		{
+			"name": "Get all positions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{application_host}}/api/v1/positions",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"positions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get position by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{application_host}}/api/v1/positions/37",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"positions",
+						"37"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete position",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{application_host}}/api/v1/positions/25",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"positions",
+						"25"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update position",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"itemId\": \"b6b7764c-ed62-47a4-a68d-3cad4da1e187\",\r\n    \"amount\": 4,\r\n    \"version\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{application_host}}/api/v1/positions/1",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"positions",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create position",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"itemId\": \"5c33b41a-e76d-448d-8434-1fcaa497e966\",\r\n    \"itemVersion\": 1,\r\n    \"companyId\": 2,\r\n    \"createdBy\": \"886e840c-3ca8-4f8a-ab03-71e6348860aa\",\r\n    \"amount\": 150,\r\n    \"minAmount\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{application_host}}/api/v1/positions",
+					"host": [
+						"{{application_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"positions"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "password",
+				"value": "{{user_password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{username}}",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "Keycloak",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "password_credentials",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{client_secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{client_name}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{keycloak_host}}/realms/{{realm}}/protocol/openid-connect/token",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

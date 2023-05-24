@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="2022-12-28-create-pg-enum-status" author="Andrdemyan4ik@gmail.com">
+        <sql>CREATE TYPE user_transaction_service.transaction_status AS ENUM ('IN_PROGRESS', 'SUCCESS', 'REJECTED')</sql>
+        <rollback>
+            <sql>DROP TYPE user_transaction_service.transaction_status</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2022-12-28-add-transaction-status-column" author="Andrdemyan4ik@gmail.com">
+        <addColumn tableName="user_transaction" schemaName="user_transaction_service">
+            <column name="status" type="user_transaction_service.transaction_status" defaultValue="SUCCESS">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="userTransaction" schemaName="user_transaction_service">
+                <column name="status"/>
+            </dropColumn>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

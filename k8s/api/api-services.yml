@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-service
+spec:
+  selector:
+    app: config-server
+  ports:
+    - port: 8888
+      targetPort: 8888
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: company-service
+spec:
+  selector:
+    app: company-api
+  ports:
+    - port: 8090
+      targetPort: 8090
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user-api
+  ports:
+    - port: 8095
+      targetPort: 8095
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: position-service
+spec:
+  selector:
+    app: position-api
+  ports:
+    - port: 8085
+      targetPort: 8085
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-transaction-service
+spec:
+  selector:
+    app: user-transaction-api
+  ports:
+    - port: 8100
+      targetPort: 8100
+  type: ClusterIP
