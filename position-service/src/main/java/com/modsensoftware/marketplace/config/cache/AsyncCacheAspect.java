@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsensoftware.marketplace.domain.Category;
 import com.modsensoftware.marketplace.domain.Item;
-import com.modsensoftware.marketplace.dto.response.PositionResponseDto;
+import com.modsensoftware.marketplace.dto.response.PositionResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -60,11 +60,11 @@ public class AsyncCacheAspect {
 
         classTtlMap.put(Category.class, categoryTtlSeconds);
         classTtlMap.put(Item.class, itemTtlSeconds);
-        classTtlMap.put(PositionResponseDto.class, positionTtlSeconds);
+        classTtlMap.put(PositionResponse.class, positionTtlSeconds);
 
-        cacheNameTypeRefMap.put(SINGLE_POSITION_CACHE_NAME, new TypeReference<PositionResponseDto>() {
+        cacheNameTypeRefMap.put(SINGLE_POSITION_CACHE_NAME, new TypeReference<PositionResponse>() {
         });
-        cacheNameTypeRefMap.put(POSITIONS_CACHE_NAME, new TypeReference<List<PositionResponseDto>>() {
+        cacheNameTypeRefMap.put(POSITIONS_CACHE_NAME, new TypeReference<List<PositionResponse>>() {
         });
         cacheNameTypeRefMap.put(SINGLE_CATEGORY_CACHE_NAME, new TypeReference<Category>() {
         });

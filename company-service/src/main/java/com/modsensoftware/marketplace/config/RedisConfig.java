@@ -1,7 +1,7 @@
 package com.modsensoftware.marketplace.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsensoftware.marketplace.dto.CompanyResponseDto;
+import com.modsensoftware.marketplace.dto.CompanyResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -41,8 +41,8 @@ public class RedisConfig {
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-        Jackson2JsonRedisSerializer<CompanyResponseDto> companyValueSerializer
-                = new Jackson2JsonRedisSerializer<>(CompanyResponseDto.class);
+        Jackson2JsonRedisSerializer<CompanyResponse> companyValueSerializer
+                = new Jackson2JsonRedisSerializer<>(CompanyResponse.class);
         companyValueSerializer.setObjectMapper(mapper);
         Jackson2JsonRedisSerializer<List> companiesValueSerializer
                 = new Jackson2JsonRedisSerializer<>(List.class);

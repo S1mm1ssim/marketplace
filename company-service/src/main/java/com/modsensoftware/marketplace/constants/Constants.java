@@ -12,6 +12,8 @@ public final class Constants {
     public static final String INVALID_EMAIL_MESSAGE = "Email must be valid.";
     public static final String NEGATIVE_PAGE_NUMBER_MESSAGE = "Page number can not be negative.";
 
+    public static final String ID_PATH_VARIABLE_NAME = "id";
+
     public static final long MIN_PAGE_NUMBER = 0L;
     public static final String EMAIL_REGEX = "(\\w+)@(\\w+\\.)(\\w+)(\\.\\w+)*";
 
